@@ -1,0 +1,392 @@
+/* 한샘 대시보드 공통 기반 스타일 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.hanssem-app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    color: #333;
+}
+
+/* 헤더 공통 */
+.header-logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.hanssem-header-ci {
+    height: 22px;
+    /* 상단 고정 바에서 많이 쓰는 규격 */
+    width: auto;
+    object-fit: contain;
+}
+
+.header-title-text {
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.header-title-text::before {
+    content: "";
+    display: inline-block;
+    width: 1px;
+    height: 12px;
+    background: #e0e0e0;
+    margin: 0 16px;
+}
+
+/* 필터 섹션 공통 */
+.hanssem-filter-section {
+    background: #f8f9fa;
+    padding: 1.5rem 0;
+}
+
+.header-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    background: white;
+    padding: 1.2rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    margin-top: 1.5rem;
+}
+
+.filter-btn {
+    padding: 0.8rem 1.8rem;
+    background: #eee;
+    color: #666;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-btn:hover {
+    background: #e0e0e0;
+    color: #333;
+    transform: translateY(-2px);
+}
+
+.filter-btn.active {
+    background: #667eea;
+    color: white;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+/* 메인 콘텐츠 레이아웃 */
+.hanssem-main {
+    flex: 1;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto 3rem;
+    padding: 0 2rem 3rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.section-header {
+    padding: 2rem 0 1.2rem;
+    border-bottom: 2px solid #f0f0f0;
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    font-size: 1.3rem;
+    color: #111;
+    font-weight: 700;
+}
+
+/* 매체 CI 및 공통 요소 */
+.media-ci-wrapper {
+    height: 26px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.media-ci-img {
+    height: 100%;
+    width: auto;
+    max-width: 70px;
+    object-fit: contain;
+}
+
+.metrics-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    width: 100%;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.metric-item .label {
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+.metric-item .value {
+    font-weight: 700;
+    color: #333;
+}
+
+.metric-item .value.highlighting {
+    color: #667eea;
+}
+
+.footer-note {
+    text-align: right;
+    font-size: 0.85rem;
+    color: #999;
+    padding: 1.5rem 0;
+    font-style: italic;
+}
+
+/* 3D Flip Card 공통 스타일 */
+.chart-grid, .dashboard-grid-5 {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chart-card.flip-container {
+    background: transparent;
+    perspective: 1000px;
+    height: 450px;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    position: relative;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.chart-card.flip-container.flipped .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    background: white;
+    border: 1px solid #eee;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.flip-card-front {
+    z-index: 2;
+    transform: rotateY(0deg);
+}
+
+.chart-image-wrapper {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background: #f8f9fa;
+    flex-shrink: 0;
+}
+
+.creative-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.chart-card:hover .creative-img {
+    transform: scale(1.08);
+}
+
+.chart-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 1.2rem;
+    overflow: hidden;
+}
+
+.creative-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #333;
+    margin-bottom: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+}
+
+.chart-footer {
+    padding: 0.9rem;
+    background: #f9f9f9;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #888;
+    border-top: 1px solid #f0f0f0;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.chart-footer:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+/* 뒷면 스타일 */
+.flip-card-back {
+    transform: rotateY(180deg);
+    background: #fff;
+    border: 2px solid #667eea;
+    z-index: 1;
+}
+
+.chart-card.flip-container.flipped .flip-card-back {
+    z-index: 3;
+}
+
+.back-header {
+    padding: 1rem 1.2rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    flex-shrink: 0;
+}
+
+.back-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+    font-weight: 700;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #999;
+    cursor: pointer;
+    line-height: 0.5;
+    padding: 0 0.5rem;
+}
+
+.back-content {
+    padding: 1.2rem 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    overflow-y: auto;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.detail-row strong {
+    color: #333;
+    font-weight: 600;
+}
+
+.detail-divider {
+    height: 1px;
+    background: #eee;
+    margin: 0.5rem 0;
+}
+
+.detail-row.highlight strong {
+    color: #667eea;
+    font-size: 1.1rem;
+}
+
+.chart-card:hover .flip-card-inner {
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* 반응형 공통 */
+@media (max-width: 1200px) {
+
+    .chart-grid,
+    .dashboard-grid-5 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+
+    .chart-grid,
+    .dashboard-grid-5 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dashboard-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-buttons {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .chart-grid,
+    .dashboard-grid-5 {
+        grid-template-columns: 1fr;
+    }
+}
