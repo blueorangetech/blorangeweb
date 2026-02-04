@@ -121,7 +121,7 @@
 /* 매체 CI 및 공통 요소 */
 .media-ci-wrapper {
     height: 26px;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
     display: flex;
     align-items: center;
 }
@@ -257,10 +257,26 @@
     font-size: 1.05rem;
     font-weight: 800;
     color: #333;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    flex: 1;
+}
+
+.card-title-area {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.media-ci-wrapper {
+    height: 26px;
+    margin-bottom: 0 !important;
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
 }
 
