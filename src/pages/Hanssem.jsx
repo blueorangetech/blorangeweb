@@ -107,9 +107,9 @@ function Hanssem() {
       </section>
 
       {/* 메인 콘텐츠 영역 (컴포넌트 분리) */}
-      {activeFilter === 'insight' && <InsightView />}
+      {/* {activeFilter === 'insight' && <InsightView />} */}
 
-      {/* {activeFilter === 'performance' && <PerformanceView />} */}
+      {activeFilter === 'performance' && <PerformanceView />}
 
       {(activeFilter === 'notice' || activeFilter === 'mypage') && (
         <main className="hanssem-main">
