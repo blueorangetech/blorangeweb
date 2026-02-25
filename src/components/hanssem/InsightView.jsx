@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from 'date-fns/locale';
@@ -6,35 +6,96 @@ import '../../styles/HanssemInsight.css';
 import { CreativeCard } from './';
 import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
 
+// 차트 데이터 (샘플/폴백용)
+const chartData = [
+    { id: 1, media: '카카오', title: '소재_메인_거실_01', ctr: '2.45%', roas: '450%', clicks: '1,240', img: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600&h=450&fit=crop' },
+    { id: 2, media: '메타', title: '소재_주방_리모델링', ctr: '3.12%', roas: '520%', clicks: '2,150', img: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&h=450&fit=crop' },
+    { id: 3, media: '구글', title: '소재_침실_패키지', ctr: '1.98%', roas: '380%', clicks: '980', img: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600&h=450&fit=crop' },
+    { id: 4, media: '유튜브', title: '소재_모던_바스', ctr: '4.21%', roas: '290%', clicks: '4,500', img: 'https://images.unsplash.com/photo-1584622781514-f63f84ced453?w=600&h=450&fit=crop' },
+    { id: 5, media: '메타', title: '소재_다이닝_테이블', ctr: '2.87%', roas: '610%', clicks: '1,560', img: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=600&h=450&fit=crop' },
+];
+
 function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
-    const [selectedMedia, setSelectedMedia] = useState(['all']);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [realData, setRealData] = useState([]); // API에서 가져온 실제 데이터 저장용
+    // 필터 상태 통합 관리
+    const [selectedFilters, setSelectedFilters] = useState({
+        media: ['all'],
+        concept: ['all'],
+        explore: ['all'],
+        main_copy: ['all'],
+        sub_copy: ['all']
+    });
+
+    // 어떤 드롭다운이 열려있는지 관리
+    const [openDropdown, setOpenDropdown] = useState(null);
+
+    const [realData, setRealData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     // 무한 스크롤 관련 상태
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
-    const LIMIT = 20; // 한 번에 불러올 개수
+    const LIMIT = 20;
 
-    // 날짜 상태는 부모로부터 전달받음
+    // 카테고리 매핑 정보 (utm_content_1 사용)
+    const categoryMap = {
+        '키친_시공사례': 'kitchencase',
+        '바스_시공사례': 'bathcase',
+        '붙박이장_시공사례': 'dresscase',
+        '빌트인_시공사례': 'builtincase',
+        '드레스룸_시공사례': 'roomcase',
+        '마루_시공사례': 'floorcase',
+        '중문_시공사례': 'doorcase',
+        '창호_시공사례': 'windowcase',
+        '키친_연출컷(바흐)': 'kitchenhsbach',
+        '키친_연출컷(유로)': 'kitchenhseuro',
+        '키친_연출컷(그 외)': 'kitchenother',
+        '바스_연출컷': 'bathhs',
+        '붙박이장_연출컷': 'dresshs',
+        '빌트인_연출컷': 'builtinhs',
+        '드레스룸_연출컷': 'roomhs',
+        '마루_연출컷': 'floorhs',
+        '중문_연출컷': 'doorhs',
+        '창호_연출컷': 'windowhs',
+        '홈플래너(도안)': 'planner',
+        '패키지': 'pkg',
+        '기타': 'etc',
+        '로고': 'logo',
+        '매장이미지': 'shophs'
+    };
 
+    // 타게팅 매핑 정보 (utm_content_8 사용)
+    const targetingMap = {
+        '논타겟': 'non',
+        '데모': 'demo',
+        'dmp': 'dmp',
+        '관심사': 'interest',
+        '유사타겟': 'similar',
+        '리타게팅': 'retarget',
+        '키워드타겟': 'keyword'
+    };
 
+    // 메세지 매핑 정보 (주메세지: utm_content_3, 서브메세지: utm_content_4)
+    const messageMap = {
+        'RTB_신뢰(업력,규모)': 'Rtrust',
+        'RTB_서비스(고객상담)': 'Rservice',
+        'RTB_품질(시공측면)': 'Rquality',
+        'USP_맞춤설계': 'Ucustomize',
+        'USP_심미성': 'Udesign',
+        'USP_제품/자재': 'Uproduct',
+        '혜택_패키지': 'Bpkg',
+        '혜택_단품': 'Bsingle',
+        '혜택_사은품': 'Bgift',
+        '혜택_카드': 'Bcard',
+        'VOC': 'voc'
+    };
 
-    // 탭 메뉴 데이터
-    const tabMenus = [
-        { id: 'concept', label: '카테고리 조건' },
-        { id: 'explore', label: '타게팅 조건' },
-        { id: 'copy', label: '메세지 조건' },
-    ];
-
-    // 차트 데이터 (샘플/폴백용)
-    const chartData = [
-        { id: 1, media: '카카오', title: '소재_메인_거실_01', ctr: '2.45%', roas: '450%', clicks: '1,240', img: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600&h=450&fit=crop' },
-        { id: 2, media: '메타', title: '소재_주방_리모델링', ctr: '3.12%', roas: '520%', clicks: '2,150', img: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&h=450&fit=crop' },
-        { id: 3, media: '구글', title: '소재_침실_패키지', ctr: '1.98%', roas: '380%', clicks: '980', img: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600&h=450&fit=crop' },
-        { id: 4, media: '유튜브', title: '소재_모던_바스', ctr: '4.21%', roas: '290%', clicks: '4,500', img: 'https://images.unsplash.com/photo-1584622781514-f63f84ced453?w=600&h=450&fit=crop' },
-        { id: 5, media: '메타', title: '소재_다이닝_테이블', ctr: '2.87%', roas: '610%', clicks: '1,560', img: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=600&h=450&fit=crop' },
+    // 탭 메뉴 데이터 및 옵션
+    const filterConfigs = [
+        { id: 'media', label: '매체', options: Object.keys(mediaLogos) },
+        { id: 'concept', label: '카테고리', options: Object.keys(categoryMap) },
+        { id: 'explore', label: '타게팅', options: Object.keys(targetingMap) },
+        { id: 'main_copy', label: '주 메세지', options: Object.keys(messageMap) },
+        { id: 'sub_copy', label: '서브 메세지', options: Object.keys(messageMap) },
     ];
 
     // 날짜가 바뀌면 데이터와 오프셋 초기화
@@ -105,77 +166,118 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
         return () => observer.disconnect();
     }, [isLoading, hasMore]);
 
+    // 필서 선택 처리
+    const handleFilterSelect = (type, value) => {
+        setSelectedFilters(prev => {
+            if (value === 'all') {
+                return { ...prev, [type]: ['all'] };
+            } else {
+                let next = prev[type].filter(v => v !== 'all');
+                if (next.includes(value)) {
+                    next = next.filter(v => v !== value);
+                } else {
+                    next = [...next, value];
+                }
+                if (next.length === 0) next = ['all'];
+                return { ...prev, [type]: next };
+            }
+        });
+    };
+
     // 필터링된 데이터 계산
     const displayData = realData.length > 0 ? realData : (offset === 0 ? chartData : []);
 
-    const filteredData = !selectedMedia.includes('all')
-        ? displayData.filter(item => selectedMedia.includes(getCanonicalMedia(item.media)))
-        : displayData;
+    const filteredData = useMemo(() => {
+        return displayData.filter(item => {
+            // 1. 매체 필터
+            const matchesMedia = selectedFilters.media.includes('all') || selectedFilters.media.includes(getCanonicalMedia(item.media));
 
-    const handleTabChange = (tabId) => {
-        setIsDropdownOpen(false);
+            // 2. 카테고리 필터 (utm_content_1 사용)
+            const selectedCategoryValues = selectedFilters.concept.includes('all')
+                ? ['all']
+                : selectedFilters.concept.map(label => categoryMap[label]);
+            const matchesCategory = selectedCategoryValues.includes('all') || selectedCategoryValues.includes(item.utm_content_1);
+
+            // 3. 타게팅 필터 (utm_content_8 사용)
+            const selectedTargetingValues = selectedFilters.explore.includes('all')
+                ? ['all']
+                : selectedFilters.explore.map(label => targetingMap[label]);
+            const matchesTargeting = selectedTargetingValues.includes('all') || selectedTargetingValues.includes(item.utm_content_8);
+
+            // 4. 주 메세지 필터 (utm_content_3 사용)
+            const selectedMainCopyValues = selectedFilters.main_copy.includes('all')
+                ? ['all']
+                : selectedFilters.main_copy.map(label => messageMap[label]);
+            const matchesMainCopy = selectedMainCopyValues.includes('all') || selectedMainCopyValues.includes(item.utm_content_3);
+
+            // 5. 서브 메세지 필터 (utm_content_4 사용)
+            const selectedSubCopyValues = selectedFilters.sub_copy.includes('all')
+                ? ['all']
+                : selectedFilters.sub_copy.map(label => messageMap[label]);
+            const matchesSubCopy = selectedSubCopyValues.includes('all') || selectedSubCopyValues.includes(item.utm_content_4);
+
+            return matchesMedia && matchesCategory && matchesTargeting && matchesMainCopy && matchesSubCopy;
+        });
+    }, [displayData, selectedFilters, targetingMap, messageMap, categoryMap]);
+
+    // 드롭다운 라벨 생성
+    const getDropdownLabel = (type, defaultLabel) => {
+        const selected = selectedFilters[type];
+        if (selected.includes('all')) return `${defaultLabel} 전체`;
+        if (selected.length === 1) return selected[0];
+        return `${selected[0]} 외 ${selected.length - 1}건`;
     };
 
-    const handleMediaSelect = (media) => {
-        if (media === 'all') {
-            setSelectedMedia(['all']);
-        } else {
-            let nextSelected = selectedMedia.filter(m => m !== 'all');
-            if (nextSelected.includes(media)) {
-                nextSelected = nextSelected.filter(m => m !== media);
-            } else {
-                nextSelected.push(media);
-            }
-
-            if (nextSelected.length === 0) {
-                setSelectedMedia(['all']);
-            } else {
-                setSelectedMedia(nextSelected);
-            }
+    // 필터 라벨 포맷팅 (괄호 앞 줄바꿈)
+    const formatFilterLabel = (label) => {
+        if (label.includes('(')) {
+            const [main, sub] = label.split('(');
+            return (
+                <>
+                    {main}
+                    <br />
+                    <span style={{ fontSize: '0.9rem', opacity: 1 }}>({sub}</span>
+                </>
+            );
         }
+        return label;
     };
 
     return (
         <>
             <nav className="tab-navigation">
-                <div className="tab-dropdown-wrapper">
-
-                    <div className="custom-dropdown">
+                {filterConfigs.map((config) => (
+                    <div key={config.id} className="custom-dropdown">
                         <button
                             className="dropdown-toggle tab-dropdown-btn"
-                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            onClick={() => setOpenDropdown(openDropdown === config.id ? null : config.id)}
                         >
                             <span className="dropdown-label">
-                                {selectedMedia.includes('all') ? '매체 전체' : (selectedMedia.length === 1 ? selectedMedia[0] : `${selectedMedia[0]} 외 ${selectedMedia.length - 1}건`)}
+                                {getDropdownLabel(config.id, config.label)}
                             </span>
-                            <span className={`arrow ${isDropdownOpen ? 'open' : ''}`}>▼</span>
+                            <span className={`arrow ${openDropdown === config.id ? 'open' : ''}`}>▼</span>
                         </button>
 
-                        {isDropdownOpen && (
+                        {openDropdown === config.id && (
                             <ul className="dropdown-menu multi-select">
-                                <li className={selectedMedia.includes('all') ? 'active' : ''} onClick={() => handleMediaSelect('all')}>
-                                    <div className="checkbox">{selectedMedia.includes('all') ? '✓' : ''}</div>
-                                    매체 전체
+                                <li className={selectedFilters[config.id].includes('all') ? 'active' : ''} onClick={() => handleFilterSelect(config.id, 'all')}>
+                                    <div className="checkbox">{selectedFilters[config.id].includes('all') ? '✓' : ''}</div>
+                                    <span>{config.label} 전체</span>
                                 </li>
-                                {Object.keys(mediaLogos).map(media => (
-                                    <li key={media} className={selectedMedia.includes(media) ? 'active' : ''} onClick={() => handleMediaSelect(media)}>
-                                        <div className="checkbox">{selectedMedia.includes(media) ? '✓' : ''}</div>
-                                        {media}
+                                {config.options.map(option => (
+                                    <li key={option} className={selectedFilters[config.id].includes(option) ? 'active' : ''} onClick={() => handleFilterSelect(config.id, option)}>
+                                        <div className="checkbox" style={{ marginTop: option.includes('(') ? '4px' : '0' }}>
+                                            {selectedFilters[config.id].includes(option) ? '✓' : ''}
+                                        </div>
+                                        <span className="option-text">{formatFilterLabel(option)}</span>
                                     </li>
                                 ))}
                             </ul>
                         )}
                     </div>
-                </div>
-
-                {tabMenus.map((tab) => (
-                    <button key={tab.id} className="tab-btn" onClick={() => handleTabChange(tab.id)}>
-                        {tab.label}
-                    </button>
                 ))}
 
                 <div className="tab-datepicker-wrapper">
-
                     <DatePicker
                         selectsRange={true}
                         startDate={startDate}
@@ -200,9 +302,16 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                 <button
                     className="tab-btn reset-btn"
                     onClick={() => {
-                        setSelectedMedia(['all']);
+                        setSelectedFilters({
+                            media: ['all'],
+                            concept: ['all'],
+                            explore: ['all'],
+                            main_copy: ['all'],
+                            sub_copy: ['all']
+                        });
                         setStartDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
                         setEndDate(new Date());
+                        setOpenDropdown(null);
                     }}
                 >
                     조건 초기화
@@ -211,7 +320,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
 
             <main className="hanssem-main">
                 <div className="section-header">
-                    <h2>[{!selectedMedia.includes('all') ? (selectedMedia.length === 1 ? `${selectedMedia[0]} 성과` : `${selectedMedia[0]} 외 ${selectedMedia.length - 1}개 매체 성과`) : '전체 통합'} 소재 성과 수치 ]</h2>
+                    <h2>[{!selectedFilters.media.includes('all') ? (selectedFilters.media.length === 1 ? `${selectedFilters.media[0]} 성과` : `${selectedFilters.media[0]} 외 ${selectedFilters.media.length - 1}개 매체 성과`) : '전체 통합'} 소재 성과 수치 ]</h2>
                 </div>
                 <div className="chart-grid">
                     {filteredData.map((chart, index) => (

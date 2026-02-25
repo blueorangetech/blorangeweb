@@ -91,39 +91,39 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
                     impressions: 0,
                     clicks: 0,
                     cost: 0,
-                    consultation: 0
+                    distribution: 0
                 };
             }
             dailyMap[d].impressions += Number(item.impressions || 0);
             dailyMap[d].clicks += Number(item.clicks || 0);
             dailyMap[d].cost += Number(item.cost || 0);
-            dailyMap[d].consultation += Number(item.consultation || 0);
+            dailyMap[d].distribution += Number(item.distribution || 0);
         });
 
         return Object.values(dailyMap).map(day => ({
             ...day,
             displayDate: day.date.substring(5).replace('-', '/'), // MM/DD 형식
             ctr: day.impressions > 0 ? (day.clicks / day.impressions) * 100 : 0,
-            cpa: day.consultation > 0 ? Math.round(day.cost / day.consultation) : 0,
+            cpa: day.distribution > 0 ? Math.round(day.cost / day.distribution) : 0,
             cpc: day.clicks > 0 ? Math.round(day.cost / day.clicks) : 0
         })).sort((a, b) => a.date.localeCompare(b.date));
     }, [trendData]);
 
     // 전체 요약 데이터 계산
     const summaryMetrics = useMemo(() => {
-        const initial = { clicks: 0, impressions: 0, cost: 0, consultation: 0 };
+        const initial = { clicks: 0, impressions: 0, cost: 0, distribution: 0 };
         const totals = processedTrendData.reduce((acc, curr) => {
             acc.clicks += curr.clicks;
             acc.impressions += curr.impressions;
             acc.cost += curr.cost;
-            acc.consultation += curr.consultation;
+            acc.distribution += curr.distribution;
             return acc;
         }, initial);
 
         return {
             ...totals,
             ctr: totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0,
-            cpa: totals.consultation > 0 ? Math.round(totals.cost / totals.consultation) : 0,
+            cpa: totals.distribution > 0 ? Math.round(totals.cost / totals.distribution) : 0,
             cpc: totals.clicks > 0 ? Math.round(totals.cost / totals.clicks) : 0
         };
     }, [processedTrendData]);
@@ -136,7 +136,7 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
             {/* 대시보드 2 - 전 매체 통합 성과 트렌드 */}
             <section className="dashboard-section">
                 <div className="section-header-with-action">
-                    <h2>[ 전 매체 통합 성과 트렌드 (통계 기준) ]</h2>
+                    <h2>[ 전 매체 통합 성과 트렌드 ]</h2>
                     <div className="performance-datepicker-wrapper">
                         <DatePicker
                             selectsRange={true}
@@ -248,7 +248,7 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
                                         }}
                                     />
                                     <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                                    <Bar yAxisId="left" dataKey="consultation" name="전환수" fill="#4bc0c0" radius={[4, 4, 0, 0]} barSize={20} />
+                                    <Bar yAxisId="left" dataKey="distribution" name="배분수" fill="#4bc0c0" radius={[4, 4, 0, 0]} barSize={20} />
                                     <Line yAxisId="right" type="monotone" dataKey="cpa" name="CPA" stroke="#f39c12" strokeWidth={2} dot={{ r: 3 }} />
                                 </ComposedChart>
                             </ResponsiveContainer>
@@ -259,7 +259,7 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
                                     <tr><th>항목</th><th>수치</th><th>비중/기준</th></tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td>총 전환수</td><td>{formatInt(summaryMetrics.consultation)}</td><td>100.0%</td></tr>
+                                    <tr><td>총 배분수</td><td>{formatInt(summaryMetrics.distribution)}</td><td>100.0%</td></tr>
                                     <tr><td>평균 CPA</td><td>{formatInt(summaryMetrics.cpa)} 원</td><td>-</td></tr>
                                     <tr><td>총 집행비용</td><td>{formatInt(summaryMetrics.cost)} 원</td><td>-</td></tr>
                                 </tbody>

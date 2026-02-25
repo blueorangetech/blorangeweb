@@ -7,17 +7,9 @@ function CreativeCard({ data }) {
 
     const canonicalMedia = getCanonicalMedia(data.media);
 
-    // 랜덤 이미지 풀
+    // 대체 이미지
     const randomImages = [
-        'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600',
-        'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600',
-        'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600',
-        'https://images.unsplash.com/photo-1584622781514-f63f84ced453?w=600',
-        'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=600',
-        'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600',
-        'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600',
-        'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600',
-        'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600',
+        'https://upload.wikimedia.org/wikipedia/commons/7/7b/%ED%95%9C%EC%83%98_%EB%A1%9C%EA%B3%A0.jpg',
     ];
 
     // 제목 기반 고정 랜덤 인덱스 생성
@@ -35,9 +27,31 @@ function CreativeCard({ data }) {
 
     // Cloud Storage 이미지 경로 구성: 기본 주소 + utm_content
     const STORAGE_BASE_URL = 'https://storage.googleapis.com/hanssem_rh/';
-    const displayImg = data.utm_content
-        ? `${STORAGE_BASE_URL}${data.utm_content}.jpg`
-        : (data.img || randomImages[getSafeIndex(itemName)]);
+    // 이미지 이미지 소스 상태 관리 (확장자 jpg/png 대응)
+    const [imgSrc, setImgSrc] = useState(
+        data.utm_content
+            ? `${STORAGE_BASE_URL}${data.utm_content}.jpg`
+            : (data.img || randomImages[getSafeIndex(itemName)])
+    );
+
+    // props 변경 시 이미지 경로 초기화
+    React.useEffect(() => {
+        setImgSrc(
+            data.utm_content
+                ? `${STORAGE_BASE_URL}${data.utm_content}.jpg`
+                : (data.img || randomImages[getSafeIndex(itemName)])
+        );
+    }, [data.utm_content, data.img, itemName]);
+
+    const handleImgError = () => {
+        // .jpg 로 로드 실패 시 .png 로 재시도
+        if (imgSrc.endsWith('.jpg') && data.utm_content) {
+            setImgSrc(`${STORAGE_BASE_URL}${data.utm_content}.png`);
+        } else {
+            // 최종 실패 시 랜덤 이미지로 대체
+            setImgSrc(randomImages[getSafeIndex(itemName)]);
+        }
+    };
 
     const toggleFlip = (e) => {
         if (e) e.stopPropagation();
@@ -57,28 +71,29 @@ function CreativeCard({ data }) {
                 {/* 앞면 */}
                 <div className="flip-card-front">
                     <div className="chart-image-wrapper">
-                        <img src={displayImg} alt={data.title} className="creative-img" />
+                        <img
+                            src={imgSrc}
+                            alt={data.title}
+                            className="creative-img"
+                            onError={handleImgError}
+                        />
                     </div>
                     <div className="chart-content">
                         <div className="card-title-area">
                             <div className="media-ci-wrapper">
                                 <img src={mediaLogos[canonicalMedia] || mediaLogos['기타']} alt={data.media} className="media-ci-img" title={data.media} />
                             </div>
-                            <h3 className="creative-title" title={data.media || data.creative_name}>
-                                {data.media || data.creative_name || '소재 정보 없음'}
-                            </h3>
                         </div>
+                        <h3 className="creative-title" title={data.media || data.creative_name}>
+                            {data.media || data.creative_name || '소재 정보 없음'}
+                        </h3>
                         <div className="metrics-summary">
-                            <div className="metric-item">
-                                <span className="label">상담신청</span>
-                                <span className="value">{formatInt(data.consultation)} 건</span>
-                            </div>
                             <div className="metric-item">
                                 <span className="label">배분수</span>
                                 <span className="value">{formatInt(data.distribution)} 건</span>
                             </div>
                             <div className="metric-item">
-                                <span className="label">배분률(CVR)</span>
+                                <span className="label">배분 CVR</span>
                                 <span className="value">{formatDecimal(data.cvr)} %</span>
                             </div>
                             <div className="metric-item">
@@ -123,17 +138,18 @@ function CreativeCard({ data }) {
                             <span>CPC</span>
                             <strong>{formatInt(data.cpc)} 원</strong>
                         </div>
-                        <div className="detail-row">
-                            <span>상담신청</span>
-                            <strong>{formatInt(data.consultation)}</strong>
-                        </div>
+
                         <div className="detail-row">
                             <span>배분수</span>
                             <strong>{formatInt(data.distribution)}</strong>
                         </div>
                         <div className="detail-row">
-                            <span>배분율(CVR)</span>
+                            <span>배분 CVR</span>
                             <strong>{formatDecimal(data.cvr)} %</strong>
+                        </div>
+                        <div className="detail-row">
+                            <span>배분률</span>
+                            <strong>{formatDecimal(data.distribution_cvr)} %</strong>
                         </div>
                         <div className="detail-divider"></div>
                         <div className="detail-row highlight">

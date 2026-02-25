@@ -30,10 +30,10 @@
 }
 
 .header-title-text {
-    font-size: 1.2rem;
+    font-size: 1.35rem;
     font-weight: 800;
     letter-spacing: -0.04em;
-    color: #333;
+    color: white;
     display: flex;
     align-items: center;
 }
@@ -42,8 +42,8 @@
     content: "";
     display: inline-block;
     width: 1px;
-    height: 12px;
-    background: #e0e0e0;
+    height: 16px;
+    background: rgba(255, 255, 255, 0.4);
     margin: 0 16px;
 }
 
@@ -272,21 +272,20 @@
 }
 
 .creative-title {
-    font-size: 1.05rem;
-    font-weight: 800;
-    color: #333;
-    margin-bottom: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #444;
+    margin-bottom: 1.2rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    flex: 1;
 }
 
 .card-title-area {
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.6rem;
     overflow: hidden;
 }
 

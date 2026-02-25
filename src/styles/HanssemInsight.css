@@ -35,7 +35,7 @@
     display: flex;
     align-items: center;
     gap: 0.8rem;
-    padding: 0.5rem 1rem !important;
+    padding: 0.6rem 1.2rem !important;
     background: #f8f9fa !important;
     border: 1px solid #e0e0e0 !important;
     border-radius: 8px !important;
@@ -43,7 +43,7 @@
     font-size: 0.95rem !important;
     color: #555 !important;
     transition: all 0.2s ease !important;
-    min-width: 140px;
+    min-width: 170px;
     justify-content: space-between;
 }
 
@@ -73,9 +73,9 @@
 
 .dropdown-menu {
     position: absolute;
-    top: 100%;
+    top: 105%;
     left: 0;
-    min-width: 160px;
+    min-width: 200px;
     background: white;
     border: 1px solid #eee;
     border-radius: 12px;
@@ -83,19 +83,20 @@
     list-style: none;
     padding: 0.5rem;
     margin: 0;
-    z-index: 100;
+    z-index: 1001;
     animation: fadeInDown 0.2s ease;
 }
 
 .dropdown-menu li {
     display: flex;
-    align-items: center;
-    padding: 0.7rem 1rem;
+    align-items: flex-start;
+    padding: 0.8rem 1rem;
     border-radius: 8px;
     cursor: pointer;
     font-size: 0.9rem;
     color: #555;
     transition: all 0.2s ease;
+    line-height: 1.4;
 }
 
 .dropdown-menu li img {
