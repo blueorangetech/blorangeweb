@@ -1,20 +1,9 @@
 import React, { useState } from 'react';
+import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
 
-function CreativeCard({ data, mediaLogos }) {
+function CreativeCard({ data }) {
     const [isFlipped, setIsFlipped] = useState(false);
 
-    // 대표 매체명 추출 함수 (GFA -> 카카오 등)
-    const getCanonicalMedia = (mediaName) => {
-        if (!mediaName) return '기타';
-        const upperName = mediaName.toUpperCase();
-        if (upperName.includes('GFA')) return "네이버";
-        if (upperName.includes('당근')) return "당근";
-        if (upperName.includes('카카오') || upperName.includes('KAKAO')) return '카카오';
-        if (upperName.includes('메타') || upperName.includes('META') || upperName.includes('FACEBOOK') || upperName.includes('INSTAGRAM')) return '메타';
-        if (upperName.includes('구글') || upperName.includes('GOOGLE')) return '구글';
-        if (upperName.includes('유튜브') || upperName.includes('YOUTUBE')) return '유튜브';
-        return mediaName;
-    };
 
     const canonicalMedia = getCanonicalMedia(data.media);
 
@@ -43,7 +32,12 @@ function CreativeCard({ data, mediaLogos }) {
 
     // 이미지 선정을 위한 고유값 (제목이 없으면 매체+클릭수 등으로 조합)
     const itemName = data.title || data.creative_name || data.ad_name || `${data.media}_${data.clicks}`;
-    const displayImg = data.img || randomImages[getSafeIndex(itemName)];
+
+    // Cloud Storage 이미지 경로 구성: 기본 주소 + utm_content
+    const STORAGE_BASE_URL = 'https://storage.googleapis.com/hanssem_rh/';
+    const displayImg = data.utm_content
+        ? `${STORAGE_BASE_URL}${data.utm_content}.jpg`
+        : (data.img || randomImages[getSafeIndex(itemName)]);
 
     const toggleFlip = (e) => {
         if (e) e.stopPropagation();
@@ -76,16 +70,20 @@ function CreativeCard({ data, mediaLogos }) {
                         </div>
                         <div className="metrics-summary">
                             <div className="metric-item">
-                                <span className="label">Clicks</span>
-                                <span className="value">{formatInt(data.clicks)}</span>
+                                <span className="label">상담신청</span>
+                                <span className="value">{formatInt(data.consultation)} 건</span>
                             </div>
                             <div className="metric-item">
-                                <span className="label">CTR</span>
-                                <span className="value highlighting">{formatDecimal(data.ctr)} %</span>
+                                <span className="label">배분수</span>
+                                <span className="value">{formatInt(data.distribution)} 건</span>
                             </div>
                             <div className="metric-item">
-                                <span className="label">CPC</span>
-                                <span className="value highlighting">{formatInt(data.cpc)} 원</span>
+                                <span className="label">배분률(CVR)</span>
+                                <span className="value">{formatDecimal(data.cvr)} %</span>
+                            </div>
+                            <div className="metric-item">
+                                <span className="label">배분 CPA</span>
+                                <span className="value highlighting">{formatInt(data.cpa)} 원</span>
                             </div>
                         </div>
                     </div>
@@ -101,6 +99,10 @@ function CreativeCard({ data, mediaLogos }) {
                         <button className="close-btn" onClick={toggleFlip}>×</button>
                     </div>
                     <div className="back-content">
+                        <div className="detail-row">
+                            <span>소재 고유명</span>
+                            <strong>{data.utm_content_5}</strong>
+                        </div>
                         <div className="detail-row">
                             <span>노출수</span>
                             <strong>{formatInt(data.impressions)}</strong>
@@ -121,19 +123,22 @@ function CreativeCard({ data, mediaLogos }) {
                             <span>CPC</span>
                             <strong>{formatInt(data.cpc)} 원</strong>
                         </div>
-
                         <div className="detail-row">
-                            <span>전환수</span>
-                            <strong>{formatInt(data.consultation_requests)}</strong>
+                            <span>상담신청</span>
+                            <strong>{formatInt(data.consultation)}</strong>
                         </div>
                         <div className="detail-row">
-                            <span>전환율(CVR)</span>
+                            <span>배분수</span>
+                            <strong>{formatInt(data.distribution)}</strong>
+                        </div>
+                        <div className="detail-row">
+                            <span>배분율(CVR)</span>
                             <strong>{formatDecimal(data.cvr)} %</strong>
                         </div>
                         <div className="detail-divider"></div>
                         <div className="detail-row highlight">
-                            <span>ROAS</span>
-                            <strong>{formatInt(data.roas)}%</strong>
+                            <span>배분 CPA</span>
+                            <strong>{formatInt(data.cpa)} 원</strong>
                         </div>
                     </div>
                     <div className="chart-footer" onClick={toggleFlip}>

@@ -4,8 +4,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import { ko } from 'date-fns/locale';
 import '../../styles/HanssemInsight.css';
 import { CreativeCard } from './';
+import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
 
-function InsightView() {
+function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
     const [selectedMedia, setSelectedMedia] = useState(['all']);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [realData, setRealData] = useState([]); // API에서 가져온 실제 데이터 저장용
@@ -16,19 +17,9 @@ function InsightView() {
     const [hasMore, setHasMore] = useState(true);
     const LIMIT = 20; // 한 번에 불러올 개수
 
-    // 날짜 상태 추가 (기본값: 최근 7일)
-    const [startDate, setStartDate] = useState(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-    const [endDate, setEndDate] = useState(new Date());
+    // 날짜 상태는 부모로부터 전달받음
 
-    // 매체 로고 URL 매핑
-    const mediaLogos = {
-        '네이버': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Naver_Logotype.svg/250px-Naver_Logotype.svg.png',
-        '카카오': 'https://upload.wikimedia.org/wikipedia/commons/e/e3/KakaoTalk_logo.svg',
-        '메타': 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Meta_Platforms_Inc._logo.svg',
-        '구글': 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg',
-        '유튜브': 'https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg',
-        '당근': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Daangn_Signature_RGB.jpg/250px-Daangn_Signature_RGB.jpg'
-    };
+
 
     // 탭 메뉴 데이터
     const tabMenus = [
@@ -73,13 +64,13 @@ function InsightView() {
 
             try {
                 const response = await fetch(
-                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=creative_performance&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}`
+                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=material&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}`
                 );
                 if (!response.ok) throw new Error('데이터 로드 실패');
                 const result = await response.json();
-                
+
                 const newData = Array.isArray(result) ? result : (result.data || []);
-                
+
                 if (newData.length < LIMIT) {
                     setHasMore(false);
                 }
@@ -118,7 +109,7 @@ function InsightView() {
     const displayData = realData.length > 0 ? realData : (offset === 0 ? chartData : []);
 
     const filteredData = !selectedMedia.includes('all')
-        ? displayData.filter(item => selectedMedia.includes(item.media))
+        ? displayData.filter(item => selectedMedia.includes(getCanonicalMedia(item.media)))
         : displayData;
 
     const handleTabChange = (tabId) => {
@@ -148,6 +139,7 @@ function InsightView() {
         <>
             <nav className="tab-navigation">
                 <div className="tab-dropdown-wrapper">
+
                     <div className="custom-dropdown">
                         <button
                             className="dropdown-toggle tab-dropdown-btn"
@@ -183,6 +175,7 @@ function InsightView() {
                 ))}
 
                 <div className="tab-datepicker-wrapper">
+
                     <DatePicker
                         selectsRange={true}
                         startDate={startDate}
@@ -197,7 +190,7 @@ function InsightView() {
                         customInput={
                             <button className="tab-btn date-picker-btn">
                                 {startDate && endDate
-                                    ? `${startDate.toLocaleDateString('ko-KR', { year: '2-digit', month: 'numeric', day: 'numeric' })} - ${endDate.toLocaleDateString('ko-KR', { year: '2-digit', month: 'numeric', day: 'numeric' })}`
+                                    ? `${startDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })} - ${endDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })}`
                                     : '기간 조건'}
                             </button>
                         }
@@ -222,17 +215,16 @@ function InsightView() {
                 </div>
                 <div className="chart-grid">
                     {filteredData.map((chart, index) => (
-                        <CreativeCard 
-                            key={chart.id || `${chart.media}_${chart.title}_${index}`} 
-                            data={chart} 
-                            mediaLogos={mediaLogos} 
+                        <CreativeCard
+                            key={chart.id || `${chart.media}_${chart.title}_${index}`}
+                            data={chart}
                         />
                     ))}
                 </div>
 
                 {/* 무한 스크롤 트리거 */}
                 <div ref={lastElementRef} style={{ height: '100px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    {isLoading && <div style={{ color: '#667eea', fontWeight: 'bold' }}>데이터 로딩 중...</div>}
+                    {isLoading && <div style={{ color: '#667eea', fontWeight: 'bold' }}>데이터 로드 중...</div>}
                     {!hasMore && realData.length > 0 && <div style={{ color: '#999' }}>모든 데이터를 불러왔습니다.</div>}
                 </div>
             </main>

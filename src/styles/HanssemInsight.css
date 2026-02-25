@@ -3,19 +3,28 @@
 .tab-navigation {
     display: flex;
     gap: 1.5rem;
-    padding: 0 5%;
-    margin: 1.5rem auto 2.5rem;
-    border-bottom: 2px solid #eee;
-    align-items: flex-end;
+    padding: 1.2rem 2rem;
+    margin: 1.5rem auto 2rem;
+    align-items: center;
     max-width: 1400px;
+    width: 100%;
     background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 .tab-dropdown-wrapper {
     position: relative;
-    padding-bottom: 0.8rem;
     display: flex;
     align-items: center;
+    gap: 0.8rem;
+}
+
+.insight-filter-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #444;
+    white-space: nowrap;
 }
 
 .custom-dropdown {
@@ -142,7 +151,9 @@
 /* DatePicker Styles */
 .tab-datepicker-wrapper {
     position: relative;
-    padding-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
 }
 
 .date-picker-btn {
