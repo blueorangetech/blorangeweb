@@ -89,6 +89,10 @@ function CreativeCard({ data }) {
                         </h3>
                         <div className="metrics-summary">
                             <div className="metric-item">
+                                <span className="label">상담신청</span>
+                                <span className="value">{formatInt(data.consultation)} 건</span>
+                            </div>
+                            <div className="metric-item">
                                 <span className="label">배분수</span>
                                 <span className="value">{formatInt(data.distribution)} 건</span>
                             </div>
@@ -138,7 +142,10 @@ function CreativeCard({ data }) {
                             <span>CPC</span>
                             <strong>{formatInt(data.cpc)} 원</strong>
                         </div>
-
+                        <div className="detail-row">
+                            <span>상담신청</span>
+                            <strong>{formatInt(data.consultation)}</strong>
+                        </div>
                         <div className="detail-row">
                             <span>배분수</span>
                             <strong>{formatInt(data.distribution)}</strong>
