@@ -36,6 +36,16 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
     const [hasMore, setHasMore] = useState(true);
     const LIMIT = 20;
 
+    // 성과 임계치 필터 관련 상태
+    const [distributionFilterInput, setDistributionFilterInput] = useState(0);
+    const [costFilterInput, setCostFilterInput] = useState(0);
+    const [appliedDistribution, setAppliedDistribution] = useState(0);
+    const [appliedCost, setAppliedCost] = useState(0);
+
+    // 정렬 관련 상태 (기본값: CPA 오름차순)
+    const [sortConfig, setSortConfig] = useState('cpa-asc');
+
+
     // 카테고리 매핑 정보 (utm_content_1 사용)
     const categoryMap = {
         '키친_시공사례': 'kitchencase',
@@ -184,11 +194,24 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
         });
     };
 
+    // 성과 필터 적용/초기화
+    const handleApplyPerformanceFilters = () => {
+        setAppliedDistribution(Number(distributionFilterInput));
+        setAppliedCost(Number(costFilterInput));
+    };
+
+    const handleResetPerformanceFilters = () => {
+        setDistributionFilterInput(0);
+        setCostFilterInput(0);
+        setAppliedDistribution(0);
+        setAppliedCost(0);
+    };
+
     // 필터링된 데이터 계산
     const displayData = realData.length > 0 ? realData : (offset === 0 ? chartData : []);
 
     const filteredData = useMemo(() => {
-        return displayData.filter(item => {
+        let data = displayData.filter(item => {
             // 1. 매체 필터
             const matchesMedia = selectedFilters.media.includes('all') || selectedFilters.media.includes(getCanonicalMedia(item.media));
 
@@ -216,9 +239,33 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                 : selectedFilters.sub_copy.map(label => messageMap[label]);
             const matchesSubCopy = selectedSubCopyValues.includes('all') || selectedSubCopyValues.includes(item.utm_content_4);
 
-            return matchesMedia && matchesCategory && matchesTargeting && matchesMainCopy && matchesSubCopy;
+            // 6. 성과 임계치 필터
+            const matchesMinDist = Number(item.distribution || 0) >= appliedDistribution;
+            const matchesMinCost = Number(item.cost || 0) >= appliedCost;
+
+            return matchesMedia && matchesCategory && matchesTargeting && matchesMainCopy && matchesSubCopy && matchesMinDist && matchesMinCost;
         });
-    }, [displayData, selectedFilters, targetingMap, messageMap, categoryMap]);
+
+        // 데이터 정렬 로직
+        const sorted = [...data].sort((a, b) => {
+            const [field, order] = sortConfig.split('-');
+            const valA = parseFloat(a[field] || 0);
+            const valB = parseFloat(b[field] || 0);
+
+            // 0은 항상 맨 뒤로 보냄 (오름차순/내림차순 공통)
+            if (valA === 0 && valB !== 0) return 1;
+            if (valA !== 0 && valB === 0) return -1;
+            if (valA === 0 && valB === 0) return 0;
+
+            if (order === 'asc') {
+                return valA - valB;
+            } else {
+                return valB - valA;
+            }
+        });
+
+        return sorted;
+    }, [displayData, selectedFilters, targetingMap, messageMap, categoryMap, appliedDistribution, appliedCost, sortConfig]);
 
     // 드롭다운 라벨 생성
     const getDropdownLabel = (type, defaultLabel) => {
@@ -312,6 +359,8 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                         setStartDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
                         setEndDate(new Date());
                         setOpenDropdown(null);
+                        setSortConfig('cpa-asc');
+                        handleResetPerformanceFilters();
                     }}
                 >
                     조건 초기화
@@ -319,8 +368,53 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
             </nav>
 
             <main className="hanssem-main">
-                <div className="section-header">
-                    <h2>[{!selectedFilters.media.includes('all') ? (selectedFilters.media.length === 1 ? `${selectedFilters.media[0]} 성과` : `${selectedFilters.media[0]} 외 ${selectedFilters.media.length - 1}개 매체 성과`) : '전체 통합'} 소재 성과 수치 ]</h2>
+                <div className="section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+                    <h2 style={{ flex: '1 1 auto', margin: 0 }}>[{!selectedFilters.media.includes('all') ? (selectedFilters.media.length === 1 ? `${selectedFilters.media[0]} 성과` : `${selectedFilters.media[0]} 외 ${selectedFilters.media.length - 1}개매체 성과`) : '전체 통합'} 소재 성과 수치 ]</h2>
+
+                    <div className="insight-performance-filters" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                        {/* 성과 임계치 필터 그룹 */}
+                        <div className="performance-filter-group">
+                            <div className="performance-input-wrapper">
+                                <label>배분</label>
+                                <input
+                                    type="number"
+                                    className="performance-filter-input"
+                                    placeholder="건"
+                                    value={distributionFilterInput}
+                                    onChange={(e) => setDistributionFilterInput(e.target.value)}
+                                />
+                                <span className="filter-unit">건 이상</span>
+                            </div>
+                            <div className="performance-input-wrapper">
+                                <label>광고비</label>
+                                <input
+                                    type="number"
+                                    className="performance-filter-input"
+                                    placeholder="원"
+                                    value={costFilterInput}
+                                    onChange={(e) => setCostFilterInput(e.target.value)}
+                                />
+                                <span className="filter-unit">원 이상</span>
+                            </div>
+                            <button className="performance-filter-btn apply" onClick={handleApplyPerformanceFilters}>적용</button>
+                            <button className="performance-filter-btn reset" onClick={handleResetPerformanceFilters}>초기화</button>
+                        </div>
+
+                        {/* 정렬 필터 그룹 */}
+                        <div className="sort-filter-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: '0.5rem', paddingLeft: '1.5rem', borderLeft: '1px solid #eee' }}>
+                            <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#666' }}>정렬</span>
+                            <select
+                                className="performance-sort-select"
+                                value={sortConfig}
+                                onChange={(e) => setSortConfig(e.target.value)}
+                            >
+                                <option value="cpa-asc">CPA 낮은 순 (기본)</option>
+                                <option value="cpa-desc">CPA 높은 순</option>
+                                <option value="cost-asc">광고비 낮은 순</option>
+                                <option value="cost-desc">광고비 높은 순</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div className="chart-grid">
                     {filteredData.map((chart, index) => (
