@@ -33,13 +33,13 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
         }
 
         try {
-            const endpoint = view === 'login' ? `/auth/${loginIdentifier}` : `/auth/register`;
+            const endpoint = view === 'login' ? `/auth/login` : `/auth/register`;
             const payload = view === 'login' ? {
-                name: loginIdentifier,
+                user_id: userId,
                 password: password
             } : {
+                user_id: userId,
                 name: name,
-                login_id: userId,
                 password: password
             };
 
@@ -56,8 +56,11 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
             if (response.ok && result.status === 'success') {
                 if (view === 'login') {
                     Cookies.set('Authorization', result.token, { expires: 7 });
+                    if (result.name) {
+                        Cookies.set('UserName', result.name, { expires: 7 });
+                    }
                     alert('반갑습니다! 성공적으로 로그인되었습니다.');
-                    onLoginSuccess();
+                    onLoginSuccess(result);
                 } else {
                     alert('회원가입이 완료되었습니다! 로그인해주세요.');
                     setView('login');
@@ -154,19 +157,17 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                         </div>
                     )}
 
-                    {view === 'signup' && (
-                        <div className="input-group">
-                            <label htmlFor="userId">아이디 (ID)</label>
-                            <input
-                                id="userId"
-                                type="text"
-                                placeholder="example123"
-                                value={userId}
-                                onChange={(e) => setUserId(e.target.value)}
-                                required
-                            />
-                        </div>
-                    )}
+                    <div className="input-group">
+                        <label htmlFor="userId">아이디 (ID)</label>
+                        <input
+                            id="userId"
+                            type="text"
+                            placeholder="아이디를 입력하세요"
+                            value={userId}
+                            onChange={(e) => setUserId(e.target.value)}
+                            required
+                        />
+                    </div>
 
                     <div className="input-group">
                         <label htmlFor="password">비밀번호</label>
@@ -191,6 +192,11 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 required
                             />
+                            {confirmPassword && password !== confirmPassword && (
+                                <span style={{ color: '#ff4d4f', fontSize: '12px', marginTop: '4px' }}>
+                                    비밀번호가 일치하지 않습니다.
+                                </span>
+                            )}
                         </div>
                     )}
 
