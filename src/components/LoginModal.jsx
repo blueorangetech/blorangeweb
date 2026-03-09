@@ -9,6 +9,7 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [name, setName] = useState('');
+    const [userId, setUserId] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -19,9 +20,9 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
         setIsLoading(true);
         setError('');
 
-        const customerName = view === 'login' ?
+        const loginIdentifier = view === 'login' ?
             (location.pathname.split('/').filter(Boolean)[0] || 'hanssem') :
-            name;
+            userId;
 
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -32,16 +33,22 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
         }
 
         try {
-            const endpoint = view === 'login' ? `/auth/${customerName}` : `/auth/register`;
+            const endpoint = view === 'login' ? `/auth/${loginIdentifier}` : `/auth/register`;
+            const payload = view === 'login' ? {
+                name: loginIdentifier,
+                password: password
+            } : {
+                name: name,
+                login_id: userId,
+                password: password
+            };
+
             const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    name: customerName,
-                    password: password
-                }),
+                body: JSON.stringify(payload),
             });
 
             const result = await response.json();
@@ -55,6 +62,7 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                     alert('회원가입이 완료되었습니다! 로그인해주세요.');
                     setView('login');
                     setName('');
+                    setUserId('');
                     setPassword('');
                     setConfirmPassword('');
                 }
@@ -75,6 +83,7 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
         setPassword('');
         setConfirmPassword('');
         setName('');
+        setUserId('');
     };
 
     return (
@@ -140,6 +149,20 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
                                 placeholder="사용자 이름"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                        </div>
+                    )}
+
+                    {view === 'signup' && (
+                        <div className="input-group">
+                            <label htmlFor="userId">아이디 (ID)</label>
+                            <input
+                                id="userId"
+                                type="text"
+                                placeholder="example123"
+                                value={userId}
+                                onChange={(e) => setUserId(e.target.value)}
                                 required
                             />
                         </div>
