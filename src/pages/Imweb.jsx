@@ -13,12 +13,21 @@ function Imweb() {
   const [selectedDashboard, setSelectedDashboard] = useState('integrated')
   const [uploadedFile, setUploadedFile] = useState(null)
   const [uploadStatus, setUploadStatus] = useState({ type: '', message: '' })
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(true)
   const [hasPermission, setHasPermission] = useState(true)
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [currentUserInfo, setCurrentUserInfo] = useState({ role: '', is_master: false })
 
   const checkAuth = async () => {
+    // === 인증 기능 임시 보류 ===
+    setIsLoggedIn(true);
+    setHasPermission(true);
+    if (!Cookies.get('UserName')) {
+      Cookies.set('UserName', '게스트');
+    }
+    return;
+    // ===========================
+
     const token = Cookies.get('Authorization')
     if (!token) {
       setIsLoggedIn(false)
