@@ -4,14 +4,11 @@ import "react-datepicker/dist/react-datepicker.css";
 import { ko } from 'date-fns/locale';
 import '../../styles/HanssemInsight.css';
 import { CreativeCard } from './';
-import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
 import { categoryMap, targetingMap, placementMap, messageMap, chartData } from './common/filterMaps';
 
-function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
+function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }) {
     // 필터 상태 통합 관리
     const [selectedFilters, setSelectedFilters] = useState({
-        media: ['all'],
-        placement: ['all'],
         concept: ['all'],
         explore: ['all'],
         main_copy: ['all'],
@@ -40,8 +37,6 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
 
     // 탭 메뉴 데이터 및 옵션
     const filterConfigs = [
-        { id: 'media', label: '매체', options: Object.keys(mediaLogos) },
-        { id: 'placement', label: '노출 지면', options: Object.keys(placementMap) },
         { id: 'concept', label: '카테고리', options: Object.keys(categoryMap) },
         { id: 'explore', label: '타게팅', options: Object.keys(targetingMap) },
         { id: 'main_copy', label: '주 메세지', options: Object.keys(messageMap) },
@@ -75,7 +70,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
 
             try {
                 const response = await fetch(
-                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=media_material&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}`
+                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=all_material&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}`
                 );
                 if (!response.ok) throw new Error('데이터 로드 실패');
                 const result = await response.json();
@@ -152,15 +147,6 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
 
     const filteredData = useMemo(() => {
         let data = displayData.filter(item => {
-            // 1. 매체 필터
-            const matchesMedia = selectedFilters.media.includes('all') || selectedFilters.media.includes(getCanonicalMedia(item.media));
-
-            // 1.5. 노출 지면 필터 (utm_content_2 사용)
-            const selectedPlacementValues = selectedFilters.placement.includes('all')
-                ? ['all']
-                : selectedFilters.placement.map(label => placementMap[label]);
-            const matchesPlacement = selectedPlacementValues.includes('all') || selectedPlacementValues.includes(item.utm_content_2);
-
             // 2. 카테고리 필터 (utm_content_1 사용)
             const selectedCategoryValues = selectedFilters.concept.includes('all')
                 ? ['all']
@@ -189,7 +175,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
             const matchesMinDist = Number(item.distribution || 0) >= appliedDistribution;
             const matchesMinCost = Number(item.cost || 0) >= appliedCost;
 
-            return matchesMedia && matchesPlacement && matchesCategory && matchesTargeting && matchesMainCopy && matchesSubCopy && matchesMinDist && matchesMinCost;
+            return matchesCategory && matchesTargeting && matchesMainCopy && matchesSubCopy && matchesMinDist && matchesMinCost;
         });
 
         // 데이터 정렬 로직
@@ -217,11 +203,11 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
     const summaryTableData = useMemo(() => {
         const aggr = {};
         filteredData.forEach(item => {
-            // 그룹 단위: 노출 지면(placement) 또는 매체 + 타게팅 등 (이미지의 '구분' 기준을 노출면이나 컨셉 등으로 통합)
-            // 여기서는 이미지 구조처럼 "매체 지면" 등으로 그룹핑
-            const mediaStr = item.media || '기타';
-            const placementStr = item.utm_content_2 ? item.utm_content_2.toUpperCase() : '';
-            const groupKey = placementStr ? `${mediaStr} ${placementStr}` : mediaStr;
+            // 그룹 단위: 통합 소재 대시보드의 경우 카테고리(concept) 등으로 묶는것이 유용
+            // 또는 개별 '소재 통합 요약' 이 필요하다면 단일행 '전체 소재 통합'으로 표기.
+            // 여기서는 심플하게 '통합 카테고리별 요약' (utm_content_1 사용)으로 제공
+            const categoryStr = item.utm_content_1 || '카테고리 미지정';
+            const groupKey = categoryStr;
 
             if (!aggr[groupKey]) {
                 aggr[groupKey] = {
@@ -232,7 +218,6 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
             aggr[groupKey].cost += Number(item.cost || 0);
             aggr[groupKey].impressions += Number(item.impressions || 0);
             aggr[groupKey].clicks += Number(item.clicks || 0);
-            // 상담신청 -> link_clicks (임시), 배분 -> distribution 으로 매핑
             aggr[groupKey].consultations += Number(item.consultation || 0);
             aggr[groupKey].distributions += Number(item.distribution || 0);
         });
@@ -306,8 +291,6 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                         className="tab-btn reset-btn"
                         onClick={() => {
                             setSelectedFilters({
-                                media: ['all'],
-                                placement: ['all'],
                                 concept: ['all'],
                                 explore: ['all'],
                                 main_copy: ['all'],
@@ -476,4 +459,4 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
     );
 }
 
-export default InsightView;
+export default AllMaterialInsightView;

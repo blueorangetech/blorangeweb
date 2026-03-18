@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { Header, Footer, LoginModal, UserManagement } from '../components';
-import { InsightView, PerformanceView } from '../components/hanssem';
+import { InsightView, PerformanceView, AllMaterialInsightView } from '../components/hanssem';
 import { bqDirectUpload } from '../utils/bqDirectUpload';
 import '../styles/Hanssem.css';
 
@@ -110,7 +110,8 @@ function Hanssem() {
   // 필터 버튼 데이터
   const filterButtons = [
     { id: 'performance', label: '소재 성과 대시보드' },
-    { id: 'insight', label: '소재 인사이트' },
+    { id: 'insight', label: '매체 별 소재 인사이트' },
+    { id: 'all-material', label: '통합 소재 대시보드' },
     { id: 'notice', label: '공지사항' },
     ...(currentUserInfo.role === 'master' || currentUserInfo.role === 'admin'
       ? [{ id: 'management', label: '권한 관리' }]
@@ -212,7 +213,7 @@ function Hanssem() {
       </section>
 
       {/* 메인 콘텐츠 영역 (컴포넌트 분리) */}
-      {!isLoggedIn && (activeFilter === 'insight' || activeFilter === 'performance' || activeFilter === 'management') ? (
+      {!isLoggedIn && (activeFilter === 'insight' || activeFilter === 'performance' || activeFilter === 'all-material' || activeFilter === 'management') ? (
         <main className="hanssem-main">
           <div className="access-denied-container" style={{
             padding: '100px 20px',
@@ -273,7 +274,7 @@ function Hanssem() {
             </button>
           </div>
         </main>
-      ) : isLoggedIn && !hasPermission && (activeFilter === 'insight' || activeFilter === 'performance' || activeFilter === 'management') ? (
+      ) : isLoggedIn && !hasPermission && (activeFilter === 'insight' || activeFilter === 'performance' || activeFilter === 'all-material' || activeFilter === 'management') ? (
         <main className="hanssem-main">
           <div className="access-denied-container" style={{
             padding: '100px 20px',
@@ -321,6 +322,14 @@ function Hanssem() {
           )}
           {activeFilter === 'performance' && (
             <PerformanceView
+              startDate={startDate}
+              endDate={endDate}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+            />
+          )}
+          {activeFilter === 'all-material' && (
+            <AllMaterialInsightView
               startDate={startDate}
               endDate={endDate}
               setStartDate={setStartDate}

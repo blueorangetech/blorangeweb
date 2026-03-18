@@ -44,7 +44,7 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
         try {
             // 1. 최상위 소재 데이터 (서버 사이드 필터링 적용)
             const materialRes = await fetch(
-                `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=material&start_date=${startStr}&end_date=${endStr}&limit=5&offset=0&min_distribution=${minDist}&min_cost=${minCost}`
+                `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=media_material&start_date=${startStr}&end_date=${endStr}&limit=5&offset=0&min_distribution=${minDist}&min_cost=${minCost}`
             );
             const materialResult = await materialRes.json();
             setTopData(Array.isArray(materialResult) ? materialResult : (materialResult.data || []));
