@@ -79,13 +79,15 @@ function CreativeCard({ data }) {
                         />
                     </div>
                     <div className="chart-content">
-                        <div className="card-title-area">
-                            <div className="media-ci-wrapper">
-                                <img src={mediaLogos[canonicalMedia] || mediaLogos['기타']} alt={data.media} className="media-ci-img" title={data.media} />
+                        {data.media && (
+                            <div className="card-title-area">
+                                <div className="media-ci-wrapper">
+                                    <img src={mediaLogos[canonicalMedia] || mediaLogos['기타']} alt={data.media} className="media-ci-img" title={data.media} />
+                                </div>
                             </div>
-                        </div>
+                        )}
                         <h3 className="creative-title" title={data.media || data.creative_name}>
-                            {data.media || data.creative_name || '소재 정보 없음'}
+                            {data.media || data.creative_name || data.utm_content_5 || '소재 정보 없음'}
                         </h3>
                         <div className="metrics-summary">
                             <div className="metric-item">
