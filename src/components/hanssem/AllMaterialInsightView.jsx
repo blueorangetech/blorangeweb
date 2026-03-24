@@ -9,7 +9,7 @@ import { categoryMap, targetingMap, placementMap, messageMap, chartData } from '
 function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }) {
     // 필터 상태 통합 관리
     const [selectedFilters, setSelectedFilters] = useState({
-        concept: ['all'],
+        creative_name: ['all'],
         explore: ['all'],
         main_copy: ['all'],
         sub_copy: ['all']
@@ -35,13 +35,11 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
     // 정렬 관련 상태 (기본값: CPA 오름차순)
     const [sortConfig, setSortConfig] = useState('cpa-asc');
 
-    // 탭 메뉴 데이터 및 옵션
-    const filterConfigs = [
-        { id: 'concept', label: '카테고리', options: Object.keys(categoryMap) },
-        { id: 'explore', label: '타게팅', options: Object.keys(targetingMap) },
-        { id: 'main_copy', label: '주 메세지', options: Object.keys(messageMap) },
-        { id: 'sub_copy', label: '서브 메세지', options: Object.keys(messageMap) },
-    ];
+    // 테이블 페이지네이션 상태
+    const [tablePage, setTablePage] = useState(1);
+    const ITEMS_PER_PAGE = 5;
+
+    // 필터 옵션은 데이터 로딩 후 동적으로 생성되므로 displayData 아래로 이동했습니다.
 
     // 날짜가 바뀌면 데이터와 오프셋 초기화
     useEffect(() => {
@@ -145,37 +143,50 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
     // 필터링된 데이터 계산
     const displayData = realData.length > 0 ? realData : (offset === 0 ? chartData : []);
 
+    // 동적 구성: 소재 고유명(utm_content_5) 고유값 추출
+    const creativeNameOptions = useMemo(() => {
+        const names = new Set();
+        displayData.forEach(item => {
+            if (item.utm_content_5) names.add(item.utm_content_5);
+        });
+        return Array.from(names).sort();
+    }, [displayData]);
+
+    const filterConfigs = useMemo(() => [
+        { id: 'creative_name', label: '소재 고유명', options: creativeNameOptions },
+        { id: 'explore', label: '타게팅', options: Object.keys(targetingMap) },
+        { id: 'main_copy', label: '주 메세지', options: Object.keys(messageMap) },
+        { id: 'sub_copy', label: '서브 메세지', options: Object.keys(messageMap) },
+    ], [creativeNameOptions, targetingMap, messageMap]);
+
     const filteredData = useMemo(() => {
         let data = displayData.filter(item => {
-            // 2. 카테고리 필터 (utm_content_1 사용)
-            const selectedCategoryValues = selectedFilters.concept.includes('all')
-                ? ['all']
-                : selectedFilters.concept.map(label => categoryMap[label]);
-            const matchesCategory = selectedCategoryValues.includes('all') || selectedCategoryValues.includes(item.utm_content_1);
+            // 2. 소재 고유명 필터 (utm_content_5 사용)
+            const matchesCreativeName = selectedFilters.creative_name.includes('all') || selectedFilters.creative_name.includes(item.utm_content_5);
 
             // 3. 타게팅 필터 (utm_content_8 사용)
             const selectedTargetingValues = selectedFilters.explore.includes('all')
                 ? ['all']
-                : selectedFilters.explore.map(label => targetingMap[label]);
+                : selectedFilters.explore.map(label => targetingMap[label]).flat();
             const matchesTargeting = selectedTargetingValues.includes('all') || selectedTargetingValues.includes(item.utm_content_8);
 
             // 4. 주 메세지 필터 (utm_content_3 사용)
             const selectedMainCopyValues = selectedFilters.main_copy.includes('all')
                 ? ['all']
-                : selectedFilters.main_copy.map(label => messageMap[label]);
+                : selectedFilters.main_copy.map(label => messageMap[label]).flat();
             const matchesMainCopy = selectedMainCopyValues.includes('all') || selectedMainCopyValues.includes(item.utm_content_3);
 
             // 5. 서브 메세지 필터 (utm_content_4 사용)
             const selectedSubCopyValues = selectedFilters.sub_copy.includes('all')
                 ? ['all']
-                : selectedFilters.sub_copy.map(label => messageMap[label]);
+                : selectedFilters.sub_copy.map(label => messageMap[label]).flat();
             const matchesSubCopy = selectedSubCopyValues.includes('all') || selectedSubCopyValues.includes(item.utm_content_4);
 
             // 6. 성과 임계치 필터
             const matchesMinDist = Number(item.distribution || 0) >= appliedDistribution;
             const matchesMinCost = Number(item.cost || 0) >= appliedCost;
 
-            return matchesCategory && matchesTargeting && matchesMainCopy && matchesSubCopy && matchesMinDist && matchesMinCost;
+            return matchesCreativeName && matchesTargeting && matchesMainCopy && matchesSubCopy && matchesMinDist && matchesMinCost;
         });
 
         // 데이터 정렬 로직
@@ -197,17 +208,17 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
         });
 
         return sorted;
-    }, [displayData, selectedFilters, targetingMap, messageMap, categoryMap, appliedDistribution, appliedCost, sortConfig]);
+    }, [displayData, selectedFilters, targetingMap, messageMap, appliedDistribution, appliedCost, sortConfig]);
 
     // 테이블 요약 데이터 계산 로직
     const summaryTableData = useMemo(() => {
         const aggr = {};
         filteredData.forEach(item => {
-            // 그룹 단위: 통합 소재 대시보드의 경우 카테고리(concept) 등으로 묶는것이 유용
+            // 그룹 단위: 통합 소재 대시보드의 경우 소재 고유명(utm_content_5) 등으로 묶는것이 유용
             // 또는 개별 '소재 통합 요약' 이 필요하다면 단일행 '전체 소재 통합'으로 표기.
-            // 여기서는 심플하게 '통합 카테고리별 요약' (utm_content_1 사용)으로 제공
-            const categoryStr = item.utm_content_1 || '카테고리 미지정';
-            const groupKey = categoryStr;
+            // 여기서는 심플하게 '통합 소재 고유명별 요약' (utm_content_5 사용)으로 제공
+            const creativeNameStr = item.utm_content_5 || '소재 미지정';
+            const groupKey = creativeNameStr;
 
             if (!aggr[groupKey]) {
                 aggr[groupKey] = {
@@ -237,6 +248,18 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
             };
         }).sort((a, b) => b.cost - a.cost); // 비용 내림차순 정렬
     }, [filteredData]);
+
+    // 테이블 데이터 페이징 처리
+    useEffect(() => {
+        setTablePage(1);
+    }, [summaryTableData]);
+
+    const totalTablePages = Math.max(1, Math.ceil(summaryTableData.length / ITEMS_PER_PAGE));
+
+    const currentTableData = useMemo(() => {
+        const start = (tablePage - 1) * ITEMS_PER_PAGE;
+        return summaryTableData.slice(start, start + ITEMS_PER_PAGE);
+    }, [summaryTableData, tablePage]);
 
     // 드롭다운 라벨 생성
     const getDropdownLabel = (type, defaultLabel) => {
@@ -291,7 +314,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
                         className="tab-btn reset-btn"
                         onClick={() => {
                             setSelectedFilters({
-                                concept: ['all'],
+                                creative_name: ['all'],
                                 explore: ['all'],
                                 main_copy: ['all'],
                                 sub_copy: ['all']
@@ -364,8 +387,8 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
                         </tr>
                     </thead>
                     <tbody>
-                        {realData.length > 0 && summaryTableData.length > 0 ? (
-                            summaryTableData.map((row, idx) => (
+                        {realData.length > 0 && currentTableData.length > 0 ? (
+                            currentTableData.map((row, idx) => (
                                 <tr key={idx}>
                                     <td className="row-key">{row.key}</td>
                                     <td>{Math.round(row.cost).toLocaleString()}</td>
@@ -391,6 +414,33 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
                         )}
                     </tbody>
                 </table>
+                {summaryTableData.length > 0 && (
+                    <div className="table-pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '15px' }}>
+                        <button
+                            onClick={() => setTablePage(p => Math.max(1, p - 1))}
+                            disabled={tablePage === 1}
+                            style={{
+                                padding: '6px 14px', borderRadius: '4px', border: '1px solid #ddd',
+                                background: tablePage === 1 ? '#f5f5f5' : '#fff', color: tablePage === 1 ? '#aaa' : '#333', cursor: tablePage === 1 ? 'not-allowed' : 'pointer', fontSize: '0.85rem'
+                            }}
+                        >
+                            이전
+                        </button>
+                        <span style={{ fontSize: '0.9rem', color: '#555', fontWeight: '500' }}>
+                            {tablePage} <span style={{ color: '#ccc', margin: '0 4px' }}>/</span> {totalTablePages}
+                        </span>
+                        <button
+                            onClick={() => setTablePage(p => Math.min(totalTablePages, p + 1))}
+                            disabled={tablePage === totalTablePages}
+                            style={{
+                                padding: '6px 14px', borderRadius: '4px', border: '1px solid #ddd',
+                                background: tablePage === totalTablePages ? '#f5f5f5' : '#fff', color: tablePage === totalTablePages ? '#aaa' : '#333', cursor: tablePage === totalTablePages ? 'not-allowed' : 'pointer', fontSize: '0.85rem'
+                            }}
+                        >
+                            다음
+                        </button>
+                    </div>
+                )}
             </div>
 
             <main className="hanssem-main">

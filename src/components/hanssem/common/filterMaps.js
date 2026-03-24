@@ -26,7 +26,7 @@ export const categoryMap = {
 
 export const targetingMap = {
     '논타겟': 'non',
-    '데모': 'demo',
+    '데모': ['non', 'demo'],
     'dmp': 'dmp',
     '관심사': 'interest',
     '유사타겟': 'similar',
