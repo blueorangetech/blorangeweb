@@ -199,7 +199,7 @@
 .chart-card.flip-container {
     background: transparent;
     perspective: 1000px;
-    height: 520px;
+    height: 560px;
     width: 100%;
     border: none;
     box-shadow: none;
@@ -287,6 +287,7 @@
     gap: 0.8rem;
     margin-bottom: 0.6rem;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .media-ci-wrapper {
@@ -400,7 +401,7 @@
     }
 
     .chart-card.flip-container {
-        height: 580px;
+        height: 600px;
     }
 }
 
@@ -412,7 +413,7 @@
     }
 
     .chart-card.flip-container {
-        height: 580px;
+        height: 600px;
     }
 
     .dashboard-grid-2 {
@@ -432,6 +433,6 @@
     }
 
     .chart-card.flip-container {
-        height: 680px;
+        height: 700px;
     }
 }

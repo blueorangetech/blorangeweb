@@ -14,8 +14,7 @@ import {
     ResponsiveContainer
 } from 'recharts';
 import '../../styles/HanssemPerformance.css';
-import { CreativeCard } from './';
-import { mediaLogos } from '../../utils/mediaUtils';
+import { CreativeCard } from '.';
 
 function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
     const [topData, setTopData] = useState([]);
@@ -23,10 +22,11 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
     const [isLoading, setIsLoading] = useState(false);
 
     // 필터 관련 상태
-    const [distributionFilterInput, setdistributionFilterInput] = useState(0);
+    const [orderFilterInput, setOrderFilterInput] = useState(0);
     const [costFilterInput, setCostFilterInput] = useState(0);
+    const [roasFilterInput, setRoasFilterInput] = useState(0);
 
-    const fetchData = async (sDate, eDate, minDist, minCost) => {
+    const fetchData = async (sDate, eDate, minOrders = 0, minCost = 0, minRoas = 0) => {
         if (!sDate || !eDate) return;
         setIsLoading(true);
         const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -44,14 +44,14 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
         try {
             // 1. 최상위 소재 데이터 (서버 사이드 필터링 적용)
             const materialRes = await fetch(
-                `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=media_material&start_date=${startStr}&end_date=${endStr}&limit=5&offset=0&min_distribution=${minDist}&min_cost=${minCost}`
+                `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem_hf&table_id=performance_raw&report_type=media_material&start_date=${startStr}&end_date=${endStr}&limit=5&offset=0&min_orders=${minOrders}&min_cost=${minCost}&min_roas=${minRoas}`
             );
             const materialResult = await materialRes.json();
             setTopData(Array.isArray(materialResult) ? materialResult : (materialResult.data || []));
 
             // 2. 트렌드 데이터 (전체 데이터 추이)
             const trendRes = await fetch(
-                `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=trend&start_date=${startStr}&end_date=${endStr}`
+                `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem_hf&table_id=performance_raw&report_type=trend&start_date=${startStr}&end_date=${endStr}`
             );
             const trendResult = await trendRes.json();
             setTrendData(Array.isArray(trendResult) ? trendResult : (trendResult.data || []));
@@ -64,17 +64,18 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
     };
 
     useEffect(() => {
-        fetchData(startDate, endDate, 0, 0);
+        fetchData(startDate, endDate, 0, 0, 0);
     }, [startDate, endDate]);
 
     const handleApplyFilters = () => {
-        fetchData(startDate, endDate, distributionFilterInput, costFilterInput);
+        fetchData(startDate, endDate, orderFilterInput, costFilterInput, roasFilterInput);
     };
 
     const handleResetFilters = () => {
-        setdistributionFilterInput(0);
+        setOrderFilterInput(0);
         setCostFilterInput(0);
-        fetchData(startDate, endDate, 0, 0);
+        setRoasFilterInput(0);
+        fetchData(startDate, endDate, 0, 0, 0);
     };
 
     // 날짜별 데이터 집계
@@ -91,40 +92,45 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
                     impressions: 0,
                     clicks: 0,
                     cost: 0,
-                    distribution: 0
+                    orders: 0,
+                    revenue: 0
                 };
             }
             dailyMap[d].impressions += Number(item.impressions || 0);
             dailyMap[d].clicks += Number(item.clicks || 0);
-            dailyMap[d].cost += Number(item.cost || 0);
-            dailyMap[d].distribution += Number(item.distribution || 0);
+            dailyMap[d].cost += Number(item.total_cost || 0);
+            dailyMap[d].orders += Number(item.total_orders || 0);
+            dailyMap[d].revenue += Number(item.total_revenue || 0);
         });
 
         return Object.values(dailyMap).map(day => ({
             ...day,
             displayDate: day.date.substring(5).replace('-', '/'), // MM/DD 형식
             ctr: day.impressions > 0 ? (day.clicks / day.impressions) * 100 : 0,
-            cpa: day.distribution > 0 ? Math.round(day.cost / day.distribution) : 0,
-            cpc: day.clicks > 0 ? Math.round(day.cost / day.clicks) : 0
+            cpc: day.clicks > 0 ? Math.round(day.cost / day.clicks) : 0,
+            cvr: day.clicks > 0 ? (day.orders / day.clicks) * 100 : 0,
+            roas: day.cost > 0 ? (day.revenue / day.cost) * 100 : 0
         })).sort((a, b) => a.date.localeCompare(b.date));
     }, [trendData]);
 
     // 전체 요약 데이터 계산
     const summaryMetrics = useMemo(() => {
-        const initial = { clicks: 0, impressions: 0, cost: 0, distribution: 0 };
+        const initial = { clicks: 0, impressions: 0, cost: 0, orders: 0, revenue: 0 };
         const totals = processedTrendData.reduce((acc, curr) => {
             acc.clicks += curr.clicks;
             acc.impressions += curr.impressions;
             acc.cost += curr.cost;
-            acc.distribution += curr.distribution;
+            acc.orders += curr.orders;
+            acc.revenue += curr.revenue;
             return acc;
         }, initial);
 
         return {
             ...totals,
             ctr: totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0,
-            cpa: totals.distribution > 0 ? Math.round(totals.cost / totals.distribution) : 0,
-            cpc: totals.clicks > 0 ? Math.round(totals.cost / totals.clicks) : 0
+            cpc: totals.clicks > 0 ? Math.round(totals.cost / totals.clicks) : 0,
+            cvr: totals.clicks > 0 ? (totals.orders / totals.clicks) * 100 : 0,
+            roas: totals.cost > 0 ? (totals.revenue / totals.cost) * 100 : 0
         };
     }, [processedTrendData]);
 
@@ -203,12 +209,12 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
                         <div className="metrics-placeholder">
                             <table className="simple-table">
                                 <thead>
-                                    <tr><th>항목</th><th>수치</th><th>비중/기준</th></tr>
+                                    <tr><th>항목</th><th>수치</th></tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td>총 클릭수</td><td>{formatInt(summaryMetrics.clicks)}</td><td>100.0%</td></tr>
-                                    <tr><td>평균 CTR</td><td>{formatDecimal(summaryMetrics.ctr)} %</td><td>-</td></tr>
-                                    <tr><td>평균 CPC</td><td>{formatInt(summaryMetrics.cpc)} 원</td><td>-</td></tr>
+                                    <tr><td>총 클릭수</td><td>{formatInt(summaryMetrics.clicks)}</td></tr>
+                                    <tr><td>평균 CTR</td><td>{formatDecimal(summaryMetrics.ctr)} %</td></tr>
+                                    <tr><td>평균 CPC</td><td>{formatInt(summaryMetrics.cpc)} 원</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -243,25 +249,25 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
                                     <Tooltip
                                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                                         formatter={(value, name) => {
-                                            if (name === 'CTR') return [`${value.toFixed(2)}%`, name];
-                                            return [`${value.toLocaleString('ko-KR')}${name === 'CPA' ? '원' : ''}`, name];
+                                            if (name === 'CTR' || name === 'CVR' || name === 'ROAS') return [`${value.toFixed(2)}%`, name];
+                                            return [value.toLocaleString('ko-KR'), name];
                                         }}
                                     />
                                     <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                                    <Bar yAxisId="left" dataKey="distribution" name="배분수" fill="#4bc0c0" radius={[4, 4, 0, 0]} barSize={20} />
-                                    <Line yAxisId="right" type="monotone" dataKey="cpa" name="CPA" stroke="#f39c12" strokeWidth={2} dot={{ r: 3 }} />
+                                    <Bar yAxisId="left" dataKey="roas" name="ROAS" fill="#4bc0c0" radius={[4, 4, 0, 0]} barSize={20} />
+                                    <Line yAxisId="right" type="monotone" dataKey="cvr" name="CVR" stroke="#f39c12" strokeWidth={2} dot={{ r: 3 }} />
                                 </ComposedChart>
                             </ResponsiveContainer>
                         </div>
                         <div className="metrics-placeholder">
                             <table className="simple-table">
                                 <thead>
-                                    <tr><th>항목</th><th>수치</th><th>비중/기준</th></tr>
+                                    <tr><th>항목</th><th>수치</th></tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td>총 배분수</td><td>{formatInt(summaryMetrics.distribution)}</td><td>100.0%</td></tr>
-                                    <tr><td>평균 CPA</td><td>{formatInt(summaryMetrics.cpa)} 원</td><td>-</td></tr>
-                                    <tr><td>총 집행비용</td><td>{formatInt(summaryMetrics.cost)} 원</td><td>-</td></tr>
+                                    <tr><td>총 ROAS</td><td>{formatDecimal(summaryMetrics.roas)} %</td></tr>
+                                    <tr><td>평균 CVR</td><td>{formatDecimal(summaryMetrics.cvr)} %</td></tr>
+                                    <tr><td>총 집행비용</td><td>{formatInt(summaryMetrics.cost)} 원</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -272,16 +278,16 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
             {/* 대시보드 3 - CPA 기준 우수 소재 */}
             <section className="dashboard-section" style={{ marginTop: '4rem' }}>
                 <div className="section-header-with-action">
-                    <h2>[ 전 매체 통합, CPA 기준 우수 소재 이미지 및 성과 지표 노출 ]</h2>
+                    <h2>[ 전 매체 통합, 우수 소재 이미지 및 성과 ]</h2>
                     <div className="performance-filter-group">
                         <div className="performance-input-wrapper">
-                            <label>배분</label>
+                            <label>주문수</label>
                             <input
                                 type="number"
                                 className="performance-filter-input"
                                 placeholder="건"
-                                value={distributionFilterInput}
-                                onChange={(e) => setdistributionFilterInput(e.target.value)}
+                                value={orderFilterInput}
+                                onChange={(e) => setOrderFilterInput(e.target.value)}
                             />
                             <span className="filter-unit">건 이상</span>
                         </div>
@@ -295,6 +301,17 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
                                 onChange={(e) => setCostFilterInput(e.target.value)}
                             />
                             <span className="filter-unit">원 이상</span>
+                        </div>
+                        <div className="performance-input-wrapper">
+                            <label>ROAS</label>
+                            <input
+                                type="number"
+                                className="performance-filter-input"
+                                placeholder="%"
+                                value={roasFilterInput}
+                                onChange={(e) => setRoasFilterInput(e.target.value)}
+                            />
+                            <span className="filter-unit">% 이상</span>
                         </div>
                         <button className="performance-filter-btn apply" onClick={handleApplyFilters}>적용</button>
                         <button className="performance-filter-btn reset" onClick={handleResetFilters}>초기화</button>

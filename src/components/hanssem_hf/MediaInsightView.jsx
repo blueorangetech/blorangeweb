@@ -3,24 +3,35 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from 'date-fns/locale';
 import '../../styles/HanssemInsight.css';
-import { CreativeCard } from './';
+import { CreativeCard } from '.';
 import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
-import { categoryMap, targetingMap, placementMap, messageMap, chartData } from './common/filterMaps';
+import { chartData } from './common/filterMaps';
 
 function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
     // 필터 상태 통합 관리
     const [selectedFilters, setSelectedFilters] = useState({
         media: ['all'],
-        media_detail: ['all'],
-        placement: ['all'],
-        concept: ['all'],
-        explore: ['all'],
-        main_copy: ['all'],
-        sub_copy: ['all']
+        device: ['all'],
+        ad_type: ['all'],
+        business_unit: ['all'],
+        creative_type: ['all'],
+        landing: ['all'],
+        ad_objective: ['all'],
+        targeting: ['all']
     });
 
     // 어떤 드롭다운이 열려있는지 관리
     const [openDropdown, setOpenDropdown] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const toggleDropdown = (id) => {
+        if (openDropdown === id) {
+            setOpenDropdown(null);
+        } else {
+            setOpenDropdown(id);
+            setSearchQuery(''); // 드롭다운 열 때마다 검색어 초기화
+        }
+    };
 
     const [realData, setRealData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -31,13 +42,15 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
     const LIMIT = 20;
 
     // 성과 임계치 필터 관련 상태
-    const [distributionFilterInput, setDistributionFilterInput] = useState(0);
+    const [orderFilterInput, setOrderFilterInput] = useState(0);
     const [costFilterInput, setCostFilterInput] = useState(0);
-    const [appliedDistribution, setAppliedDistribution] = useState(0);
+    const [roasFilterInput, setRoasFilterInput] = useState(0);
+    const [appliedOrder, setAppliedOrder] = useState(0);
     const [appliedCost, setAppliedCost] = useState(0);
+    const [appliedRoas, setAppliedRoas] = useState(0);
 
-    // 정렬 관련 상태 (기본값: CPA 오름차순)
-    const [sortConfig, setSortConfig] = useState('cpa-asc');
+    // 정렬 관련 상태 (기본값: ROAS 내림차순)
+    const [sortConfig, setSortConfig] = useState('roas-desc');
 
     // 테이블 페이지네이션 상태
     const [tablePage, setTablePage] = useState(1);
@@ -45,11 +58,47 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
 
     // 탭 메뉴 데이터 및 옵션은 동적 생성을 위해 아래 필터링된 데이터 부분으로 이동했습니다.
 
+    const [realTableData, setRealTableData] = useState([]);
+
     // 날짜가 바뀌면 데이터와 오프셋 초기화
     useEffect(() => {
         setRealData([]);
+        setRealTableData([]);
         setOffset(0);
         setHasMore(true);
+    }, [startDate, endDate]);
+
+    // 데이터 테이블용 Fetch
+    useEffect(() => {
+        if (!startDate || !endDate) return;
+
+        const fetchTableData = async () => {
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            const startStr = formatDate(startDate);
+            const endStr = formatDate(endDate);
+
+            try {
+                const response = await fetch(
+                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem_hf&table_id=performance_raw&report_type=data_table&start_date=${startStr}&end_date=${endStr}`
+                );
+                if (response.ok) {
+                    const result = await response.json();
+                    setRealTableData(Array.isArray(result) ? result : (result.data || []));
+                }
+            } catch (error) {
+                console.error('Table Data Fetch Error:', error);
+            }
+        };
+
+        fetchTableData();
     }, [startDate, endDate]);
 
     // 실제 데이터 가져오기 (useEffect)
@@ -72,7 +121,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
 
             try {
                 const response = await fetch(
-                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=media_material&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}`
+                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem_hf&table_id=performance_raw&report_type=media_material&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}`
                 );
                 if (!response.ok) throw new Error('데이터 로드 실패');
                 const result = await response.json();
@@ -133,89 +182,121 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
 
     // 성과 필터 적용/초기화
     const handleApplyPerformanceFilters = () => {
-        setAppliedDistribution(Number(distributionFilterInput));
+        setAppliedOrder(Number(orderFilterInput));
         setAppliedCost(Number(costFilterInput));
+        setAppliedRoas(Number(roasFilterInput));
     };
 
     const handleResetPerformanceFilters = () => {
-        setDistributionFilterInput(0);
+        setOrderFilterInput(0);
         setCostFilterInput(0);
-        setAppliedDistribution(0);
+        setRoasFilterInput(0);
+        setAppliedOrder(0);
         setAppliedCost(0);
+        setAppliedRoas(0);
     };
 
     // 필터링된 데이터 계산
     const displayData = realData.length > 0 ? realData : (offset === 0 ? chartData : []);
 
-    // 동적 구성: 매체 상세(media_detail) 고유값 추출
-    const mediaDetailOptions = useMemo(() => {
-        const details = new Set();
+    // 동적 구성: 각 필드 고유값 추출
+    const filterOptions = useMemo(() => {
+        const options = {
+            media: new Set(),
+            device: new Set(),
+            ad_type: new Set(),
+            business_unit: new Set(),
+            creative_type: new Set(),
+            landing: new Set(),
+            ad_objective: new Set(),
+            targeting: new Set()
+        };
+
         displayData.forEach(item => {
-            if (item.media_detail) details.add(item.media_detail);
+            if (item.media) options.media.add(getCanonicalMedia(item.media));
+            if (item.device) options.device.add(item.device);
+            if (item.ad_type) options.ad_type.add(item.ad_type);
+            if (item.business_unit) options.business_unit.add(item.business_unit);
+            if (item.creative_type) options.creative_type.add(item.creative_type);
+            if (item.landing) options.landing.add(item.landing);
+            if (item.ad_objective) options.ad_objective.add(item.ad_objective);
+            if (item.targeting) options.targeting.add(item.targeting);
         });
-        return Array.from(details).sort();
+
+        const sortedOptions = {
+            media: Object.keys(mediaLogos), // 매체는 기존 로고 기준도 유지
+            device: Array.from(options.device).sort(),
+            ad_type: Array.from(options.ad_type).sort(),
+            business_unit: Array.from(options.business_unit).sort(),
+            creative_type: Array.from(options.creative_type).sort(),
+            landing: Array.from(options.landing).sort(),
+            ad_objective: Array.from(options.ad_objective).sort(),
+            targeting: Array.from(options.targeting).sort()
+        };
+
+        // 데이터에 있는 매체 중 로고맵에 없는 매체도 추가 (옵셔널)
+        Array.from(options.media).forEach(m => {
+            if (!sortedOptions.media.includes(m)) {
+                sortedOptions.media.push(m);
+            }
+        });
+
+        return sortedOptions;
     }, [displayData]);
 
     const filterConfigs = useMemo(() => [
-        { id: 'media', label: '매체', options: Object.keys(mediaLogos) },
-        { id: 'media_detail', label: '매체 상세', options: mediaDetailOptions },
-        { id: 'placement', label: '소재 유형', options: Object.keys(placementMap) },
-        { id: 'concept', label: '카테고리', options: Object.keys(categoryMap) },
-        { id: 'explore', label: '타게팅', options: Object.keys(targetingMap) },
-        { id: 'main_copy', label: '주 메세지', options: Object.keys(messageMap) },
-        { id: 'sub_copy', label: '서브 메세지', options: Object.keys(messageMap) },
-    ], [mediaDetailOptions]);
+        { id: 'media', label: '매체', options: filterOptions.media },
+        { id: 'device', label: '디바이스', options: filterOptions.device },
+        { id: 'ad_type', label: '광고유형', options: filterOptions.ad_type },
+        { id: 'business_unit', label: '사업부/기획전', options: filterOptions.business_unit },
+        { id: 'creative_type', label: '소재분류', options: filterOptions.creative_type },
+        { id: 'landing', label: '랜딩', options: filterOptions.landing },
+        { id: 'ad_objective', label: '광고목표', options: filterOptions.ad_objective },
+        { id: 'targeting', label: '타게팅', options: filterOptions.targeting },
+    ], [filterOptions]);
 
     const filteredData = useMemo(() => {
         let data = displayData.filter(item => {
-            // 1. 매체 필터
             const matchesMedia = selectedFilters.media.includes('all') || selectedFilters.media.includes(getCanonicalMedia(item.media));
-
-            // 1.2 매체 상세 필터 (media_detail 사용)
-            const matchesMediaDetail = selectedFilters.media_detail.includes('all') || selectedFilters.media_detail.includes(item.media_detail);
-
-            // 1.5. 노출 지면 필터 (utm_content_2 사용)
-            const selectedPlacementValues = selectedFilters.placement.includes('all')
-                ? ['all']
-                : selectedFilters.placement.map(label => placementMap[label]).flat();
-            const matchesPlacement = selectedPlacementValues.includes('all') || selectedPlacementValues.includes(item.utm_content_2);
-
-            // 2. 카테고리 필터 (utm_content_1 사용)
-            const selectedCategoryValues = selectedFilters.concept.includes('all')
-                ? ['all']
-                : selectedFilters.concept.map(label => categoryMap[label]).flat();
-            const matchesCategory = selectedCategoryValues.includes('all') || selectedCategoryValues.includes(item.utm_content_1);
-
-            // 3. 타게팅 필터 (utm_content_8 사용)
-            const selectedTargetingValues = selectedFilters.explore.includes('all')
-                ? ['all']
-                : selectedFilters.explore.map(label => targetingMap[label]).flat();
-            const matchesTargeting = selectedTargetingValues.includes('all') || selectedTargetingValues.includes(item.utm_content_8);
-
-            // 4. 주 메세지 필터 (utm_content_3 사용)
-            const selectedMainCopyValues = selectedFilters.main_copy.includes('all')
-                ? ['all']
-                : selectedFilters.main_copy.map(label => messageMap[label]).flat();
-            const matchesMainCopy = selectedMainCopyValues.includes('all') || selectedMainCopyValues.includes(item.utm_content_3);
-
-            // 5. 서브 메세지 필터 (utm_content_4 사용)
-            const selectedSubCopyValues = selectedFilters.sub_copy.includes('all')
-                ? ['all']
-                : selectedFilters.sub_copy.map(label => messageMap[label]).flat();
-            const matchesSubCopy = selectedSubCopyValues.includes('all') || selectedSubCopyValues.includes(item.utm_content_4);
+            const matchesDevice = selectedFilters.device.includes('all') || selectedFilters.device.includes(item.device);
+            const matchesAdType = selectedFilters.ad_type.includes('all') || selectedFilters.ad_type.includes(item.ad_type);
+            const matchesBusinessUnit = selectedFilters.business_unit.includes('all') || selectedFilters.business_unit.includes(item.business_unit);
+            const matchesCreativeType = selectedFilters.creative_type.includes('all') || selectedFilters.creative_type.includes(item.creative_type);
+            const matchesLanding = selectedFilters.landing.includes('all') || selectedFilters.landing.includes(item.landing);
+            const matchesAdObjective = selectedFilters.ad_objective.includes('all') || selectedFilters.ad_objective.includes(item.ad_objective);
+            const matchesTargeting = selectedFilters.targeting.includes('all') || selectedFilters.targeting.includes(item.targeting);
 
             // 6. 성과 임계치 필터
-            const matchesMinDist = Number(item.distribution || 0) >= appliedDistribution;
-            const matchesMinCost = Number(item.cost || 0) >= appliedCost;
+            const matchesMinOrder = Number(item.total_orders || item.orders || 0) >= appliedOrder;
+            const matchesMinCost = Number(item.total_cost || item.cost || 0) >= appliedCost;
 
-            return matchesMedia && matchesMediaDetail && matchesPlacement && matchesCategory && matchesTargeting && matchesMainCopy && matchesSubCopy && matchesMinDist && matchesMinCost;
+            const costVal = Number(item.total_cost || item.cost || 0);
+            const revenueVal = Number(item.total_revenue || item.revenue || 0);
+            const itemRoas = costVal > 0 ? (revenueVal / costVal) * 100 : 0;
+            const matchesMinRoas = itemRoas >= appliedRoas;
+
+            return matchesMedia && matchesDevice && matchesAdType && matchesBusinessUnit && matchesCreativeType && matchesLanding && matchesAdObjective && matchesTargeting && matchesMinOrder && matchesMinCost && matchesMinRoas;
         });
 
         // 데이터 정렬 로직
         const sorted = [...data].sort((a, b) => {
             const [field, order] = sortConfig.split('-');
-            const valA = parseFloat(a[field] || 0);
-            const valB = parseFloat(b[field] || 0);
+
+            // 호환성을 위한 정렬 필드 매핑
+            const getVal = (obj, fieldKey) => {
+                if (fieldKey === 'cost') return parseFloat(obj.total_cost || obj.cost || 0);
+                if (fieldKey === 'orders') return parseFloat(obj.total_orders || obj.orders || 0);
+                if (fieldKey === 'roas') {
+                    if (obj.roas !== undefined) return parseFloat(obj.roas);
+                    const c = parseFloat(obj.total_cost || obj.cost || 0);
+                    const r = parseFloat(obj.total_revenue || obj.revenue || 0);
+                    return c > 0 ? (r / c) * 100 : 0;
+                }
+                return parseFloat(obj[fieldKey] || 0);
+            };
+
+            const valA = getVal(a, field);
+            const valB = getVal(b, field);
 
             // 0은 항상 맨 뒤로 보냄 (오름차순/내림차순 공통)
             if (valA === 0 && valB !== 0) return 1;
@@ -230,46 +311,81 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
         });
 
         return sorted;
-    }, [displayData, selectedFilters, targetingMap, messageMap, categoryMap, appliedDistribution, appliedCost, sortConfig]);
+    }, [displayData, selectedFilters, appliedOrder, appliedCost, appliedRoas, sortConfig]);
+
+    // 테이블용 필터 적용된 데이터 계산
+    const filteredTableData = useMemo(() => {
+        return realTableData.filter(item => {
+            const matchesMedia = selectedFilters.media.includes('all') || selectedFilters.media.includes(getCanonicalMedia(item.media));
+            const matchesDevice = selectedFilters.device.includes('all') || selectedFilters.device.includes(item.device);
+            const matchesAdType = selectedFilters.ad_type.includes('all') || selectedFilters.ad_type.includes(item.ad_type);
+            const matchesBusinessUnit = selectedFilters.business_unit.includes('all') || selectedFilters.business_unit.includes(item.business_unit);
+            const matchesCreativeType = selectedFilters.creative_type.includes('all') || selectedFilters.creative_type.includes(item.creative_type);
+            const matchesLanding = selectedFilters.landing.includes('all') || selectedFilters.landing.includes(item.landing);
+            const matchesAdObjective = selectedFilters.ad_objective.includes('all') || selectedFilters.ad_objective.includes(item.ad_objective);
+            const matchesTargeting = selectedFilters.targeting.includes('all') || selectedFilters.targeting.includes(item.targeting);
+
+            const matchesMinOrder = Number(item.total_orders || item.orders || 0) >= appliedOrder;
+            const matchesMinCost = Number(item.total_cost || item.cost || 0) >= appliedCost;
+
+            const costVal = Number(item.total_cost || item.cost || 0);
+            const revenueVal = Number(item.total_revenue || item.revenue || 0);
+            const itemRoas = costVal > 0 ? (revenueVal / costVal) * 100 : 0;
+            const matchesMinRoas = itemRoas >= appliedRoas;
+
+            return matchesMedia && matchesDevice && matchesAdType && matchesBusinessUnit && matchesCreativeType && matchesLanding && matchesAdObjective && matchesTargeting && matchesMinOrder && matchesMinCost && matchesMinRoas;
+        });
+    }, [realTableData, selectedFilters, appliedOrder, appliedCost, appliedRoas]);
 
     // 테이블 요약 데이터 계산 로직
     const summaryTableData = useMemo(() => {
         const aggr = {};
-        filteredData.forEach(item => {
-            // 그룹 단위: 소재 유형(placement) 또는 매체 + 타게팅 등 (이미지의 '구분' 기준을 노출면이나 컨셉 등으로 통합)
-            // 여기서는 이미지 구조처럼 "매체 지면" 등으로 그룹핑
-            const mediaStr = item.media || '기타';
-            const placementStr = item.utm_content_2 ? item.utm_content_2.toUpperCase() : '';
-            const groupKey = placementStr ? `${mediaStr} ${placementStr}` : mediaStr;
+        filteredTableData.forEach(item => {
+            // 그룹 단위: 날짜
+            // (BigQuery 등에서 받은 날짜가 YYYY-MM-DD 문자열을 가지도록 앞 10자리만 절삭)
+            const dateStr = item.date ? String(item.date).substring(0, 10) : '해당없음';
+            const groupKey = dateStr;
 
             if (!aggr[groupKey]) {
                 aggr[groupKey] = {
                     key: groupKey, cost: 0, impressions: 0, clicks: 0,
+                    total_cost: 0, total_users: 0, total_orders: 0, total_revenue: 0,
                     consultations: 0, distributions: 0
                 };
             }
             aggr[groupKey].cost += Number(item.cost || 0);
             aggr[groupKey].impressions += Number(item.impressions || 0);
             aggr[groupKey].clicks += Number(item.clicks || 0);
-            // 상담신청 -> link_clicks (임시), 배분 -> distribution 으로 매핑
+            aggr[groupKey].total_cost += Number(item.total_cost || 0);
+            aggr[groupKey].total_users += Number(item.total_users || 0);
+            aggr[groupKey].total_orders += Number(item.total_orders || 0);
+            aggr[groupKey].total_revenue += Number(item.total_revenue || 0);
             aggr[groupKey].consultations += Number(item.consultation || 0);
             aggr[groupKey].distributions += Number(item.distribution || 0);
         });
 
         return Object.values(aggr).map(row => {
+            const actualCost = row.total_cost > 0 ? row.total_cost : row.cost; // Fallback to cost if total_cost is missing
+
             const ctr = row.impressions > 0 ? (row.clicks / row.impressions) * 100 : 0;
-            const cpc = row.clicks > 0 ? row.cost / row.clicks : 0;
+            const cpc = row.clicks > 0 ? actualCost / row.clicks : 0;
             const consult_cvr = row.clicks > 0 ? (row.consultations / row.clicks) * 100 : 0;
-            const consult_cpa = row.consultations > 0 ? row.cost / row.consultations : 0;
+            const consult_cpa = row.consultations > 0 ? actualCost / row.consultations : 0;
             const dist_cvr = row.clicks > 0 ? (row.distributions / row.clicks) * 100 : 0;
-            const dist_cpa = row.distributions > 0 ? row.cost / row.distributions : 0;
+            const dist_cpa = row.distributions > 0 ? actualCost / row.distributions : 0;
             const dist_rate = row.consultations > 0 ? (row.distributions / row.consultations) * 100 : 0;
+
+            // hf metrics
+            const inflow_cvr = row.clicks > 0 ? (row.total_users / row.clicks) * 100 : 0;
+            const purchase_cvr = row.total_users > 0 ? (row.total_orders / row.total_users) * 100 : 0;
+            const roas = actualCost > 0 ? (row.total_revenue / actualCost) * 100 : 0;
+            const atv = row.total_orders > 0 ? row.total_revenue / row.total_orders : 0; // 객단가
 
             return {
                 ...row,
-                ctr, cpc, consult_cvr, consult_cpa, dist_cvr, dist_cpa, dist_rate
+                ctr, cpc, consult_cvr, consult_cpa, dist_cvr, dist_cpa, dist_rate, inflow_cvr, purchase_cvr, roas, atv
             };
-        }).sort((a, b) => b.cost - a.cost); // 비용 내림차순 정렬
+        }).sort((a, b) => b.key.localeCompare(a.key)); // 날짜(key) 기준 최신순 정렬
     }, [filteredData]);
 
     // 테이블 데이터 페이징 처리
@@ -338,12 +454,13 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                         onClick={() => {
                             setSelectedFilters({
                                 media: ['all'],
-                                media_detail: ['all'],
-                                placement: ['all'],
-                                concept: ['all'],
-                                explore: ['all'],
-                                main_copy: ['all'],
-                                sub_copy: ['all']
+                                device: ['all'],
+                                ad_type: ['all'],
+                                business_unit: ['all'],
+                                creative_type: ['all'],
+                                landing: ['all'],
+                                ad_objective: ['all'],
+                                targeting: ['all']
                             });
                             setStartDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
                             setEndDate(new Date());
@@ -362,7 +479,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                         <div key={config.id} className="custom-dropdown" style={{ flex: 1 }}>
                             <button
                                 className="dropdown-toggle tab-dropdown-btn"
-                                onClick={() => setOpenDropdown(openDropdown === config.id ? null : config.id)}
+                                onClick={() => toggleDropdown(config.id)}
                                 style={{ width: '100%' }}
                             >
                                 <span className="dropdown-label">
@@ -373,18 +490,44 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
 
                             {openDropdown === config.id && (
                                 <ul className="dropdown-menu multi-select">
-                                    <li className={selectedFilters[config.id].includes('all') ? 'active' : ''} onClick={() => handleFilterSelect(config.id, 'all')}>
-                                        <div className="checkbox">{selectedFilters[config.id].includes('all') ? '✓' : ''}</div>
-                                        <span>{config.label}</span>
+                                    <li className="dropdown-search" style={{ padding: '8px', cursor: 'default' }} onClick={(e) => e.stopPropagation()}>
+                                        <input
+                                            type="text"
+                                            placeholder={`${config.label} 검색...`}
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '8px',
+                                                boxSizing: 'border-box',
+                                                border: '1px solid #ddd',
+                                                borderRadius: '6px',
+                                                fontSize: '0.9rem',
+                                                outline: 'none'
+                                            }}
+                                        />
                                     </li>
-                                    {config.options.map(option => (
-                                        <li key={option} className={selectedFilters[config.id].includes(option) ? 'active' : ''} onClick={() => handleFilterSelect(config.id, option)}>
-                                            <div className="checkbox" style={{ marginTop: option.includes('(') ? '4px' : '0' }}>
-                                                {selectedFilters[config.id].includes(option) ? '✓' : ''}
-                                            </div>
-                                            <span className="option-text">{formatFilterLabel(option, config.id)}</span>
+                                    {searchQuery === '' && (
+                                        <li className={selectedFilters[config.id].includes('all') ? 'active' : ''} onClick={() => handleFilterSelect(config.id, 'all')}>
+                                            <div className="checkbox">{selectedFilters[config.id].includes('all') ? '✓' : ''}</div>
+                                            <span>전체</span>
                                         </li>
-                                    ))}
+                                    )}
+                                    {config.options
+                                        .filter(option => option.toLowerCase().includes(searchQuery.toLowerCase()))
+                                        .map(option => (
+                                            <li key={option} className={selectedFilters[config.id].includes(option) ? 'active' : ''} onClick={() => handleFilterSelect(config.id, option)}>
+                                                <div className="checkbox" style={{ marginTop: option.includes('(') ? '4px' : '0' }}>
+                                                    {selectedFilters[config.id].includes(option) ? '✓' : ''}
+                                                </div>
+                                                <span className="option-text">{formatFilterLabel(option, config.id)}</span>
+                                            </li>
+                                        ))}
+                                    {config.options.filter(option => option.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                                        <li style={{ padding: '10px', textAlign: 'center', color: '#999', cursor: 'default' }} onClick={(e) => e.stopPropagation()}>
+                                            검색 결과가 없습니다
+                                        </li>
+                                    )}
                                 </ul>
                             )}
                         </div>
@@ -397,38 +540,38 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                 <table className="summary-data-table">
                     <thead>
                         <tr>
-                            <th>구분</th>
-                            <th>소진비용</th>
+                            <th>날짜</th>
                             <th>노출</th>
                             <th>클릭</th>
                             <th>CTR</th>
                             <th>CPC</th>
-                            <th className="consultation-group">상담신청</th>
-                            <th className="consultation-group">상담신청_CVR</th>
-                            <th className="consultation-group">상담신청_CPA</th>
-                            <th className="consultation-group">배분</th>
-                            <th className="consultation-group">배분_CVR</th>
-                            <th className="consultation-group">배분_CPA</th>
-                            <th className="consultation-group">배분율</th>
+                            <th>총 비용</th>
+                            <th>총 사용자</th>
+                            <th>유입 전환율</th>
+                            <th>주문 건수</th>
+                            <th>주문 금액</th>
+                            <th>ROAS</th>
+                            <th>CVR</th>
+                            <th>객단가</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {realData.length > 0 && currentTableData.length > 0 ? (
+                        {realTableData.length > 0 && currentTableData.length > 0 ? (
                             currentTableData.map((row, idx) => (
                                 <tr key={idx}>
                                     <td className="row-key">{row.key}</td>
-                                    <td>{Math.round(row.cost).toLocaleString()}</td>
                                     <td>{Math.round(row.impressions).toLocaleString()}</td>
                                     <td>{Math.round(row.clicks).toLocaleString()}</td>
                                     <td>{row.ctr.toFixed(2)}%</td>
                                     <td>{Math.round(row.cpc).toLocaleString()}</td>
-                                    <td>{Math.round(row.consultations).toLocaleString()}</td>
-                                    <td>{row.consult_cvr.toFixed(2)}%</td>
-                                    <td>{Math.round(row.consult_cpa).toLocaleString()}</td>
-                                    <td>{Math.round(row.distributions).toLocaleString()}</td>
-                                    <td>{row.dist_cvr.toFixed(2)}%</td>
-                                    <td>{Math.round(row.dist_cpa).toLocaleString()}</td>
-                                    <td>{row.dist_rate.toFixed(0)}%</td>
+                                    <td>{Math.round(row.total_cost || row.cost).toLocaleString()}</td>
+                                    <td>{Math.round(row.total_users).toLocaleString()}</td>
+                                    <td>{row.inflow_cvr.toFixed(2)}%</td>
+                                    <td>{Math.round(row.total_orders).toLocaleString()}</td>
+                                    <td>{Math.round(row.total_revenue).toLocaleString()}</td>
+                                    <td>{row.roas.toFixed(0)}%</td>
+                                    <td>{row.purchase_cvr.toFixed(2)}%</td>
+                                    <td>{Math.round(row.atv).toLocaleString()}</td>
                                 </tr>
                             ))
                         ) : (
@@ -475,13 +618,13 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                         {/* 성과 임계치 필터 그룹 */}
                         <div className="performance-filter-group">
                             <div className="performance-input-wrapper">
-                                <label>배분</label>
+                                <label>주문수</label>
                                 <input
                                     type="number"
                                     className="performance-filter-input"
                                     placeholder="건"
-                                    value={distributionFilterInput}
-                                    onChange={(e) => setDistributionFilterInput(e.target.value)}
+                                    value={orderFilterInput}
+                                    onChange={(e) => setOrderFilterInput(e.target.value)}
                                 />
                                 <span className="filter-unit">건 이상</span>
                             </div>
@@ -496,6 +639,17 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                                 />
                                 <span className="filter-unit">원 이상</span>
                             </div>
+                            <div className="performance-input-wrapper">
+                                <label>ROAS</label>
+                                <input
+                                    type="number"
+                                    className="performance-filter-input"
+                                    placeholder="%"
+                                    value={roasFilterInput}
+                                    onChange={(e) => setRoasFilterInput(e.target.value)}
+                                />
+                                <span className="filter-unit">% 이상</span>
+                            </div>
                             <button className="performance-filter-btn apply" onClick={handleApplyPerformanceFilters}>적용</button>
                             <button className="performance-filter-btn reset" onClick={handleResetPerformanceFilters}>초기화</button>
                         </div>
@@ -508,10 +662,11 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                                 value={sortConfig}
                                 onChange={(e) => setSortConfig(e.target.value)}
                             >
-                                <option value="cpa-asc">CPA 낮은 순 (기본)</option>
-                                <option value="cpa-desc">CPA 높은 순</option>
-                                <option value="cost-asc">광고비 낮은 순</option>
+                                <option value="roas-desc">ROAS 높은 순 (기본)</option>
+                                <option value="roas-asc">ROAS 낮은 순</option>
+                                <option value="orders-desc">주문수 많은 순</option>
                                 <option value="cost-desc">광고비 높은 순</option>
+                                <option value="cost-asc">광고비 낮은 순</option>
                             </select>
                         </div>
                     </div>
