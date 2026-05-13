@@ -92,6 +92,26 @@
     margin: 0;
     z-index: 1001;
     animation: fadeInDown 0.2s ease;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+/* 커스텀 스크롤바 디자인 */
+.dropdown-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb {
+    background: #dcdcdc;
+    border-radius: 10px;
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover {
+    background: #b0b0b0;
 }
 
 .dropdown-menu li {

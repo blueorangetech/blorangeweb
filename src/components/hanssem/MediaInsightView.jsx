@@ -6,238 +6,92 @@ import '../../styles/HanssemInsight.css';
 import { CreativeCard } from '.';
 import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
 import { categoryMap, targetingMap, placementMap, messageMap, chartData } from './common/filterMaps';
+import InsightSummaryTable from './common/InsightSummaryTable';
+import InsightPerformanceFilter from './common/InsightPerformanceFilter';
+import { useInsightData } from './hooks/useInsightData';
+
+const initialFilters = {
+    media: ['all'],
+    media_detail: ['all'],
+    classification: ['all'],
+    placement: ['all'],
+    category: ['all'],
+    creative_name: ['all'],
+    explore: ['all'],
+    main_copy: ['all'],
+    sub_copy: ['all']
+};
+
+const filterMappings = {
+    media: { field: 'media', transform: getCanonicalMedia },
+    media_detail: { field: 'media_detail' },
+    classification: { field: 'classification' },
+    placement: { field: 'utm_content_2', map: placementMap },
+    category: { field: 'utm_content_1', map: categoryMap },
+    explore: { field: 'utm_content_8', map: targetingMap },
+    main_copy: { field: 'utm_content_3', map: messageMap },
+    sub_copy: { field: 'utm_content_4', map: messageMap },
+    creative_name: { field: 'utm_content_5' }
+};
 
 function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
-    // 필터 상태 통합 관리
-    const [selectedFilters, setSelectedFilters] = useState({
-        media: ['all'],
-        media_detail: ['all'],
-        placement: ['all'],
-        concept: ['all'],
-        explore: ['all'],
-        main_copy: ['all'],
-        sub_copy: ['all']
-    });
+    const [isExporting, setIsExporting] = useState(false);
 
-    // 어떤 드롭다운이 열려있는지 관리
-    const [openDropdown, setOpenDropdown] = useState(null);
-
-    const [realData, setRealData] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-
-    // 무한 스크롤 관련 상태
-    const [offset, setOffset] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const LIMIT = 20;
-
-    // 성과 임계치 필터 관련 상태
-    const [distributionFilterInput, setDistributionFilterInput] = useState(0);
-    const [costFilterInput, setCostFilterInput] = useState(0);
-    const [appliedDistribution, setAppliedDistribution] = useState(0);
-    const [appliedCost, setAppliedCost] = useState(0);
-
-    // 정렬 관련 상태 (기본값: CPA 오름차순)
-    const [sortConfig, setSortConfig] = useState('cpa-asc');
-
-    // 테이블 페이지네이션 상태
-    const [tablePage, setTablePage] = useState(1);
-    const ITEMS_PER_PAGE = 5;
-
-    // 탭 메뉴 데이터 및 옵션은 동적 생성을 위해 아래 필터링된 데이터 부분으로 이동했습니다.
-
-    // 날짜가 바뀌면 데이터와 오프셋 초기화
-    useEffect(() => {
-        setRealData([]);
-        setOffset(0);
-        setHasMore(true);
-    }, [startDate, endDate]);
-
-    // 실제 데이터 가져오기 (useEffect)
-    useEffect(() => {
-        if (!startDate || !endDate || !hasMore || isLoading) return;
-
-        const fetchBigQueryData = async () => {
-            setIsLoading(true);
-            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-            const formatDate = (date) => {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            };
-
-            const startStr = formatDate(startDate);
-            const endStr = formatDate(endDate);
-
-            try {
-                const response = await fetch(
-                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=media_material&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}`
-                );
-                if (!response.ok) throw new Error('데이터 로드 실패');
-                const result = await response.json();
-
-                const newData = Array.isArray(result) ? result : (result.data || []);
-
-                if (newData.length < LIMIT) {
-                    setHasMore(false);
-                }
-
-                setRealData(prev => offset === 0 ? newData : [...prev, ...newData]);
-            } catch (error) {
-                console.error('BigQuery Fetch Error:', error);
-                setHasMore(false);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchBigQueryData();
-    }, [startDate, endDate, offset]);
-
-    // 스크롤 감지 (Intersection Observer)
-    const lastElementRef = useRef();
-    useEffect(() => {
-        if (isLoading || !hasMore) return;
-
-        const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                setOffset(prev => prev + LIMIT);
-            }
-        }, { threshold: 0.1 });
-
-        if (lastElementRef.current) {
-            observer.observe(lastElementRef.current);
-        }
-
-        return () => observer.disconnect();
-    }, [isLoading, hasMore]);
-
-    // 필터 선택 처리
-    const handleFilterSelect = (type, value) => {
-        setSelectedFilters(prev => {
-            if (value === 'all') {
-                return { ...prev, [type]: ['all'] };
-            } else {
-                let next = prev[type].filter(v => v !== 'all');
-                if (next.includes(value)) {
-                    next = next.filter(v => v !== value);
-                } else {
-                    next = [...next, value];
-                }
-                if (next.length === 0) next = ['all'];
-                return { ...prev, [type]: next };
-            }
-        });
-    };
-
-    // 성과 필터 적용/초기화
-    const handleApplyPerformanceFilters = () => {
-        setAppliedDistribution(Number(distributionFilterInput));
-        setAppliedCost(Number(costFilterInput));
-    };
-
-    const handleResetPerformanceFilters = () => {
-        setDistributionFilterInput(0);
-        setCostFilterInput(0);
-        setAppliedDistribution(0);
-        setAppliedCost(0);
-    };
-
-    // 필터링된 데이터 계산
-    const displayData = realData.length > 0 ? realData : (offset === 0 ? chartData : []);
+    const {
+        realData, isLoading, hasMore, lastElementRef,
+        fullData, fullFilteredData, isFullDataLoading,
+        displayData, filteredData, applyFiltersToData,
+        selectedFilters, handleFilterSelect, openDropdown, setOpenDropdown,
+        distributionFilterInput, setDistributionFilterInput,
+        costFilterInput, setCostFilterInput,
+        appliedDistribution, appliedCost,
+        handleApplyPerformanceFilters, handleResetPerformanceFilters,
+        sortConfig, setSortConfig, resetAllFilters
+    } = useInsightData('media_material', startDate, endDate, initialFilters, filterMappings, chartData);
 
     // 동적 구성: 매체 상세(media_detail) 고유값 추출
     const mediaDetailOptions = useMemo(() => {
         const details = new Set();
-        displayData.forEach(item => {
+        fullData.forEach(item => {
             if (item.media_detail) details.add(item.media_detail);
         });
         return Array.from(details).sort();
-    }, [displayData]);
+    }, [fullData]);
+
+    const classificationOptions = useMemo(() => {
+        const clsses = new Set();
+        fullData.forEach(item => {
+            if (item.classification) clsses.add(item.classification);
+        });
+        return Array.from(clsses).sort();
+    }, [fullData]);
+
+    // 동적 구성: 소재 고유명(utm_content_5) 고유값 추출
+    const creativeNameOptions = useMemo(() => {
+        const names = new Set();
+        fullData.forEach(item => {
+            if (item.utm_content_5) names.add(item.utm_content_5);
+        });
+        return Array.from(names).sort();
+    }, [fullData]);
+
 
     const filterConfigs = useMemo(() => [
+        { id: 'classification', label: '집행 구분', options: classificationOptions },
         { id: 'media', label: '매체', options: Object.keys(mediaLogos) },
         { id: 'media_detail', label: '매체 상세', options: mediaDetailOptions },
-        { id: 'placement', label: '소재 유형', options: Object.keys(placementMap) },
-        { id: 'concept', label: '카테고리', options: Object.keys(categoryMap) },
         { id: 'explore', label: '타게팅', options: Object.keys(targetingMap) },
+        { id: 'placement', label: '소재 유형', options: Object.keys(placementMap) },
+        { id: 'category', label: '카테고리', options: Object.keys(categoryMap) },
+        { id: 'creative_name', label: '소재 고유명', options: creativeNameOptions },
         { id: 'main_copy', label: '주 메세지', options: Object.keys(messageMap) },
         { id: 'sub_copy', label: '서브 메세지', options: Object.keys(messageMap) },
-    ], [mediaDetailOptions]);
-
-    const filteredData = useMemo(() => {
-        let data = displayData.filter(item => {
-            // 1. 매체 필터
-            const matchesMedia = selectedFilters.media.includes('all') || selectedFilters.media.includes(getCanonicalMedia(item.media));
-
-            // 1.2 매체 상세 필터 (media_detail 사용)
-            const matchesMediaDetail = selectedFilters.media_detail.includes('all') || selectedFilters.media_detail.includes(item.media_detail);
-
-            // 1.5. 노출 지면 필터 (utm_content_2 사용)
-            const selectedPlacementValues = selectedFilters.placement.includes('all')
-                ? ['all']
-                : selectedFilters.placement.map(label => placementMap[label]).flat();
-            const matchesPlacement = selectedPlacementValues.includes('all') || selectedPlacementValues.includes(item.utm_content_2);
-
-            // 2. 카테고리 필터 (utm_content_1 사용)
-            const selectedCategoryValues = selectedFilters.concept.includes('all')
-                ? ['all']
-                : selectedFilters.concept.map(label => categoryMap[label]).flat();
-            const matchesCategory = selectedCategoryValues.includes('all') || selectedCategoryValues.includes(item.utm_content_1);
-
-            // 3. 타게팅 필터 (utm_content_8 사용)
-            const selectedTargetingValues = selectedFilters.explore.includes('all')
-                ? ['all']
-                : selectedFilters.explore.map(label => targetingMap[label]).flat();
-            const matchesTargeting = selectedTargetingValues.includes('all') || selectedTargetingValues.includes(item.utm_content_8);
-
-            // 4. 주 메세지 필터 (utm_content_3 사용)
-            const selectedMainCopyValues = selectedFilters.main_copy.includes('all')
-                ? ['all']
-                : selectedFilters.main_copy.map(label => messageMap[label]).flat();
-            const matchesMainCopy = selectedMainCopyValues.includes('all') || selectedMainCopyValues.includes(item.utm_content_3);
-
-            // 5. 서브 메세지 필터 (utm_content_4 사용)
-            const selectedSubCopyValues = selectedFilters.sub_copy.includes('all')
-                ? ['all']
-                : selectedFilters.sub_copy.map(label => messageMap[label]).flat();
-            const matchesSubCopy = selectedSubCopyValues.includes('all') || selectedSubCopyValues.includes(item.utm_content_4);
-
-            // 6. 성과 임계치 필터
-            const matchesMinDist = Number(item.distribution || 0) >= appliedDistribution;
-            const matchesMinCost = Number(item.cost || 0) >= appliedCost;
-
-            return matchesMedia && matchesMediaDetail && matchesPlacement && matchesCategory && matchesTargeting && matchesMainCopy && matchesSubCopy && matchesMinDist && matchesMinCost;
-        });
-
-        // 데이터 정렬 로직
-        const sorted = [...data].sort((a, b) => {
-            const [field, order] = sortConfig.split('-');
-            const valA = parseFloat(a[field] || 0);
-            const valB = parseFloat(b[field] || 0);
-
-            // 0은 항상 맨 뒤로 보냄 (오름차순/내림차순 공통)
-            if (valA === 0 && valB !== 0) return 1;
-            if (valA !== 0 && valB === 0) return -1;
-            if (valA === 0 && valB === 0) return 0;
-
-            if (order === 'asc') {
-                return valA - valB;
-            } else {
-                return valB - valA;
-            }
-        });
-
-        return sorted;
-    }, [displayData, selectedFilters, targetingMap, messageMap, categoryMap, appliedDistribution, appliedCost, sortConfig]);
+    ], [mediaDetailOptions, classificationOptions, creativeNameOptions]);
 
     // 테이블 요약 데이터 계산 로직
     const summaryTableData = useMemo(() => {
         const aggr = {};
-        filteredData.forEach(item => {
-            // 그룹 단위: 소재 유형(placement) 또는 매체 + 타게팅 등 (이미지의 '구분' 기준을 노출면이나 컨셉 등으로 통합)
-            // 여기서는 이미지 구조처럼 "매체 지면" 등으로 그룹핑
+        fullFilteredData.forEach(item => {
             const mediaStr = item.media || '기타';
             const placementStr = item.utm_content_2 ? item.utm_content_2.toUpperCase() : '';
             const groupKey = placementStr ? `${mediaStr} ${placementStr}` : mediaStr;
@@ -251,7 +105,6 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
             aggr[groupKey].cost += Number(item.cost || 0);
             aggr[groupKey].impressions += Number(item.impressions || 0);
             aggr[groupKey].clicks += Number(item.clicks || 0);
-            // 상담신청 -> link_clicks (임시), 배분 -> distribution 으로 매핑
             aggr[groupKey].consultations += Number(item.consultation || 0);
             aggr[groupKey].distributions += Number(item.distribution || 0);
         });
@@ -270,19 +123,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                 ctr, cpc, consult_cvr, consult_cpa, dist_cvr, dist_cpa, dist_rate
             };
         }).sort((a, b) => b.cost - a.cost); // 비용 내림차순 정렬
-    }, [filteredData]);
-
-    // 테이블 데이터 페이징 처리
-    useEffect(() => {
-        setTablePage(1);
-    }, [summaryTableData]);
-
-    const totalTablePages = Math.max(1, Math.ceil(summaryTableData.length / ITEMS_PER_PAGE));
-
-    const currentTableData = useMemo(() => {
-        const start = (tablePage - 1) * ITEMS_PER_PAGE;
-        return summaryTableData.slice(start, start + ITEMS_PER_PAGE);
-    }, [summaryTableData, tablePage]);
+    }, [fullFilteredData]);
 
     // 드롭다운 라벨 생성
     const getDropdownLabel = (type, defaultLabel) => {
@@ -333,27 +174,129 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                             }
                         />
                     </div>
-                    <button
-                        className="tab-btn reset-btn"
-                        onClick={() => {
-                            setSelectedFilters({
-                                media: ['all'],
-                                media_detail: ['all'],
-                                placement: ['all'],
-                                concept: ['all'],
-                                explore: ['all'],
-                                main_copy: ['all'],
-                                sub_copy: ['all']
-                            });
-                            setStartDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-                            setEndDate(new Date());
-                            setOpenDropdown(null);
-                            setSortConfig('cpa-asc');
-                            handleResetPerformanceFilters();
-                        }}
-                    >
-                        조건 초기화
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px', marginLeft: 'auto' }}>
+                        <button
+                            className="tab-btn export-btn"
+                            style={{
+                                background: '#107c41',
+                                color: 'white',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '8px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}
+                            onClick={async () => {
+                                if (isExporting || isFullDataLoading) {
+                                    if (isFullDataLoading) alert('전체 데이터를 불러오는 중입니다. 잠시 후 다시 시도해주세요.');
+                                    return;
+                                }
+                                setIsExporting(true);
+                                try {
+                                    const exportData = [...fullFilteredData];
+
+                                    // 날짜순 정렬
+                                    exportData.sort((a, b) => {
+                                        const dA = a.date?.value || a.date || '';
+                                        const dB = b.date?.value || b.date || '';
+                                        return String(dA).localeCompare(String(dB));
+                                    });
+
+                                    // 엑셀(CSV) 헤더
+                                    const headers = [
+                                        '날짜', '매체', '매체 상세', '집행 구분', '소재 유형', '카테고리',
+                                        '타게팅', '주 메세지', '서브 메세지', '소재 고유명',
+                                        '소진비용', '노출수', '클릭수', '상담신청', '배분'
+                                    ];
+
+                                    // 필터링된 데이터 기반으로 행 생성 (원본 값 그대로 출력)
+                                    const rows = exportData.map(item => {
+                                        // BigQuery DATE/DATETIME (타임존 없는 객체 형태) 대응
+                                        let dateStr = '';
+                                        if (item.date) {
+                                            const rawDate = typeof item.date === 'object' && item.date.value ? item.date.value : String(item.date);
+                                            dateStr = rawDate.substring(0, 10);
+                                        }
+
+                                        return [
+                                            `"${dateStr}"`,
+                                            `"${item.media || ''}"`,
+                                            `"${item.media_detail || ''}"`,
+                                            `"${item.classification || ''}"`,
+                                            `"${item.utm_content_2 || ''}"`,
+                                            `"${item.utm_content_1 || ''}"`,
+                                            `"${item.utm_content_8 || ''}"`,
+                                            `"${item.utm_content_3 || ''}"`,
+                                            `"${item.utm_content_4 || ''}"`,
+                                            `"${item.utm_content_5 || ''}"`,
+                                            item.cost || 0,
+                                            item.impressions || 0,
+                                            item.clicks || 0,
+                                            item.consultation || 0,
+                                            item.distribution || 0
+                                        ];
+                                    });
+
+                                    // 한글 깨짐 방지를 위한 BOM(\uFEFF) 추가
+                                    const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+                                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                                    const link = document.createElement('a');
+                                    const url = URL.createObjectURL(blob);
+                                    link.setAttribute('href', url);
+                                    link.setAttribute('download', `Media_Insight_Data_${new Date().toISOString().slice(0, 10)}.csv`);
+                                    link.style.visibility = 'hidden';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                } catch (error) {
+                                    console.error("Excel Export Error: ", error);
+                                    alert("엑셀 데이터 추출 중 오류가 발생했습니다.");
+                                } finally {
+                                    setIsExporting(false);
+                                }
+                            }}
+                        >
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M14 11V14H2V11H0V14C0 15.1 0.9 16 2 16H14C15.1 16 16 15.1 16 14V11H14ZM13 7L11.59 5.59L9 8.17V0H7V8.17L4.41 5.59L3 7L8 12L13 7Z" fill="currentColor" />
+                            </svg>
+                            {isExporting ? '추출 중...' : '엑셀 추출'}
+                        </button>
+                        <button
+                            className="tab-btn"
+                            style={{
+                                background: '#e53935',
+                                color: 'white',
+                                border: 'none',
+                                padding: '0.5rem 1rem',
+                                borderRadius: '8px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                fontSize: '0.9rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                margin: 0,
+                                transition: 'background 0.2s ease'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.background = '#d32f2f'}
+                            onMouseOut={(e) => e.currentTarget.style.background = '#e53935'}
+                            onClick={() => {
+                                resetAllFilters();
+                                setStartDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
+                                setEndDate(new Date());
+                            }}
+                        >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                <path d="M3 3v5h5" />
+                            </svg>
+                            조건 초기화
+                        </button>
+                    </div>
                 </div>
 
                 {/* 하단: 나머지 드롭다운 필터들 */}
@@ -375,7 +318,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                                 <ul className="dropdown-menu multi-select">
                                     <li className={selectedFilters[config.id].includes('all') ? 'active' : ''} onClick={() => handleFilterSelect(config.id, 'all')}>
                                         <div className="checkbox">{selectedFilters[config.id].includes('all') ? '✓' : ''}</div>
-                                        <span>{config.label}</span>
+                                        <span> 전체 </span>
                                     </li>
                                     {config.options.map(option => (
                                         <li key={option} className={selectedFilters[config.id].includes(option) ? 'active' : ''} onClick={() => handleFilterSelect(config.id, option)}>
@@ -393,129 +336,19 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
             </nav>
 
             {/* 필터와 메인 영역 사이: 데이터 테이블 추가 */}
-            <div className="summary-data-table-container">
-                <table className="summary-data-table">
-                    <thead>
-                        <tr>
-                            <th>구분</th>
-                            <th>소진비용</th>
-                            <th>노출</th>
-                            <th>클릭</th>
-                            <th>CTR</th>
-                            <th>CPC</th>
-                            <th className="consultation-group">상담신청</th>
-                            <th className="consultation-group">상담신청_CVR</th>
-                            <th className="consultation-group">상담신청_CPA</th>
-                            <th className="consultation-group">배분</th>
-                            <th className="consultation-group">배분_CVR</th>
-                            <th className="consultation-group">배분_CPA</th>
-                            <th className="consultation-group">배분율</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {realData.length > 0 && currentTableData.length > 0 ? (
-                            currentTableData.map((row, idx) => (
-                                <tr key={idx}>
-                                    <td className="row-key">{row.key}</td>
-                                    <td>{Math.round(row.cost).toLocaleString()}</td>
-                                    <td>{Math.round(row.impressions).toLocaleString()}</td>
-                                    <td>{Math.round(row.clicks).toLocaleString()}</td>
-                                    <td>{row.ctr.toFixed(2)}%</td>
-                                    <td>{Math.round(row.cpc).toLocaleString()}</td>
-                                    <td>{Math.round(row.consultations).toLocaleString()}</td>
-                                    <td>{row.consult_cvr.toFixed(2)}%</td>
-                                    <td>{Math.round(row.consult_cpa).toLocaleString()}</td>
-                                    <td>{Math.round(row.distributions).toLocaleString()}</td>
-                                    <td>{row.dist_cvr.toFixed(2)}%</td>
-                                    <td>{Math.round(row.dist_cpa).toLocaleString()}</td>
-                                    <td>{row.dist_rate.toFixed(0)}%</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="13" className="empty-message">
-                                    설정한 데이터 조건(필터/기간 등)에 맞는 데이터가 없습니다.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-                {summaryTableData.length > 0 && (
-                    <div className="table-pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '15px' }}>
-                        <button
-                            onClick={() => setTablePage(p => Math.max(1, p - 1))}
-                            disabled={tablePage === 1}
-                            style={{
-                                padding: '6px 14px', borderRadius: '4px', border: '1px solid #ddd',
-                                background: tablePage === 1 ? '#f5f5f5' : '#fff', color: tablePage === 1 ? '#aaa' : '#333', cursor: tablePage === 1 ? 'not-allowed' : 'pointer', fontSize: '0.85rem'
-                            }}
-                        >
-                            이전
-                        </button>
-                        <span style={{ fontSize: '0.9rem', color: '#555', fontWeight: '500' }}>
-                            {tablePage} <span style={{ color: '#ccc', margin: '0 4px' }}>/</span> {totalTablePages}
-                        </span>
-                        <button
-                            onClick={() => setTablePage(p => Math.min(totalTablePages, p + 1))}
-                            disabled={tablePage === totalTablePages}
-                            style={{
-                                padding: '6px 14px', borderRadius: '4px', border: '1px solid #ddd',
-                                background: tablePage === totalTablePages ? '#f5f5f5' : '#fff', color: tablePage === totalTablePages ? '#aaa' : '#333', cursor: tablePage === totalTablePages ? 'not-allowed' : 'pointer', fontSize: '0.85rem'
-                            }}
-                        >
-                            다음
-                        </button>
-                    </div>
-                )}
-            </div>
+            <InsightSummaryTable data={summaryTableData} hasRealData={fullData.length > 0 || realData.length > 0} />
 
             <main className="hanssem-main">
-                <div className="section-header" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-                    <div className="insight-performance-filters" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                        {/* 성과 임계치 필터 그룹 */}
-                        <div className="performance-filter-group">
-                            <div className="performance-input-wrapper">
-                                <label>배분</label>
-                                <input
-                                    type="number"
-                                    className="performance-filter-input"
-                                    placeholder="건"
-                                    value={distributionFilterInput}
-                                    onChange={(e) => setDistributionFilterInput(e.target.value)}
-                                />
-                                <span className="filter-unit">건 이상</span>
-                            </div>
-                            <div className="performance-input-wrapper">
-                                <label>광고비</label>
-                                <input
-                                    type="number"
-                                    className="performance-filter-input"
-                                    placeholder="원"
-                                    value={costFilterInput}
-                                    onChange={(e) => setCostFilterInput(e.target.value)}
-                                />
-                                <span className="filter-unit">원 이상</span>
-                            </div>
-                            <button className="performance-filter-btn apply" onClick={handleApplyPerformanceFilters}>적용</button>
-                            <button className="performance-filter-btn reset" onClick={handleResetPerformanceFilters}>초기화</button>
-                        </div>
-
-                        {/* 정렬 필터 그룹 */}
-                        <div className="sort-filter-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: '0.5rem', paddingLeft: '1.5rem', borderLeft: '1px solid #eee' }}>
-                            <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#666' }}>정렬</span>
-                            <select
-                                className="performance-sort-select"
-                                value={sortConfig}
-                                onChange={(e) => setSortConfig(e.target.value)}
-                            >
-                                <option value="cpa-asc">CPA 낮은 순 (기본)</option>
-                                <option value="cpa-desc">CPA 높은 순</option>
-                                <option value="cost-asc">광고비 낮은 순</option>
-                                <option value="cost-desc">광고비 높은 순</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
+                <InsightPerformanceFilter
+                    distributionFilterInput={distributionFilterInput}
+                    setDistributionFilterInput={setDistributionFilterInput}
+                    costFilterInput={costFilterInput}
+                    setCostFilterInput={setCostFilterInput}
+                    onApply={handleApplyPerformanceFilters}
+                    onReset={handleResetPerformanceFilters}
+                    sortConfig={sortConfig}
+                    setSortConfig={setSortConfig}
+                />
                 <div className="chart-grid">
                     {filteredData.map((chart, index) => (
                         <CreativeCard
