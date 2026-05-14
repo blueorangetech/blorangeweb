@@ -202,6 +202,71 @@ export function useInsightData(reportType, startDate, endDate, initialFilters, f
         return applyFiltersToData(fullData);
     }, [fullData, applyFiltersToData]);
 
+    const availableFilterOptions = useMemo(() => {
+        const result = {};
+        for (const key in filterMappings) {
+            result[key] = new Set();
+        }
+
+        fullData.forEach(item => {
+            const matchesMinDist = Number(item.distribution || 0) >= appliedDistribution;
+            const matchesMinCost = Number(item.cost || 0) >= appliedCost;
+            if (!matchesMinDist || !matchesMinCost) return;
+
+            let totalFails = 0;
+            let failedKey = null;
+
+            for (const key in filterMappings) {
+                const config = filterMappings[key];
+                const selected = selectedFilters[key];
+                
+                let passed = true;
+                if (selected && !selected.includes('all')) {
+                    const itemValue = config.transform ? config.transform(item[config.field]) : item[config.field];
+                    if (config.map) {
+                        const mappedValues = selected.map(label => config.map[label]).flat();
+                        if (!mappedValues.includes('all') && !mappedValues.includes(itemValue)) {
+                            passed = false;
+                        }
+                    } else {
+                        if (!selected.includes(itemValue)) {
+                            passed = false;
+                        }
+                    }
+                }
+                if (!passed) {
+                    totalFails++;
+                    failedKey = key;
+                    if (totalFails > 1) break;
+                }
+            }
+
+            if (totalFails > 1) return;
+
+            for (const key in filterMappings) {
+                if (totalFails === 1 && key !== failedKey) continue;
+                
+                const config = filterMappings[key];
+                const itemValue = config.transform ? config.transform(item[config.field]) : item[config.field];
+
+                if (config.map) {
+                    for (const label in config.map) {
+                        const mappedValues = Array.isArray(config.map[label]) ? config.map[label] : [config.map[label]];
+                        if (mappedValues.includes(itemValue) || mappedValues.includes('all')) {
+                            result[key].add(label);
+                        }
+                    }
+                } else {
+                    if (itemValue !== undefined && itemValue !== null && itemValue !== '') {
+                        result[key].add(itemValue);
+                    }
+                }
+            }
+        });
+
+        return result;
+    }, [fullData, selectedFilters, appliedDistribution, appliedCost, filterMappings]);
+
     // -----------------------------------------------------
     // 이벤트 핸들러
     // -----------------------------------------------------
@@ -254,6 +319,7 @@ export function useInsightData(reportType, startDate, endDate, initialFilters, f
         displayData,
         filteredData,
         applyFiltersToData,
+        availableFilterOptions,
 
         selectedFilters,
         setSelectedFilters,

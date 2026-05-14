@@ -4,7 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import { ko } from 'date-fns/locale';
 import '../../styles/HanssemInsight.css';
 import { CreativeCard } from './';
-import { categoryMap, targetingMap, placementMap, messageMap, chartData } from './common/filterMaps';
+import { categoryMap, targetingMap, placementMap, chartData } from './common/filterMaps';
 import InsightSummaryTable from './common/InsightSummaryTable';
 import InsightPerformanceFilter from './common/InsightPerformanceFilter';
 import { useInsightData } from './hooks/useInsightData';
@@ -19,8 +19,8 @@ const initialFilters = {
 const filterMappings = {
     creative_name: { field: 'utm_content_5' },
     explore: { field: 'utm_content_8', map: targetingMap },
-    main_copy: { field: 'utm_content_3', map: messageMap },
-    sub_copy: { field: 'utm_content_4', map: messageMap }
+    main_copy: { field: 'utm_content_3' },
+    sub_copy: { field: 'utm_content_4' }
 };
 
 function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }) {
@@ -29,7 +29,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
     const {
         realData, isLoading, hasMore, lastElementRef,
         fullData, fullFilteredData, isFullDataLoading,
-        displayData, filteredData, applyFiltersToData,
+        displayData, filteredData, applyFiltersToData, availableFilterOptions,
         selectedFilters, handleFilterSelect, openDropdown, setOpenDropdown,
         distributionFilterInput, setDistributionFilterInput,
         costFilterInput, setCostFilterInput,
@@ -38,21 +38,23 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
         sortConfig, setSortConfig, resetAllFilters
     } = useInsightData('all_material', startDate, endDate, initialFilters, filterMappings, chartData);
 
-    // 동적 구성: 소재 고유명(utm_content_5) 고유값 추출 (전체 데이터 기준)
-    const creativeNameOptions = useMemo(() => {
-        const names = new Set();
-        fullData.forEach(item => {
-            if (item.utm_content_5) names.add(item.utm_content_5);
-        });
-        return Array.from(names).sort();
-    }, [fullData]);
+    const filterConfigs = useMemo(() => {
+        const getOptions = (key, defaultOptions) => {
+            const available = availableFilterOptions?.[key];
+            if (!available) return defaultOptions || [];
+            if (defaultOptions) {
+                return defaultOptions.filter(opt => available.has(opt));
+            }
+            return Array.from(available).sort();
+        };
 
-    const filterConfigs = useMemo(() => [
-        { id: 'creative_name', label: '소재 고유명', options: creativeNameOptions },
-        { id: 'explore', label: '타게팅', options: Object.keys(targetingMap) },
-        { id: 'main_copy', label: '주 메세지', options: Object.keys(messageMap) },
-        { id: 'sub_copy', label: '서브 메세지', options: Object.keys(messageMap) },
-    ], [creativeNameOptions, targetingMap, messageMap]);
+        return [
+            { id: 'creative_name', label: '소재 고유명', options: getOptions('creative_name') },
+            { id: 'explore', label: '타게팅', options: getOptions('explore', Object.keys(targetingMap)) },
+            { id: 'main_copy', label: '주 메세지', options: getOptions('main_copy') },
+            { id: 'sub_copy', label: '서브 메세지', options: getOptions('sub_copy') },
+        ];
+    }, [availableFilterOptions]);
 
     // 테이블 요약 데이터 계산 로직 (전체 필터링된 데이터 기준)
     const summaryTableData = useMemo(() => {

@@ -5,7 +5,7 @@ import { ko } from 'date-fns/locale';
 import '../../styles/HanssemInsight.css';
 import { CreativeCard } from '.';
 import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
-import { categoryMap, targetingMap, placementMap, messageMap, chartData } from './common/filterMaps';
+import { categoryMap, targetingMap, placementMap, chartData } from './common/filterMaps';
 import InsightSummaryTable from './common/InsightSummaryTable';
 import InsightPerformanceFilter from './common/InsightPerformanceFilter';
 import { useInsightData } from './hooks/useInsightData';
@@ -29,8 +29,8 @@ const filterMappings = {
     placement: { field: 'utm_content_2', map: placementMap },
     category: { field: 'utm_content_1', map: categoryMap },
     explore: { field: 'utm_content_8', map: targetingMap },
-    main_copy: { field: 'utm_content_3', map: messageMap },
-    sub_copy: { field: 'utm_content_4', map: messageMap },
+    main_copy: { field: 'utm_content_3' },
+    sub_copy: { field: 'utm_content_4' },
     creative_name: { field: 'utm_content_5' }
 };
 
@@ -40,7 +40,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
     const {
         realData, isLoading, hasMore, lastElementRef,
         fullData, fullFilteredData, isFullDataLoading,
-        displayData, filteredData, applyFiltersToData,
+        displayData, filteredData, applyFiltersToData, availableFilterOptions,
         selectedFilters, handleFilterSelect, openDropdown, setOpenDropdown,
         distributionFilterInput, setDistributionFilterInput,
         costFilterInput, setCostFilterInput,
@@ -49,44 +49,28 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
         sortConfig, setSortConfig, resetAllFilters
     } = useInsightData('media_material', startDate, endDate, initialFilters, filterMappings, chartData);
 
-    // 동적 구성: 매체 상세(media_detail) 고유값 추출
-    const mediaDetailOptions = useMemo(() => {
-        const details = new Set();
-        fullData.forEach(item => {
-            if (item.media_detail) details.add(item.media_detail);
-        });
-        return Array.from(details).sort();
-    }, [fullData]);
+    const filterConfigs = useMemo(() => {
+        const getOptions = (key, defaultOptions) => {
+            const available = availableFilterOptions?.[key];
+            if (!available) return defaultOptions || [];
+            if (defaultOptions) {
+                return defaultOptions.filter(opt => available.has(opt));
+            }
+            return Array.from(available).sort();
+        };
 
-    const classificationOptions = useMemo(() => {
-        const clsses = new Set();
-        fullData.forEach(item => {
-            if (item.classification) clsses.add(item.classification);
-        });
-        return Array.from(clsses).sort();
-    }, [fullData]);
-
-    // 동적 구성: 소재 고유명(utm_content_5) 고유값 추출
-    const creativeNameOptions = useMemo(() => {
-        const names = new Set();
-        fullData.forEach(item => {
-            if (item.utm_content_5) names.add(item.utm_content_5);
-        });
-        return Array.from(names).sort();
-    }, [fullData]);
-
-
-    const filterConfigs = useMemo(() => [
-        { id: 'classification', label: '집행 구분', options: classificationOptions },
-        { id: 'media', label: '매체', options: Object.keys(mediaLogos) },
-        { id: 'media_detail', label: '매체 상세', options: mediaDetailOptions },
-        { id: 'explore', label: '타게팅', options: Object.keys(targetingMap) },
-        { id: 'placement', label: '소재 유형', options: Object.keys(placementMap) },
-        { id: 'category', label: '카테고리', options: Object.keys(categoryMap) },
-        { id: 'creative_name', label: '소재 고유명', options: creativeNameOptions },
-        { id: 'main_copy', label: '주 메세지', options: Object.keys(messageMap) },
-        { id: 'sub_copy', label: '서브 메세지', options: Object.keys(messageMap) },
-    ], [mediaDetailOptions, classificationOptions, creativeNameOptions]);
+        return [
+            { id: 'classification', label: '집행 구분', options: getOptions('classification') },
+            { id: 'media', label: '매체', options: getOptions('media', Object.keys(mediaLogos)) },
+            { id: 'media_detail', label: '매체 상세', options: getOptions('media_detail') },
+            { id: 'explore', label: '타게팅', options: getOptions('explore', Object.keys(targetingMap)) },
+            { id: 'placement', label: '소재 유형', options: getOptions('placement', Object.keys(placementMap)) },
+            { id: 'category', label: '카테고리', options: getOptions('category', Object.keys(categoryMap)) },
+            { id: 'creative_name', label: '소재 고유명', options: getOptions('creative_name') },
+            { id: 'main_copy', label: '주 메세지', options: getOptions('main_copy') },
+            { id: 'sub_copy', label: '서브 메세지', options: getOptions('sub_copy') },
+        ];
+    }, [availableFilterOptions]);
 
     // 테이블 요약 데이터 계산 로직
     const summaryTableData = useMemo(() => {

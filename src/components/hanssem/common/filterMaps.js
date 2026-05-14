@@ -38,20 +38,6 @@ export const placementMap = {
     'VA': 'va'
 };
 
-export const messageMap = {
-    'RTB_신뢰(업력,규모)': 'Rtrust',
-    'RTB_서비스(고객상담)': 'Rservice',
-    'RTB_품질(시공측면)': 'Rquality',
-    'USP_맞춤설계': 'Ucustomize',
-    'USP_심미성': 'Udesign',
-    'USP_제품/자재': 'Uproduct',
-    '혜택_패키지': 'Bpkg',
-    '혜택_단품': 'Bsingle',
-    '혜택_사은품': 'Bgift',
-    '혜택_카드': 'Bcard',
-    'VOC': 'voc'
-};
-
 export const chartData = [
     { id: 1, media: '카카오', title: '소재_메인_거실_01', ctr: '2.45%', roas: '450%', clicks: '1,240', img: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=600&h=450&fit=crop' },
     { id: 2, media: '메타', title: '소재_주방_리모델링', ctr: '3.12%', roas: '520%', clicks: '2,150', img: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=600&h=450&fit=crop' },
