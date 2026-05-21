@@ -16,10 +16,26 @@ import {
 import '../../styles/HanssemPerformance.css';
 import { CreativeCard } from '.';
 
+const METRIC_CONFIG = {
+    impressions: { label: '노출수', unit: '', format: 'int', color: '#a4b0be' },
+    clicks: { label: '클릭수', unit: '', format: 'int', color: '#667eea' },
+    cost: { label: '광고비', unit: '원', format: 'int', color: '#ff6b81' },
+    orders: { label: '주문수', unit: '건', format: 'int', color: '#2ed573' },
+    revenue: { label: '총 수익', unit: '원', format: 'int', color: '#1e90ff' },
+    ctr: { label: 'CTR', unit: '%', format: 'float', color: '#ffa502' },
+    cpc: { label: 'CPC', unit: '원', format: 'int', color: '#3742fa' },
+    cvr: { label: 'CVR', unit: '%', format: 'float', color: '#ff4757' },
+    roas: { label: 'ROAS', unit: '%', format: 'float', color: '#4bc0c0' },
+};
+
 function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
     const [topData, setTopData] = useState([]);
     const [trendData, setTrendData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+
+    // 동적 차트 지표 상태
+    const [metricLeft, setMetricLeft] = useState('cost');
+    const [metricRight, setMetricRight] = useState('roas');
 
     // 필터 관련 상태
     const [orderFilterInput, setOrderFilterInput] = useState(0);
@@ -84,7 +100,6 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
 
         const dailyMap = {};
         trendData.forEach(item => {
-            // 날짜 포맷 정리 (ISO string이나 YYYY-MM-DD 등에서 날짜만 추출)
             const d = item.date ? item.date.split('T')[0] : 'Unknown';
             if (!dailyMap[d]) {
                 dailyMap[d] = {
@@ -105,7 +120,7 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
 
         return Object.values(dailyMap).map(day => ({
             ...day,
-            displayDate: day.date.substring(5).replace('-', '/'), // MM/DD 형식
+            displayDate: day.date.substring(5).replace('-', '/'),
             ctr: day.impressions > 0 ? (day.clicks / day.impressions) * 100 : 0,
             cpc: day.clicks > 0 ? Math.round(day.cost / day.clicks) : 0,
             cvr: day.clicks > 0 ? (day.orders / day.clicks) * 100 : 0,
@@ -137,140 +152,142 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
     const formatInt = (val) => Math.round(val || 0).toLocaleString('ko-KR');
     const formatDecimal = (val) => (val || 0).toFixed(2);
 
+    const leftConfig = METRIC_CONFIG[metricLeft];
+    const rightConfig = METRIC_CONFIG[metricRight];
+
+    const formatAxisTick = (val, type) => {
+        if (type === 'float') return `${val.toFixed(1)}%`;
+        if (val >= 100000000) return `${(val / 100000000).toFixed(1)}억`;
+        if (val >= 10000) return `${(val / 10000).toFixed(0)}만`;
+        return val.toLocaleString('ko-KR');
+    };
+
     return (
         <main className="hanssem-main">
             {/* 대시보드 2 - 전 매체 통합 성과 트렌드 */}
             <section className="dashboard-section">
-                <div className="section-header-with-action">
+                <div className="section-header-with-action" style={{ borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
                     <h2>[ 전 매체 통합 성과 트렌드 ]</h2>
-                    <div className="performance-datepicker-wrapper">
-                        <DatePicker
-                            selectsRange={true}
-                            startDate={startDate}
-                            endDate={endDate}
-                            onChange={(update) => {
-                                const [start, end] = update;
-                                setStartDate(start);
-                                setEndDate(end);
-                            }}
-                            locale={ko}
-                            dateFormat="yyyy.MM.dd"
-                            customInput={
-                                <button className="period-btn">
-                                    {startDate && endDate
-                                        ? `${startDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })} - ${endDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })}`
-                                        : '기간 조건'}
-                                </button>
-                            }
-                        />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '0.9rem', color: '#555', fontWeight: 'bold' }}>좌측 축(막대):</span>
+                            <select 
+                                value={metricLeft} 
+                                onChange={(e) => setMetricLeft(e.target.value)}
+                                style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #ddd', cursor: 'pointer', background: '#fff' }}
+                            >
+                                {Object.entries(METRIC_CONFIG).map(([key, config]) => (
+                                    <option key={key} value={key}>{config.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '0.9rem', color: '#555', fontWeight: 'bold' }}>우측 축(선):</span>
+                            <select 
+                                value={metricRight} 
+                                onChange={(e) => setMetricRight(e.target.value)}
+                                style={{ padding: '6px 12px', borderRadius: '6px', border: '1px solid #ddd', cursor: 'pointer', background: '#fff' }}
+                            >
+                                {Object.entries(METRIC_CONFIG).map(([key, config]) => (
+                                    <option key={key} value={key}>{config.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="performance-datepicker-wrapper">
+                            <DatePicker
+                                selectsRange={true}
+                                startDate={startDate}
+                                endDate={endDate}
+                                onChange={(update) => {
+                                    const [start, end] = update;
+                                    setStartDate(start);
+                                    setEndDate(end);
+                                }}
+                                locale={ko}
+                                dateFormat="yyyy.MM.dd"
+                                customInput={
+                                    <button className="period-btn">
+                                        {startDate && endDate
+                                            ? `${startDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })} - ${endDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })}`
+                                            : '기간 조건'}
+                                    </button>
+                                }
+                            />
+                        </div>
                     </div>
                 </div>
 
-                <div className="dashboard-grid-2">
-                    {/* 좌측: 클릭 및 CTR 추이 */}
-                    <div className="dashboard-card">
-                        <div className="chart-placeholder" style={{ padding: '1.5rem 0.5rem 0.5rem' }}>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <ComposedChart data={processedTrendData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                    <XAxis dataKey="displayDate" fontSize={11} tickLine={false} axisLine={false} />
-                                    <YAxis
-                                        yAxisId="left"
-                                        orientation="left"
-                                        stroke="#667eea"
-                                        fontSize={11}
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tickFormatter={(val) => val.toLocaleString('ko-KR')}
-                                    />
-                                    <YAxis
-                                        yAxisId="right"
-                                        orientation="right"
-                                        stroke="#ff7300"
-                                        fontSize={11}
-                                        axisLine={false}
-                                        tickLine={false}
-                                        unit="%"
-                                        tickFormatter={(val) => val.toFixed(1)}
-                                    />
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                        formatter={(value, name) => {
-                                            if (name === 'CTR') return [`${value.toFixed(2)}%`, name];
-                                            return [value.toLocaleString('ko-KR'), name];
-                                        }}
-                                    />
-                                    <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                                    <Bar yAxisId="left" dataKey="clicks" name="클릭수" fill="#667eea" radius={[4, 4, 0, 0]} barSize={20} />
-                                    <Line yAxisId="right" type="monotone" dataKey="ctr" name="CTR" stroke="#ff7300" strokeWidth={2} dot={{ r: 3 }} />
-                                </ComposedChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div className="metrics-placeholder">
-                            <table className="simple-table">
-                                <thead>
-                                    <tr><th>항목</th><th>수치</th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td>총 클릭수</td><td>{formatInt(summaryMetrics.clicks)}</td></tr>
-                                    <tr><td>평균 CTR</td><td>{formatDecimal(summaryMetrics.ctr)} %</td></tr>
-                                    <tr><td>평균 CPC</td><td>{formatInt(summaryMetrics.cpc)} 원</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                <div className="dashboard-card" style={{ marginTop: '20px' }}>
+                    <div className="chart-placeholder" style={{ padding: '2rem 1rem 1rem' }}>
+                        <ResponsiveContainer width="100%" height={320}>
+                            <ComposedChart data={processedTrendData}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                                <XAxis dataKey="displayDate" fontSize={12} tickLine={false} axisLine={false} />
+                                <YAxis
+                                    yAxisId="left"
+                                    orientation="left"
+                                    stroke="#667eea"
+                                    fontSize={12}
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tickFormatter={(val) => formatAxisTick(val, leftConfig.format)}
+                                />
+                                <YAxis
+                                    yAxisId="right"
+                                    orientation="right"
+                                    stroke="#ff7300"
+                                    fontSize={12}
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tickFormatter={(val) => formatAxisTick(val, rightConfig.format)}
+                                />
+                                <Tooltip
+                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+                                    formatter={(value, name, props) => {
+                                        const config = Object.values(METRIC_CONFIG).find(c => c.label === name);
+                                        const type = config ? config.format : 'int';
+                                        const unit = config ? config.unit : '';
+                                        
+                                        if (type === 'float') return [`${value.toFixed(2)}${unit}`, name];
+                                        return [`${value.toLocaleString('ko-KR')}${unit}`, name];
+                                    }}
+                                />
+                                <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                                <Bar yAxisId="left" dataKey={metricLeft} name={leftConfig.label} fill="#667eea" radius={[4, 4, 0, 0]} barSize={30} />
+                                <Line yAxisId="right" type="monotone" dataKey={metricRight} name={rightConfig.label} stroke="#ff7300" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                            </ComposedChart>
+                        </ResponsiveContainer>
                     </div>
 
-                    {/* 우측: 전환수 및 CPA 추이 */}
-                    <div className="dashboard-card">
-                        <div className="chart-placeholder" style={{ padding: '1.5rem 0.5rem 0.5rem' }}>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <ComposedChart data={processedTrendData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                                    <XAxis dataKey="displayDate" fontSize={11} tickLine={false} axisLine={false} />
-                                    <YAxis
-                                        yAxisId="left"
-                                        orientation="left"
-                                        stroke="#4bc0c0"
-                                        fontSize={11}
-                                        axisLine={false}
-                                        tickLine={false}
-                                        tickFormatter={(val) => val.toLocaleString('ko-KR')}
-                                    />
-                                    <YAxis
-                                        yAxisId="right"
-                                        orientation="right"
-                                        stroke="#f39c12"
-                                        fontSize={11}
-                                        axisLine={false}
-                                        tickLine={false}
-                                        unit="원"
-                                        tickFormatter={(val) => val.toLocaleString('ko-KR')}
-                                    />
-                                    <Tooltip
-                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                        formatter={(value, name) => {
-                                            if (name === 'CTR' || name === 'CVR' || name === 'ROAS') return [`${value.toFixed(2)}%`, name];
-                                            return [value.toLocaleString('ko-KR'), name];
-                                        }}
-                                    />
-                                    <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                                    <Bar yAxisId="left" dataKey="roas" name="ROAS" fill="#4bc0c0" radius={[4, 4, 0, 0]} barSize={20} />
-                                    <Line yAxisId="right" type="monotone" dataKey="cvr" name="CVR" stroke="#f39c12" strokeWidth={2} dot={{ r: 3 }} />
-                                </ComposedChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div className="metrics-placeholder">
-                            <table className="simple-table">
-                                <thead>
-                                    <tr><th>항목</th><th>수치</th></tr>
-                                </thead>
-                                <tbody>
-                                    <tr><td>총 ROAS</td><td>{formatDecimal(summaryMetrics.roas)} %</td></tr>
-                                    <tr><td>평균 CVR</td><td>{formatDecimal(summaryMetrics.cvr)} %</td></tr>
-                                    <tr><td>총 집행비용</td><td>{formatInt(summaryMetrics.cost)} 원</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
+                    <div className="metrics-placeholder" style={{ padding: '10px', borderTop: '1px solid #f0f0f0' }}>
+                        <table className="simple-table" style={{ width: '100%', tableLayout: 'fixed' }}>
+                            <thead>
+                                <tr>
+                                    <th>총 노출수</th>
+                                    <th>총 클릭수</th>
+                                    <th>평균 CTR</th>
+                                    <th>평균 CPC</th>
+                                    <th>총 집행비용</th>
+                                    <th>총 주문수</th>
+                                    <th>총 수익</th>
+                                    <th>평균 CVR</th>
+                                    <th>평균 ROAS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style={{ textAlign: 'center', color: '#111' }}>
+                                    <td style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{formatInt(summaryMetrics.impressions)}</td>
+                                    <td style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{formatInt(summaryMetrics.clicks)}</td>
+                                    <td style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{formatDecimal(summaryMetrics.ctr)} %</td>
+                                    <td style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{formatInt(summaryMetrics.cpc)} 원</td>
+                                    <td style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{formatInt(summaryMetrics.cost)} 원</td>
+                                    <td style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{formatInt(summaryMetrics.orders)}</td>
+                                    <td style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{formatInt(summaryMetrics.revenue)} 원</td>
+                                    <td style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{formatDecimal(summaryMetrics.cvr)} %</td>
+                                    <td style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{formatDecimal(summaryMetrics.roas)} %</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>

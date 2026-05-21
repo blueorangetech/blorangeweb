@@ -7,6 +7,22 @@ import { CreativeCard } from './';
 import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
 import { chartData } from './common/filterMaps';
 
+const MEDIA_LIKE_MAP = {
+    "네이버": ['%GFA%', '%NAVER%'],
+    "당근": ['%당근%'],
+    "카카오": ['%카카오%', '%KAKAO%'],
+    "메타": ['%메타%', '%META%', '%FACEBOOK%', '%INSTAGRAM%'],
+    "구글": ['%구글%', '%GOOGLE%'],
+    "유튜브": ['%유튜브%', '%YOUTUBE%'],
+    "크리테오": ['%크리테오%', '%CRITEO%'],
+    "페이코": ['%PAYCO%'],
+    "애플": ['%APPLE%'],
+    "에피어": ['%APPIER%'],
+    "버즈빌": ['%BUZZVIL%'],
+    "RTB": ['%RTB%'],
+    "몰로코": ['%MOLOCO%']
+};
+
 function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }) {
     // 필터 상태 통합 관리
     const [selectedFilters, setSelectedFilters] = useState({
@@ -58,13 +74,13 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
 
     const [realTableData, setRealTableData] = useState([]);
 
-    // 날짜가 바뀌면 데이터와 오프셋 초기화
+    // 날짜 및 필터가 바뀌면 데이터와 오프셋 초기화
     useEffect(() => {
         setRealData([]);
         setRealTableData([]);
         setOffset(0);
         setHasMore(true);
-    }, [startDate, endDate]);
+    }, [startDate, endDate, selectedFilters, appliedCost, appliedRoas, appliedOrder]);
 
     // 데이터 테이블용 Fetch
     useEffect(() => {
@@ -83,11 +99,33 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
             const startStr = formatDate(startDate);
             const endStr = formatDate(endDate);
 
+            const validFilters = {};
+            Object.entries(selectedFilters).forEach(([key, values]) => {
+                if (!values.includes('all')) {
+                    if (key === 'media') {
+                        const likeValues = [];
+                        values.forEach(v => {
+                            const v_upper = v.toUpperCase();
+                            if (MEDIA_LIKE_MAP[v_upper]) {
+                                likeValues.push(...MEDIA_LIKE_MAP[v_upper]);
+                            } else {
+                                likeValues.push(`%${v_upper}%`);
+                            }
+                        });
+                        validFilters[key] = { op: 'like', values: likeValues };
+                    } else {
+                        validFilters[key] = values;
+                    }
+                }
+            });
+            const filterParam = Object.keys(validFilters).length > 0 ? `&filters=${encodeURIComponent(JSON.stringify(validFilters))}` : '';
+            const perfParams = `&min_cost=${appliedCost}&min_roas=${appliedRoas}&min_distribution=${appliedOrder}`;
+
             try {
                 // all_material이 아닌 data_table에 대해서도, 공통이므로 data_table로 테이블 조회 (필요 시 report_type을 상황에 맞게)
                 // 만약 전체 통합 소재 대시보드의 데이터 테이블용 별도 쿼리(예: all_data_table)가 없다면 data_table을 사용합니다.
                 const response = await fetch(
-                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem_hf&table_id=performance_raw&report_type=data_table&start_date=${startStr}&end_date=${endStr}`
+                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem_hf&table_id=performance_raw&report_type=data_table&start_date=${startStr}&end_date=${endStr}${filterParam}${perfParams}`
                 );
                 if (response.ok) {
                     const result = await response.json();
@@ -99,7 +137,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
         };
 
         fetchTableData();
-    }, [startDate, endDate]);
+    }, [startDate, endDate, selectedFilters, appliedCost, appliedRoas, appliedOrder]);
 
     // 실제 데이터 가져오기 (useEffect)
     useEffect(() => {
@@ -119,9 +157,31 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
             const startStr = formatDate(startDate);
             const endStr = formatDate(endDate);
 
+            const validFilters = {};
+            Object.entries(selectedFilters).forEach(([key, values]) => {
+                if (!values.includes('all')) {
+                    if (key === 'media') {
+                        const likeValues = [];
+                        values.forEach(v => {
+                            const v_upper = v.toUpperCase();
+                            if (MEDIA_LIKE_MAP[v_upper]) {
+                                likeValues.push(...MEDIA_LIKE_MAP[v_upper]);
+                            } else {
+                                likeValues.push(`%${v_upper}%`);
+                            }
+                        });
+                        validFilters[key] = { op: 'like', values: likeValues };
+                    } else {
+                        validFilters[key] = values;
+                    }
+                }
+            });
+            const filterParam = Object.keys(validFilters).length > 0 ? `&filters=${encodeURIComponent(JSON.stringify(validFilters))}` : '';
+            const perfParams = `&min_cost=${appliedCost}&min_roas=${appliedRoas}&min_distribution=${appliedOrder}`;
+
             try {
                 const response = await fetch(
-                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem_hf&table_id=performance_raw&report_type=all_material&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}`
+                    `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem_hf&table_id=performance_raw&report_type=all_material&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}${filterParam}${perfParams}`
                 );
                 if (!response.ok) throw new Error('데이터 로드 실패');
                 const result = await response.json();
@@ -142,7 +202,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
         };
 
         fetchBigQueryData();
-    }, [startDate, endDate, offset]);
+    }, [startDate, endDate, offset, selectedFilters, appliedCost, appliedRoas, appliedOrder]);
 
     // 스크롤 감지 (Intersection Observer)
     const lastElementRef = useRef();
@@ -256,27 +316,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
     ], [filterOptions]);
 
     const filteredData = useMemo(() => {
-        let data = displayData.filter(item => {
-            const matchesMedia = selectedFilters.media.includes('all') || selectedFilters.media.includes(getCanonicalMedia(item.media));
-            const matchesDevice = selectedFilters.device.includes('all') || selectedFilters.device.includes(item.device);
-            const matchesAdType = selectedFilters.ad_type.includes('all') || selectedFilters.ad_type.includes(item.ad_type);
-            const matchesBusinessUnit = selectedFilters.business_unit.includes('all') || selectedFilters.business_unit.includes(item.business_unit);
-            const matchesCreativeType = selectedFilters.creative_type.includes('all') || selectedFilters.creative_type.includes(item.creative_type);
-            const matchesLanding = selectedFilters.landing.includes('all') || selectedFilters.landing.includes(item.landing);
-            const matchesAdObjective = selectedFilters.ad_objective.includes('all') || selectedFilters.ad_objective.includes(item.ad_objective);
-            const matchesTargeting = selectedFilters.targeting.includes('all') || selectedFilters.targeting.includes(item.targeting);
-
-            // 6. 성과 임계치 필터
-            const matchesMinOrder = Number(item.total_orders || item.orders || 0) >= appliedOrder;
-            const matchesMinCost = Number(item.total_cost || item.cost || 0) >= appliedCost;
-            
-            const costVal = Number(item.total_cost || item.cost || 0);
-            const revenueVal = Number(item.total_revenue || item.revenue || 0);
-            const itemRoas = costVal > 0 ? (revenueVal / costVal) * 100 : 0;
-            const matchesMinRoas = itemRoas >= appliedRoas;
-
-            return matchesMedia && matchesDevice && matchesAdType && matchesBusinessUnit && matchesCreativeType && matchesLanding && matchesAdObjective && matchesTargeting && matchesMinOrder && matchesMinCost && matchesMinRoas;
-        });
+        let data = displayData;
 
         // 데이터 정렬 로직
         const sorted = [...data].sort((a, b) => {
@@ -311,36 +351,12 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
         });
 
         return sorted;
-    }, [displayData, selectedFilters, appliedOrder, appliedCost, appliedRoas, sortConfig]);
-
-    // 테이블용 필터 적용된 데이터 계산
-    const filteredTableData = useMemo(() => {
-        return realTableData.filter(item => {
-            const matchesMedia = selectedFilters.media.includes('all') || selectedFilters.media.includes(getCanonicalMedia(item.media));
-            const matchesDevice = selectedFilters.device.includes('all') || selectedFilters.device.includes(item.device);
-            const matchesAdType = selectedFilters.ad_type.includes('all') || selectedFilters.ad_type.includes(item.ad_type);
-            const matchesBusinessUnit = selectedFilters.business_unit.includes('all') || selectedFilters.business_unit.includes(item.business_unit);
-            const matchesCreativeType = selectedFilters.creative_type.includes('all') || selectedFilters.creative_type.includes(item.creative_type);
-            const matchesLanding = selectedFilters.landing.includes('all') || selectedFilters.landing.includes(item.landing);
-            const matchesAdObjective = selectedFilters.ad_objective.includes('all') || selectedFilters.ad_objective.includes(item.ad_objective);
-            const matchesTargeting = selectedFilters.targeting.includes('all') || selectedFilters.targeting.includes(item.targeting);
-
-            const matchesMinOrder = Number(item.total_orders || item.orders || 0) >= appliedOrder;
-            const matchesMinCost = Number(item.total_cost || item.cost || 0) >= appliedCost;
-            
-            const costVal = Number(item.total_cost || item.cost || 0);
-            const revenueVal = Number(item.total_revenue || item.revenue || 0);
-            const itemRoas = costVal > 0 ? (revenueVal / costVal) * 100 : 0;
-            const matchesMinRoas = itemRoas >= appliedRoas;
-
-            return matchesMedia && matchesDevice && matchesAdType && matchesBusinessUnit && matchesCreativeType && matchesLanding && matchesAdObjective && matchesTargeting && matchesMinOrder && matchesMinCost && matchesMinRoas;
-        });
-    }, [realTableData, selectedFilters, appliedOrder, appliedCost, appliedRoas]);
+    }, [displayData, sortConfig]);
 
     // 테이블 요약 데이터 계산 로직
     const summaryTableData = useMemo(() => {
         const aggr = {};
-        filteredTableData.forEach(item => {
+        realTableData.forEach(item => {
             // 그룹 단위: 날짜
             // (BigQuery 등에서 받은 날짜가 YYYY-MM-DD 문자열을 가지도록 앞 10자리만 절삭)
             const dateStr = item.date ? String(item.date).substring(0, 10) : '해당없음';
@@ -386,7 +402,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
                 ctr, cpc, consult_cvr, consult_cpa, dist_cvr, dist_cpa, dist_rate, inflow_cvr, purchase_cvr, roas, atv
             };
         }).sort((a, b) => b.key.localeCompare(a.key)); // 날짜(key) 기준 최신순 정렬
-    }, [filteredData]);
+    }, [realTableData]);
 
     // 테이블 데이터 페이징 처리
     useEffect(() => {

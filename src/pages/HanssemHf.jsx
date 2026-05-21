@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Cookies from 'js-cookie';
 import { Header, Footer, LoginModal, UserManagement } from '../components';
-import { InsightView, PerformanceView, AllMaterialInsightView } from '../components/hanssem_hf';
+import { InsightView, PerformanceView, AllMaterialInsightView, ABCompareView } from '../components/hanssem_hf';
 import { bqDirectUpload } from '../utils/bqDirectUpload';
 import '../styles/Hanssem.css';
 
@@ -107,11 +107,11 @@ function HanssemHf() {
     }
   };
 
-  // 필터 버튼 데이터
   const filterButtons = [
     { id: 'performance', label: '트렌드 대시보드' },
     { id: 'insight', label: '매체 별 소재 인사이트' },
     { id: 'all-material', label: '통합 소재 대시보드' },
+    { id: 'ab-compare', label: 'A/B 비교' },
     ...(currentUserInfo.role === 'master' || currentUserInfo.role === 'admin'
       ? [{ id: 'management', label: '권한 관리' }]
       : []),
@@ -212,7 +212,7 @@ function HanssemHf() {
       </section>
 
       {/* 메인 콘텐츠 영역 (컴포넌트 분리) */}
-      {!isLoggedIn && (activeFilter === 'insight' || activeFilter === 'performance' || activeFilter === 'all-material' || activeFilter === 'management') ? (
+      {!isLoggedIn && (activeFilter === 'insight' || activeFilter === 'performance' || activeFilter === 'all-material' || activeFilter === 'ab-compare' || activeFilter === 'management') ? (
         <main className="hanssem-main">
           <div className="access-denied-container" style={{
             padding: '100px 20px',
@@ -273,7 +273,7 @@ function HanssemHf() {
             </button>
           </div>
         </main>
-      ) : isLoggedIn && !hasPermission && (activeFilter === 'insight' || activeFilter === 'performance' || activeFilter === 'all-material' || activeFilter === 'management') ? (
+      ) : isLoggedIn && !hasPermission && (activeFilter === 'insight' || activeFilter === 'performance' || activeFilter === 'all-material' || activeFilter === 'ab-compare' || activeFilter === 'management') ? (
         <main className="hanssem-main">
           <div className="access-denied-container" style={{
             padding: '100px 20px',
@@ -329,6 +329,14 @@ function HanssemHf() {
           )}
           {activeFilter === 'all-material' && (
             <AllMaterialInsightView
+              startDate={startDate}
+              endDate={endDate}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+            />
+          )}
+          {activeFilter === 'ab-compare' && (
+            <ABCompareView
               startDate={startDate}
               endDate={endDate}
               setStartDate={setStartDate}
