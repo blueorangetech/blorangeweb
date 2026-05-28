@@ -34,6 +34,9 @@ function InsightSummaryTable({ data, hasRealData }) {
                         <th className="consultation-group">배분_CVR</th>
                         <th className="consultation-group">배분_CPA</th>
                         <th className="consultation-group">배분율</th>
+                        <th className="consultation-group">확정건수</th>
+                        <th className="consultation-group">확정률</th>
+                        <th className="consultation-group">확정_CPA</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -53,11 +56,14 @@ function InsightSummaryTable({ data, hasRealData }) {
                                 <td>{row.dist_cvr.toFixed(2)}%</td>
                                 <td>{Math.round(row.dist_cpa).toLocaleString()}</td>
                                 <td>{row.dist_rate.toFixed(0)}%</td>
+                                <td>{Math.round(row.confirms || 0).toLocaleString()}</td>
+                                <td>{(row.confirm_cvr || 0).toFixed(2)}%</td>
+                                <td>{Math.round(row.confirm_cpa || 0).toLocaleString()}</td>
                             </tr>
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="13" className="empty-message">
+                            <td colSpan="16" className="empty-message">
                                 설정한 데이터 조건(필터/기간 등)에 맞는 데이터가 없습니다.
                             </td>
                         </tr>

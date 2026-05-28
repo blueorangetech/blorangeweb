@@ -83,7 +83,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
             if (!aggr[groupKey]) {
                 aggr[groupKey] = {
                     key: groupKey, cost: 0, impressions: 0, clicks: 0,
-                    consultations: 0, distributions: 0
+                    consultations: 0, distributions: 0, confirms: 0
                 };
             }
             aggr[groupKey].cost += Number(item.cost || 0);
@@ -91,6 +91,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
             aggr[groupKey].clicks += Number(item.clicks || 0);
             aggr[groupKey].consultations += Number(item.consultation || 0);
             aggr[groupKey].distributions += Number(item.distribution || 0);
+            aggr[groupKey].confirms += Number(item.confirm || 0);
         });
 
         return Object.values(aggr).map(row => {
@@ -101,10 +102,14 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
             const dist_cvr = row.clicks > 0 ? (row.distributions / row.clicks) * 100 : 0;
             const dist_cpa = row.distributions > 0 ? row.cost / row.distributions : 0;
             const dist_rate = row.consultations > 0 ? (row.distributions / row.consultations) * 100 : 0;
+            
+            const confirm_cvr = row.clicks > 0 ? (row.confirms / row.clicks) * 100 : 0;
+            const confirm_cpa = row.confirms > 0 ? row.cost / row.confirms : 0;
 
             return {
                 ...row,
-                ctr, cpc, consult_cvr, consult_cpa, dist_cvr, dist_cpa, dist_rate
+                ctr, cpc, consult_cvr, consult_cpa, dist_cvr, dist_cpa, dist_rate,
+                confirm_cvr, confirm_cpa
             };
         }).sort((a, b) => b.cost - a.cost); // 비용 내림차순 정렬
     }, [fullFilteredData]);
@@ -194,7 +199,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                                     const headers = [
                                         '날짜', '매체', '매체 상세', '집행 구분', '소재 유형', '카테고리',
                                         '타게팅', '주 메세지', '서브 메세지', '소재 고유명',
-                                        '소진비용', '노출수', '클릭수', '상담신청', '배분'
+                                        '소진비용', '노출수', '클릭수', '상담신청', '배분', '확정건수'
                                     ];
 
                                     // 필터링된 데이터 기반으로 행 생성 (원본 값 그대로 출력)
@@ -221,7 +226,8 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
                                             item.impressions || 0,
                                             item.clicks || 0,
                                             item.consultation || 0,
-                                            item.distribution || 0
+                                            item.distribution || 0,
+                                            item.confirm || 0
                                         ];
                                     });
 

@@ -146,11 +146,11 @@ function CreativeCard({ data }) {
                         </div>
                         <div className="detail-row">
                             <span>상담신청</span>
-                            <strong>{formatInt(data.consultation)}</strong>
+                            <strong>{formatInt(data.consultation)} 건</strong>
                         </div>
                         <div className="detail-row">
                             <span>배분수</span>
-                            <strong>{formatInt(data.distribution)}</strong>
+                            <strong>{formatInt(data.distribution)} 건</strong>
                         </div>
                         <div className="detail-row">
                             <span>배분 CVR</span>
@@ -160,10 +160,22 @@ function CreativeCard({ data }) {
                             <span>배분률</span>
                             <strong>{formatDecimal(data.distribution_cvr)} %</strong>
                         </div>
-                        <div className="detail-divider"></div>
-                        <div className="detail-row highlight">
+                        <div className="detail-row">
                             <span>배분 CPA</span>
                             <strong>{formatInt(data.cpa)} 원</strong>
+                        </div>
+                        <div className="detail-row">
+                            <span>확정건수</span>
+                            <strong>{formatInt(data.confirm)} 건</strong>
+                        </div>
+                        <div className="detail-row">
+                            <span>확정률</span>
+                            <strong>{formatDecimal(data.confirm_cvr)} %</strong>
+                        </div>
+                        <div className="detail-divider"></div>
+                        <div className="detail-row  highlight">
+                            <span>확정 CPA</span>
+                            <strong>{formatInt(data.confirm_cpa)} 원</strong>
                         </div>
                     </div>
                     <div className="chart-footer" onClick={toggleFlip}>
