@@ -27,7 +27,7 @@ const filterMappings = {
     media_detail: { field: 'media_detail' },
     classification: { field: 'classification' },
     placement: { field: 'utm_content_2', map: placementMap },
-    category: { field: 'utm_content_1', map: categoryMap },
+    category: { field: 'utm_content_1' },
     explore: { field: 'utm_content_8', map: targetingMap },
     main_copy: { field: 'utm_content_3' },
     sub_copy: { field: 'utm_content_4' },
@@ -65,7 +65,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
             { id: 'media_detail', label: '매체 상세', options: getOptions('media_detail') },
             { id: 'explore', label: '타게팅', options: getOptions('explore', Object.keys(targetingMap)) },
             { id: 'placement', label: '소재 유형', options: getOptions('placement', Object.keys(placementMap)) },
-            { id: 'category', label: '카테고리', options: getOptions('category', Object.keys(categoryMap)) },
+            { id: 'category', label: '카테고리', options: getOptions('category') },
             { id: 'creative_name', label: '소재 고유명', options: getOptions('creative_name') },
             { id: 'main_copy', label: '주 메세지', options: getOptions('main_copy') },
             { id: 'sub_copy', label: '서브 메세지', options: getOptions('sub_copy') },
@@ -103,7 +103,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
             const dist_cpa = row.distributions > 0 ? row.cost / row.distributions : 0;
             const dist_rate = row.consultations > 0 ? (row.distributions / row.consultations) * 100 : 0;
             
-            const confirm_cvr = row.clicks > 0 ? (row.confirms / row.clicks) * 100 : 0;
+            const confirm_cvr = row.clicks > 0 ? (row.confirms / row.distributions) * 100 : 0;
             const confirm_cpa = row.confirms > 0 ? row.cost / row.confirms : 0;
 
             return {

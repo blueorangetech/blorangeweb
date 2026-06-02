@@ -89,7 +89,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
             const dist_cpa = row.distributions > 0 ? row.cost / row.distributions : 0;
             const dist_rate = row.consultations > 0 ? (row.distributions / row.consultations) * 100 : 0;
 
-            const confirm_cvr = row.clicks > 0 ? (row.confirms / row.distributions) * 100 : 0;
+            const confirm_cvr = row.distributions > 0 ? (row.confirms / row.distributions) * 100 : 0;
             const confirm_cpa = row.confirms > 0 ? row.cost / row.confirms : 0;
 
             return {

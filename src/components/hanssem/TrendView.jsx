@@ -203,12 +203,12 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
                         <div className="metrics-placeholder">
                             <table className="simple-table">
                                 <thead>
-                                    <tr><th>항목</th><th>수치</th><th>비중/기준</th></tr>
+                                    <tr><th>항목</th><th>수치</th></tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td>총 클릭수</td><td>{formatInt(summaryMetrics.clicks)}</td><td>100.0%</td></tr>
-                                    <tr><td>평균 CTR</td><td>{formatDecimal(summaryMetrics.ctr)} %</td><td>-</td></tr>
-                                    <tr><td>평균 CPC</td><td>{formatInt(summaryMetrics.cpc)} 원</td><td>-</td></tr>
+                                    <tr><td>총 클릭수</td><td>{formatInt(summaryMetrics.clicks)}</td></tr>
+                                    <tr><td>평균 CTR</td><td>{formatDecimal(summaryMetrics.ctr)} %</td></tr>
+                                    <tr><td>평균 CPC</td><td>{formatInt(summaryMetrics.cpc)} 원</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -256,12 +256,12 @@ function PerformanceView({ startDate, endDate, setStartDate, setEndDate }) {
                         <div className="metrics-placeholder">
                             <table className="simple-table">
                                 <thead>
-                                    <tr><th>항목</th><th>수치</th><th>비중/기준</th></tr>
+                                    <tr><th>항목</th><th>수치</th></tr>
                                 </thead>
                                 <tbody>
-                                    <tr><td>총 배분수</td><td>{formatInt(summaryMetrics.distribution)}</td><td>100.0%</td></tr>
-                                    <tr><td>평균 CPA</td><td>{formatInt(summaryMetrics.cpa)} 원</td><td>-</td></tr>
-                                    <tr><td>총 집행비용</td><td>{formatInt(summaryMetrics.cost)} 원</td><td>-</td></tr>
+                                    <tr><td>총 배분수</td><td>{formatInt(summaryMetrics.distribution)}</td></tr>
+                                    <tr><td>평균 CPA</td><td>{formatInt(summaryMetrics.cpa)} 원</td></tr>
+                                    <tr><td>총 집행비용</td><td>{formatInt(summaryMetrics.cost)} 원</td></tr>
                                 </tbody>
                             </table>
                         </div>
