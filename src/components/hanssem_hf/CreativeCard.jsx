@@ -38,7 +38,7 @@ function CreativeCard({ data }) {
     React.useEffect(() => {
         setImgSrc(
             data.creative_type
-                ? `${STORAGE_BASE_URL}/${data.media}/${data.creative_type}.jpg`
+                ? `${STORAGE_BASE_URL}/${data.business_unit}/${data.media}/${data.creative_type}.jpg`
                 : randomImages[getSafeIndex(itemName)]
         );
     }, [data.creative_type, itemName]);
@@ -46,7 +46,7 @@ function CreativeCard({ data }) {
     const handleImgError = () => {
         // .jpg 로 로드 실패 시 .png 로 재시도
         if (imgSrc.endsWith('.jpg') && data.creative_type) {
-            setImgSrc(`${STORAGE_BASE_URL}/${data.media}/${data.creative_type}.png`);
+            setImgSrc(`${STORAGE_BASE_URL}/${data.business_unit}/${data.media}/${data.creative_type}.png`);
         } else {
             // 최종 실패 시 랜덤 이미지로 대체
             setImgSrc(randomImages[getSafeIndex(itemName)]);
