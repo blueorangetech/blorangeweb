@@ -39,7 +39,7 @@ function Imweb() {
     const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/imweb`, {
+      const response = await fetch(`${API_BASE_URL}/auth/imweb?site_id=analytics`, {
         method: 'GET',
         headers: {
           'Authorization': token
