@@ -457,16 +457,24 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
                             locale={ko}
                             dateFormat="yyyy.MM.dd"
                             customInput={
-                                <button className="tab-btn date-picker-btn">
-                                    {startDate && endDate
-                                        ? `${startDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })} - ${endDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })}`
-                                        : '기간 조건'}
+                                <button className="date-picker-btn">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.75 }}>
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    <span>
+                                        {startDate && endDate
+                                            ? `${startDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })} - ${endDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })}`
+                                            : '기간 조건'}
+                                    </span>
                                 </button>
                             }
                         />
                     </div>
                     <button
-                        className="tab-btn reset-btn"
+                        className="reset-btn"
                         onClick={() => {
                             setSelectedFilters({
                                 media: ['all'],
@@ -485,7 +493,13 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
                             handleResetPerformanceFilters();
                         }}
                     >
-                        조건 초기화
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                            <path d="M21 3v5h-5" />
+                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                            <path d="M8 16H3v5" />
+                        </svg>
+                        <span>조건 초기화</span>
                     </button>
                 </div>
 

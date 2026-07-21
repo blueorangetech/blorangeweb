@@ -1,56 +1,48 @@
 import React, { useState } from 'react';
 import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
 
-function CreativeCard({ data }) {
+function CreativeCard({ data, onImageResolved }) {
     const [isFlipped, setIsFlipped] = useState(false);
 
 
     const canonicalMedia = getCanonicalMedia(data.media);
 
-    // 대체 이미지
-    const randomImages = [
-        'https://upload.wikimedia.org/wikipedia/commons/7/7b/%ED%95%9C%EC%83%98_%EB%A1%9C%EA%B3%A0.jpg',
-    ];
+    // 설정 가능한 대체 이미지
+    const DEFAULT_FALLBACK_IMAGE = import.meta.env.VITE_DEFAULT_FALLBACK_IMAGE || 'https://upload.wikimedia.org/wikipedia/commons/7/7b/%ED%95%9C%EC%83%98_%EB%A1%9C%EA%B3%A0.jpg';
 
-    // 제목 기반 고정 랜덤 인덱스 생성
-    const getSafeIndex = (str) => {
-        const target = str || "";
-        let hash = 0;
-        for (let i = 0; i < target.length; i++) {
-            hash = target.charCodeAt(i) + ((hash << 5) - hash);
+    // Cloud Storage 이미지 경로 구성
+    const STORAGE_BASE_URL = 'https://storage.googleapis.com/hanssem_hf';
+
+    const buildImageUrl = (ext = 'png') => {
+        if (!data.creative_type) return DEFAULT_FALLBACK_IMAGE;
+        const buSegment = data.business_unit ? `${data.business_unit}/` : '';
+        const mediaSegment = data.media ? `${data.media}/` : '';
+        let typeName = data.creative_type.trim();
+        if (/\.(png|jpg|jpeg|webp)$/i.test(typeName)) {
+            return `${STORAGE_BASE_URL}/${buSegment}${mediaSegment}${typeName}`;
         }
-        return Math.abs(hash) % randomImages.length;
+        return `${STORAGE_BASE_URL}/${buSegment}${mediaSegment}${typeName}.${ext}`;
     };
 
-    // 이미지 선정을 위한 고유값 (제목이 없으면 매체+클릭수 등으로 조합)
-    const itemName = data.title || data.creative_name || data.ad_name || `${data.media}_${data.clicks}`;
-
-    // Cloud Storage 이미지 경로 구성: 기본 주소 + utm_content
-    const STORAGE_BASE_URL = 'https://storage.googleapis.com/hanssem_hf';
-    // 이미지 이미지 소스 상태 관리 (확장자 jpg/png 대응)
-    const [imgSrc, setImgSrc] = useState(
-        data.creative_type
-            ? `${STORAGE_BASE_URL}/${data.media}/${data.creative_type}.jpg`
-            : randomImages[getSafeIndex(itemName)]
-    );
+    // 이미지 소스 상태 관리 (.png -> .jpg -> 대체 이미지 로드)
+    const [imgSrc, setImgSrc] = useState(() => buildImageUrl('png'));
 
     // props 변경 시 이미지 경로 초기화
     React.useEffect(() => {
-        setImgSrc(
-            data.creative_type
-                ? `${STORAGE_BASE_URL}/${data.business_unit}/${data.media}/${data.creative_type}.jpg`
-                : randomImages[getSafeIndex(itemName)]
-        );
-    }, [data.creative_type, itemName]);
+        const url = buildImageUrl('png');
+        setImgSrc(url);
+        if (onImageResolved) onImageResolved(url);
+    }, [data.creative_type, data.business_unit, data.media]);
 
     const handleImgError = () => {
-        // .jpg 로 로드 실패 시 .png 로 재시도
-        if (imgSrc.endsWith('.jpg') && data.creative_type) {
-            setImgSrc(`${STORAGE_BASE_URL}/${data.business_unit}/${data.media}/${data.creative_type}.png`);
-        } else {
-            // 최종 실패 시 랜덤 이미지로 대체
-            setImgSrc(randomImages[getSafeIndex(itemName)]);
+        let nextUrl = DEFAULT_FALLBACK_IMAGE;
+        if (imgSrc.endsWith('.png') && data.creative_type) {
+            nextUrl = buildImageUrl('jpg');
+        } else if (imgSrc.endsWith('.jpg') && data.creative_type) {
+            nextUrl = buildImageUrl('jpeg');
         }
+        setImgSrc(nextUrl);
+        if (onImageResolved) onImageResolved(nextUrl);
     };
 
     const toggleFlip = (e) => {

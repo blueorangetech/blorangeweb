@@ -14,6 +14,10 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [fetchedData, setFetchedData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [aiAnalysisResult, setAiAnalysisResult] = useState(null);
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [resolvedImgA, setResolvedImgA] = useState('');
+    const [resolvedImgB, setResolvedImgB] = useState('');
 
     useEffect(() => {
         if (!startDate || !endDate) return;
@@ -53,7 +57,9 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
     const commonFilteredData = useMemo(() => {
         return fetchedData.filter(item => {
             const mMedia = media === 'all' || getCanonicalMedia(item.media) === media;
-            const mDevice = device === 'all' || item.device === device;
+            const itemDevice = item.device ? String(item.device).trim().toLowerCase() : '';
+            const targetDevice = String(device).trim().toLowerCase();
+            const mDevice = device === 'all' || itemDevice === targetDevice;
             return mMedia && mDevice;
         });
     }, [fetchedData, media, device]);
@@ -69,6 +75,7 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
                     name,
                     media: item.media,
                     creative_type: item.creative_type,
+                    business_unit: item.business_unit,
                     title: item.title || name,
                     cost: Number(item.cost || item.total_cost || 0),
                     impressions: Number(item.impressions || 0),
@@ -110,11 +117,59 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
     const dataA = aggregatedDataMap.get(materialA);
     const dataB = aggregatedDataMap.get(materialB);
 
+    const handleRunAiAnalysis = async () => {
+        if (!dataA || !dataB) return;
+        setIsAiLoading(true);
+        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+        const STORAGE_BASE_URL = 'https://storage.googleapis.com/hanssem_hf';
+        const buildImgUrl = (item) => {
+            if (!item || !item.creative_type) return '';
+            const buPath = item.business_unit ? `${item.business_unit.trim()}/` : '';
+            let typeName = item.creative_type.trim();
+            if (!/\.(png|jpg|jpeg|webp)$/i.test(typeName)) {
+                typeName = `${typeName}.png`;
+            }
+            return `${STORAGE_BASE_URL}/${buPath}${item.media}/${typeName}`;
+        };
+
+        const imgUrlA = resolvedImgA || buildImgUrl(dataA);
+        const imgUrlB = resolvedImgB || buildImgUrl(dataB);
+
+        const payloadA = { ...dataA, image_url: imgUrlA };
+        const payloadB = { ...dataB, image_url: imgUrlB };
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/ai/compare`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    material_a: payloadA,
+                    material_b: payloadB
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                if (result.status === 'success' && result.data) {
+                    setAiAnalysisResult(result.data);
+                }
+            }
+        } catch (err) {
+            console.error('Fetch AI compare analysis error:', err);
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
+
     const formatCardData = (data) => {
         if (!data) return null;
         return {
             media: data.media || 'Meta',
             creative_type: data.creative_type || data.name,
+            business_unit: data.business_unit,
             title: data.title,
             total_cost: data.cost,
             inflow_cvr: data.inflow,
@@ -143,73 +198,113 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
         }
     };
 
-    const generateMockAIAnalysis = (dataA, dataB) => {
+    const renderAIAnalysis = (dataA, dataB) => {
         if (!dataA || !dataB) {
             return (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', textAlign: 'center', minHeight: '200px' }}>
-                    비교 분석을 위해<br/>두 소재를 모두 선택해주세요.
+                    비교 분석을 위해<br/>두 소재를 선택 후 상단 [분석 실행] 버튼을 눌러주세요.
                 </div>
             );
         }
 
-        const betterCtr = dataA.ctr >= dataB.ctr ? 'A' : 'B';
-        const worseCtr = betterCtr === 'A' ? 'B' : 'A';
-        
-        const betterCvr = dataA.cvr >= dataB.cvr ? 'A' : 'B';
-        const worseCvr = betterCvr === 'A' ? 'B' : 'A';
-        
-        const betterRoas = dataA.roas >= dataB.roas ? 'A' : 'B';
-
-        // 분석 텍스트 생성 로직 (구체적이고 분석적인 리포트 형태)
-        let design = "";
-        let message = "";
-        let performance = "";
-
-        if (betterCtr === betterCvr && betterCvr === betterRoas) {
-            design = `Target ${betterCtr}는 핵심 소구점(USP)을 시각적 중앙에 배치하고 불필요한 배경 요소를 덜어내어 '가시성(Visibility)'을 극대화했습니다. 반면 Target ${worseCtr}는 시각적 요소가 분산되어 있어 사용자가 스크롤을 멈추게 하는(Stop-scrolling) 매력이 상대적으로 부족했습니다.`;
-            message = `Target ${betterCtr}의 카피는 고객의 페인포인트(Pain-point)를 정확히 짚어내는 직관적인 단어 선택과 명확한 콜투액션(CTA) 여백 배치를 통해 클릭에 대한 심리적 장벽을 크게 낮췄습니다.`;
-            performance = `우수한 가독성과 명확한 시각적 계층 구조 덕분에, Target ${betterCtr}는 트래픽(CTR)을 효과적으로 모았을 뿐만 아니라 랜딩 후의 이탈률까지 최소화하여 최종 전환(CVR) 및 수익률(ROAS) 모두에서 Target ${worseCtr}와 큰 격차를 벌렸습니다.`;
-        } else if (betterCtr !== betterCvr) {
-            design = `Target ${betterCtr}는 시선을 사로잡는 강렬한 톤앤매너와 트렌디한 구도를 통해 호기심을 유발했습니다. 반면 Target ${betterCvr}는 다소 정제되고 차분한 라이프스타일 컷과 텍스트 레이아웃을 통해 브랜드의 '신뢰도'를 높이는 방향으로 설계되었습니다.`;
-            message = `Target ${betterCtr}가 '단기적 혜택'이나 '자극적인 후킹(Hooking) 카피'로 즉각적인 반응을 이끌어냈다면, Target ${betterCvr}는 상품의 '기능적 가치와 상세 정보'를 설득력 있게 전달하여 고관여 고객의 지갑을 여는 데 성공했습니다.`;
-            performance = `결론적으로 Target ${betterCtr}는 가벼운 탐색 목적의 유저 클릭(CTR)을 유도하는 데 탁월했으나 구매 의지가 약한 유저가 섞여 전환율은 낮았습니다. 반대로 Target ${betterCvr}는 클릭은 적었으나 텍스트를 읽고 들어온 진성 고객의 비율이 높아 최종 구매 전환율(CVR)과 수익(ROAS) 측면에서 훨씬 가치 있는 기여를 했습니다.`;
-        } else {
-            design = `Target A는 제품 중심의 클로즈업 샷(Close-up)을 활용해 디테일을 강조했고, Target B는 제품이 활용되는 전체적인 공간감(Wide-shot)을 보여주어 소비자에게 인테리어 영감을 제공한 것으로 분석됩니다.`;
-            message = `두 소재 간 메시지의 방향성은 유사하나, 타이포그래피의 크기와 위치 등 미세한 레이아웃 차이가 서로 다른 유저층의 반응을 이끌어냈습니다.`;
-            performance = `클릭 유도(CTR) 및 전환(CVR) 성과가 엇비슷한 상황이므로, 예산 효율성 판단의 최종 기준인 ROAS 지표에서 우위를 점한 Target ${betterRoas}를 메인 소재로 운영하면서 서브 소재로 교체 테스트를 진행하는 것을 권장합니다.`;
+        if (isAiLoading) {
+            return (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#667eea', textAlign: 'center', minHeight: '220px', gap: '14px' }}>
+                    <div style={{
+                        width: '32px',
+                        height: '32px',
+                        border: '3px solid #e2e8f0',
+                        borderTopColor: '#667eea',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }} />
+                    <span style={{ fontWeight: '600', fontSize: '0.95rem' }}>🤖 AI가 소재 이미지와 성과 데이터를 정밀 분석 중입니다...</span>
+                </div>
+            );
         }
+
+        if (!aiAnalysisResult) {
+            return (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#666', textAlign: 'center', minHeight: '200px', gap: '16px' }}>
+                    <p style={{ margin: 0, lineHeight: '1.6' }}>소재 선택이 완료되었습니다.<br />우측 상단의 <strong>[분석 실행]</strong> 버튼을 누르면 AI 분석이 시작됩니다.</p>
+                    <button
+                        onClick={handleRunAiAnalysis}
+                        style={{
+                            background: '#667eea',
+                            color: '#fff',
+                            border: 'none',
+                            padding: '10px 24px',
+                            borderRadius: '10px',
+                            fontSize: '0.95rem',
+                            fontWeight: '700',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                        }}
+                    >
+                        ✨ AI 성과 분석 실행
+                    </button>
+                </div>
+            );
+        }
+
+        const summary = aiAnalysisResult.summary || {
+            ctr_winner: dataA.ctr >= dataB.ctr ? 'A' : 'B',
+            cvr_winner: dataA.cvr >= dataB.cvr ? 'A' : 'B',
+            roas_winner: dataA.roas >= dataB.roas ? 'A' : 'B',
+        };
+
+        const designText = aiAnalysisResult.design || '디자인 분석 결과가 없습니다.';
+        const messageText = aiAnalysisResult.message || '메시지 분석 결과가 없습니다.';
+        const performanceText = aiAnalysisResult.performance || '최적화 제안 결과가 없습니다.';
 
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', overflowY: 'auto' }}>
                 <div style={{ padding: '16px', background: '#fff', borderRadius: '12px', borderLeft: '4px solid #667eea', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
                     <strong style={{ display: 'block', marginBottom: '10px', color: '#4a5568', fontSize: '1.05rem' }}>🏆 승리 지표 요약</strong>
                     <ul style={{ margin: '0', paddingLeft: '20px', color: '#555', lineHeight: '1.8', fontSize: '0.95rem' }}>
-                        <li><strong>클릭 유도 (CTR):</strong> Target {betterCtr} 우세</li>
-                        <li><strong>구매 전환 (CVR):</strong> Target {betterCvr} 우세</li>
-                        <li><strong>예산 효율 (ROAS):</strong> Target {betterRoas} 우세</li>
+                        <li><strong>클릭 유도 (CTR):</strong> Creative {summary.ctr_winner || 'A'} 우세</li>
+                        <li><strong>구매 전환 (CVR):</strong> Creative {summary.cvr_winner || 'A'} 우세</li>
+                        <li><strong>예산 효율 (ROAS):</strong> Creative {summary.roas_winner || 'A'} 우세</li>
                     </ul>
                 </div>
+
+                {/* 🔍 AI 이미지 인식 정밀 검증 (테스트용) */}
+                {(aiAnalysisResult.image_a_description || aiAnalysisResult.image_b_description) && (
+                    <div style={{ padding: '16px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
+                        <h4 style={{ margin: '0 0 10px 0', color: '#166534', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span>🔍</span> AI 이미지 인식 검증 (Test Verification)
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', color: '#14532d', lineHeight: '1.5' }}>
+                            {aiAnalysisResult.image_a_description && (
+                                <div><strong>[Creative A 이미지 인식]:</strong> {aiAnalysisResult.image_a_description}</div>
+                            )}
+                            {aiAnalysisResult.image_b_description && (
+                                <div><strong>[Creative B 이미지 인식]:</strong> {aiAnalysisResult.image_b_description}</div>
+                            )}
+                        </div>
+                    </div>
+                )}
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                     <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                         <h4 style={{ margin: '0 0 10px 0', color: '#1e293b', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span>🎨</span> 디자인 및 레이아웃 분석
                         </h4>
-                        <p style={{ margin: '0', fontSize: '0.95rem', color: '#334155', lineHeight: '1.6' }}>{design}</p>
+                        <p style={{ margin: '0', fontSize: '0.95rem', color: '#334155', lineHeight: '1.6' }}>{designText}</p>
                     </div>
 
                     <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                         <h4 style={{ margin: '0 0 10px 0', color: '#1e293b', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span>✍️</span> 메시지 및 카피라이팅
                         </h4>
-                        <p style={{ margin: '0', fontSize: '0.95rem', color: '#334155', lineHeight: '1.6' }}>{message}</p>
+                        <p style={{ margin: '0', fontSize: '0.95rem', color: '#334155', lineHeight: '1.6' }}>{messageText}</p>
                     </div>
 
                     <div style={{ padding: '16px', background: '#eff6ff', borderRadius: '12px', border: '1px solid #bfdbfe' }}>
                         <h4 style={{ margin: '0 0 10px 0', color: '#1d4ed8', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <span>💡</span> AI 핵심 인사이트 및 최적화 제안
                         </h4>
-                        <p style={{ margin: '0', fontSize: '0.95rem', color: '#1e3a8a', lineHeight: '1.6' }}>{performance}</p>
+                        <p style={{ margin: '0', fontSize: '0.95rem', color: '#1e3a8a', lineHeight: '1.6' }}>{performanceText}</p>
                     </div>
                 </div>
             </div>
@@ -222,7 +317,9 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
 
         fetchedData.forEach(item => {
             if (item.media) mediaSet.add(getCanonicalMedia(item.media));
-            if (item.device) deviceSet.add(item.device);
+            if (item.device && String(item.device).trim()) {
+                deviceSet.add(String(item.device).trim());
+            }
         });
 
         const sortedMedia = Object.keys(mediaLogos);
@@ -232,11 +329,13 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
             }
         });
 
-        const sortedDevice = Array.from(deviceSet).sort();
+        // 기본 디바이스 옵션 (PC, Mobile 등)과 extracted device 값 병합
+        const defaultDevices = ['PC', 'Mobile'];
+        const allDevices = Array.from(new Set([...defaultDevices, ...Array.from(deviceSet)])).sort();
 
         return {
             media: [ { value: 'all', label: '매체' }, ...sortedMedia.map(m => ({ value: m, label: m })) ],
-            device: [ { value: 'all', label: '디바이스' }, ...sortedDevice.map(d => ({ value: d, label: d })) ]
+            device: [ { value: 'all', label: '디바이스' }, ...allDevices.map(d => ({ value: d, label: d })) ]
         };
     }, [fetchedData]);
 
@@ -312,10 +411,18 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
             locale={ko}
             dateFormat="yyyy.MM.dd"
             customInput={
-                <button className="tab-btn date-picker-btn">
-                    {startDate && endDate
-                        ? `${startDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })} - ${endDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })}`
-                        : '기간 조건'}
+                <button className="date-picker-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.75 }}>
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span>
+                        {startDate && endDate
+                            ? `${startDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })} - ${endDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })}`
+                            : '기간 조건'}
+                    </span>
                 </button>
             }
         />
@@ -383,7 +490,7 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
 
                 <div style={{ display: 'flex', gap: '20px', width: '100%', alignItems: 'center', background: '#f8f9fa', padding: '15px 20px', borderRadius: '12px', border: '1px solid #eee', position: 'relative', zIndex: 10 }}>
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '15px' }}>
-                        <strong style={{ color: '#5C9CE6', minWidth: '100px' }}>Target A 소재</strong>
+                        <strong style={{ color: '#5C9CE6', minWidth: '100px' }}>Creative A</strong>
                         <CustomSelect 
                             id="materialA" 
                             value={materialA} 
@@ -396,7 +503,7 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
                     </div>
                     <div style={{ fontWeight: 'bold', color: '#ccc', fontSize: '1.2rem', padding: '0 10px' }}>VS</div>
                     <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '15px', minWidth: 0 }}>
-                        <strong style={{ color: '#F28F43', minWidth: '100px' }}>Target B 소재</strong>
+                        <strong style={{ color: '#F28F43', minWidth: '100px' }}>Creative B</strong>
                         <CustomSelect 
                             id="materialB" 
                             value={materialB} 
@@ -417,22 +524,42 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
                     {/* Left: AB Cards */}
                     <div style={{ flex: 2, display: 'flex', gap: '30px', justifyContent: 'center', alignItems: 'center' }}>
                         <div style={{ flex: 1, maxWidth: '320px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <div style={{ background: '#5C9CE6', color: '#fff', padding: '6px 20px', borderRadius: '20px', fontWeight: 'bold', marginBottom: '15px', fontSize: '0.9rem' }}>Target A</div>
-                            {cardDataA ? <CreativeCard data={cardDataA} /> : <div style={{ padding: '40px', color: '#999', border: '1px dashed #ddd', borderRadius: '12px', width: '100%', textAlign: 'center' }}>소재를 선택해주세요</div>}
+                            <div style={{ background: '#5C9CE6', color: '#fff', padding: '10px 0', width: '100%', textAlign: 'center', borderRadius: '10px', fontWeight: 'bold', marginBottom: '15px', fontSize: '0.95rem', boxShadow: '0 2px 6px rgba(92, 156, 230, 0.2)' }}>Creative A</div>
+                            {cardDataA ? <CreativeCard data={cardDataA} onImageResolved={setResolvedImgA} /> : <div style={{ padding: '40px', color: '#999', border: '1px dashed #ddd', borderRadius: '12px', width: '100%', textAlign: 'center' }}>소재를 선택해주세요</div>}
                         </div>
                         <div style={{ flex: 1, maxWidth: '320px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                            <div style={{ background: '#F28F43', color: '#fff', padding: '6px 20px', borderRadius: '20px', fontWeight: 'bold', marginBottom: '15px', fontSize: '0.9rem' }}>Target B</div>
-                            {cardDataB ? <CreativeCard data={cardDataB} /> : <div style={{ padding: '40px', color: '#999', border: '1px dashed #ddd', borderRadius: '12px', width: '100%', textAlign: 'center' }}>소재를 선택해주세요</div>}
+                            <div style={{ background: '#F28F43', color: '#fff', padding: '10px 0', width: '100%', textAlign: 'center', borderRadius: '10px', fontWeight: 'bold', marginBottom: '15px', fontSize: '0.95rem', boxShadow: '0 2px 6px rgba(242, 143, 67, 0.2)' }}>Creative B</div>
+                            {cardDataB ? <CreativeCard data={cardDataB} onImageResolved={setResolvedImgB} /> : <div style={{ padding: '40px', color: '#999', border: '1px dashed #ddd', borderRadius: '12px', width: '100%', textAlign: 'center' }}>소재를 선택해주세요</div>}
                         </div>
                     </div>
                     
                     {/* Right: AI Analysis */}
                     <div style={{ flex: 1.2, minWidth: '300px', backgroundColor: '#fdfdff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
-                        <h3 style={{ margin: '0 0 20px 0', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', color: '#2d3748' }}>
-                            <span style={{ fontSize: '1.3rem' }}>✨</span> AI 소재 성과 분석
-                        </h3>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', color: '#2d3748' }}>
+                                <span style={{ fontSize: '1.3rem' }}>✨</span> AI 소재 성과 분석
+                            </h3>
+                            <button
+                                onClick={handleRunAiAnalysis}
+                                disabled={!dataA || !dataB || isAiLoading}
+                                style={{
+                                    background: (!dataA || !dataB || isAiLoading) ? '#cbd5e1' : '#667eea',
+                                    color: '#fff',
+                                    border: 'none',
+                                    padding: '8px 16px',
+                                    borderRadius: '8px',
+                                    fontSize: '0.85rem',
+                                    fontWeight: '700',
+                                    cursor: (!dataA || !dataB || isAiLoading) ? 'not-allowed' : 'pointer',
+                                    transition: 'all 0.2s',
+                                    boxShadow: (!dataA || !dataB || isAiLoading) ? 'none' : '0 2px 8px rgba(102, 126, 234, 0.3)'
+                                }}
+                            >
+                                {isAiLoading ? '분석 중...' : '분석 실행'}
+                            </button>
+                        </div>
                         <div style={{ flex: 1, fontSize: '0.95rem' }}>
-                            {generateMockAIAnalysis(dataA, dataB)}
+                            {renderAIAnalysis(dataA, dataB)}
                         </div>
                     </div>
                 </div>
@@ -459,7 +586,7 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
                         <tbody>
                             {dataA && (
                                 <tr>
-                                    <td className="row-key" style={{ fontWeight: 'bold', color: '#5C9CE6' }}>Target A ({dataA.name})</td>
+                                    <td className="row-key" style={{ fontWeight: 'bold', color: '#5C9CE6' }}>Creative A ({dataA.name})</td>
                                     <td>{dataA.impressions.toLocaleString()}</td>
                                     <td>{dataA.clicks.toLocaleString()}</td>
                                     <td>{dataA.ctr.toFixed(2)}%</td>
@@ -476,7 +603,7 @@ function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
                             )}
                             {dataB && (
                                 <tr>
-                                    <td className="row-key" style={{ fontWeight: 'bold', color: '#F28F43' }}>Target B ({dataB.name})</td>
+                                    <td className="row-key" style={{ fontWeight: 'bold', color: '#F28F43' }}>Creative B ({dataB.name})</td>
                                     <td>{dataB.impressions.toLocaleString()}</td>
                                     <td>{dataB.clicks.toLocaleString()}</td>
                                     <td>{dataB.ctr.toFixed(2)}%</td>

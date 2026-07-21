@@ -8,8 +8,6 @@ import { uploadFile } from '../utils/fileUpload'
 function Imweb() {
   const tableauRef = useRef(null)
   const fileInputRef = useRef(null)
-  const [messages, setMessages] = useState([])
-  const [inputValue, setInputValue] = useState('')
   const [selectedDashboard, setSelectedDashboard] = useState('integrated')
   const [uploadedFile, setUploadedFile] = useState(null)
   const [uploadStatus, setUploadStatus] = useState({ type: '', message: '' })
@@ -88,19 +86,6 @@ function Imweb() {
 
     return () => clearInterval(checkTableauLoaded)
   }, [])
-
-  const handleSendMessage = () => {
-    if (inputValue.trim() !== '') {
-      setMessages([...messages, { text: inputValue, timestamp: new Date() }])
-      setInputValue('')
-    }
-  }
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSendMessage()
-    }
-  }
 
   const handleFileUploadClick = () => {
     // 파일 input 초기화 (같은 파일 재선택 가능하도록)
@@ -344,49 +329,17 @@ function Imweb() {
                   <UserManagement customerUrl="imweb" currentUserInfo={currentUserInfo} />
                 </div>
               ) : (
-                <>
-                  <tableau-viz
-                    ref={tableauRef}
-                    id="tableau-viz"
-                    src={dashboardUrls[selectedDashboard]}
-                    width="100%"
-                    height="808"
-                    hide-tabs
-                    toolbar="bottom"
-                  />
-                </>
+                <tableau-viz
+                  ref={tableauRef}
+                  id="tableau-viz"
+                  src={dashboardUrls[selectedDashboard]}
+                  width="100%"
+                  height="808"
+                  hide-tabs
+                  toolbar="bottom"
+                />
               )}
             </div>
-            {selectedDashboard !== 'management' && (
-              <div className="chat-wrapper">
-                <div className="chat-messages">
-                  {messages.map((message, index) => (
-                    <div key={index} className="chat-message" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', margin: '8px 0' }}>
-                      <p style={{ margin: 0 }}>{message.text}</p>
-                      <span className="chat-time">
-                        {message.timestamp.toLocaleTimeString('ko-KR', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="chat-input-container">
-                  <input
-                    type="text"
-                    className="chat-input"
-                    placeholder="메시지를 입력하세요..."
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                  />
-                  <button className="chat-send-btn" onClick={handleSendMessage}>
-                    등록
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </main>

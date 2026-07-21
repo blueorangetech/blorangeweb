@@ -4,6 +4,7 @@ import Imweb from './pages/Imweb';
 import Hanssem from './pages/Hanssem';
 import HanssemHf from './pages/HanssemHf';
 import TestDashboard from './pages/TestDashboard';
+import NotFound from './pages/NotFound';
 
 function TitleUpdater() {
   const location = useLocation();
@@ -16,7 +17,8 @@ function TitleUpdater() {
       '/test': '제안용 대시보드',
     };
 
-    document.title = `${titleMap[location.pathname]} | 블루오렌지 대시보드`;
+    const title = titleMap[location.pathname] || '페이지를 찾을 수 없습니다';
+    document.title = `${title} | 블루오렌지 대시보드`;
   }, [location]);
 
   return null;
@@ -32,6 +34,7 @@ function App() {
         <Route path="/hanssem_hf" element={<HanssemHf />} />
         <Route path="/test" element={<TestDashboard />} />
         <Route path="/" element={<Navigate to="/imweb" />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

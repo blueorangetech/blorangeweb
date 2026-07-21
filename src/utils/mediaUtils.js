@@ -18,6 +18,7 @@ export const getCanonicalMedia = (mediaName) => {
     if (upperName.includes('BUZZVIL')) return '버즈빌';
     if (upperName.includes('RTB')) return 'RTB';
     if (upperName.includes('MOLOCO')) return '몰로코';
+    if (upperName.includes('TG')) return 'TG';
     return mediaName;
 };
 
@@ -35,4 +36,5 @@ export const mediaLogos = {
     '버즈빌': 'https://ci3.googleusercontent.com/mail-sig/AIorK4zJvTYD5XtLg0HqYjS3_fKmYHWYmSiFQaumFJKhM-LBQRrVVN1ZsnZy37S0QLtZsKcHld0-laA',
     'RTB': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Rtb-house-logo-vector.svg/960px-Rtb-house-logo-vector.svg.png?_=20230703223814',
     '몰로코': 'https://cdn.prod.website-files.com/6237fca0466ffd9274a1dbdd/6544ad7675a308ab53b4c354_Moloco_logo_Horiz_Primary%201.webp',
+    'TG': 'https://tgp.widerplanet.com/favicon.ico',
 };

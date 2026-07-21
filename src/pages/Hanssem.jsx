@@ -180,34 +180,60 @@ function Hanssem() {
               </button>
             ))}
 
-            {/* 로그인/로그아웃 버튼 분리 */}
-            <button
-              className="filter-btn auth-btn"
-              onClick={() => {
-                if (isLoggedIn) {
-                  handleLogout();
-                } else {
-                  setIsLoginModalOpen(true);
-                }
-              }}
-            >
-              {isLoggedIn ? (
-                <div className="auth-user-info" style={{ display: 'flex', alignItems: 'center' }}>
-                  <span className="user-name-text" style={{ marginRight: '12px', fontWeight: '600', color: '#111' }}>{userName}님</span>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
+            {/* 유저 프로필 & 로그인/로그아웃 버튼 (리포트 대시보드 폰트 스타일 통일) */}
+            {isLoggedIn ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
+                <span style={{ fontSize: '0.9rem', color: '#555555', fontWeight: '600' }}>
+                  사용자: <span style={{ fontWeight: '700', color: '#111827' }}>{userName}</span>
+                  <span style={{ marginLeft: '6px', padding: '3px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#475569', fontWeight: '700', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+                    {currentUserInfo.role || 'viewer'}
+                  </span>
+                </span>
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    fontSize: '0.85rem',
+                    color: '#dc2626',
+                    backgroundColor: '#ffffff',
+                    padding: '6px 14px',
+                    borderRadius: '8px',
+                    border: '1px solid #fca5a5',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
                   </svg>
                   로그아웃
-                </div>
-              ) : (
-                <div className="auth-btn-content">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '8px' }}>
-                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13 12H3" />
-                  </svg>
-                  로그인 / 마이페이지
-                </div>
-              )}
-            </button>
+                </button>
+              </div>
+            ) : (
+              <button
+                className="filter-btn auth-btn"
+                onClick={() => setIsLoginModalOpen(true)}
+                style={{
+                  backgroundColor: '#667eea',
+                  color: '#ffffff',
+                  fontSize: '0.9rem',
+                  fontWeight: '600',
+                  padding: '8px 18px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  boxShadow: '0 2px 6px rgba(102, 126, 234, 0.3)',
+                  marginLeft: 'auto'
+                }}
+              >
+                로그인
+              </button>
+            )}
           </div>
         </div>
       </section>
