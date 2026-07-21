@@ -10,10 +10,10 @@ export const bqDirectUpload = async ({ file, datasetId, tableId, truncate = true
         formData.append('table_id', tableId);
         formData.append('truncate', truncate.toString());
 
-        const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+        const CSV_UPLOAD_BASE_URL = import.meta.env.VITE_CSV_UPLOAD_BASE_URL || import.meta.env.VITE_API_BASE_URL;
 
         const response = await fetch(
-            `${API_BASE_URL}/csv/upload/direct`,
+            `${CSV_UPLOAD_BASE_URL}/csv/upload/direct`,
             {
                 method: 'POST',
                 body: formData

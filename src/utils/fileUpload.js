@@ -7,10 +7,10 @@ export const uploadFile = async (file, setUploadStatus) => {
       const formData1 = new FormData()
       formData1.append('filename', file.name)
       
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+      const CSV_UPLOAD_BASE_URL = import.meta.env.VITE_CSV_UPLOAD_BASE_URL || import.meta.env.VITE_API_BASE_URL
 
       const urlResponse = await fetch(
-        `${API_BASE_URL}/csv/upload/request-upload-url`,
+        `${CSV_UPLOAD_BASE_URL}/csv/upload/request-upload-url`,
         {
           method: 'POST',
           body: formData1
@@ -46,7 +46,7 @@ export const uploadFile = async (file, setUploadStatus) => {
       formData2.append('blob_name', blob_name)
 
       const processResponse = await fetch(
-        `${API_BASE_URL}/csv/upload/process-uploaded-file`,
+        `${CSV_UPLOAD_BASE_URL}/csv/upload/process-uploaded-file`,
         {
           method: 'POST',
           body: formData2
