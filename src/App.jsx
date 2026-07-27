@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie';
 import Imweb from './pages/Imweb';
 import Hanssem from './pages/Hanssem';
 import HanssemHf from './pages/HanssemHf';
@@ -25,6 +26,20 @@ function TitleUpdater() {
 }
 
 function App() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const urlToken = searchParams.get('auth_token');
+    if (urlToken) {
+      Cookies.set('Authorization', urlToken, { expires: 7 });
+      searchParams.delete('auth_token');
+      const newSearch = searchParams.toString();
+      navigate(`${location.pathname}${newSearch ? '?' + newSearch : ''}`, { replace: true });
+    }
+  }, [location, navigate]);
+
   return (
     <>
       <TitleUpdater />

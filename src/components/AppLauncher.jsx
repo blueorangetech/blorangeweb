@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Cookies from 'js-cookie';
 import logoImage from '../assets/blueorange_logo.png';
 
 function AppLauncher() {
@@ -17,7 +18,10 @@ function AppLauncher() {
     };
   }, []);
 
-  const geoDashboardUrl = import.meta.env.VITE_GEO_DASHBOARD_URL || 'http://localhost:5173';
+  const token = Cookies.get('Authorization');
+  const geoDashboardUrl = token 
+    ? `${import.meta.env.VITE_GEO_DASHBOARD_URL || 'http://localhost:5173'}?auth_token=${token}` 
+    : (import.meta.env.VITE_GEO_DASHBOARD_URL || 'http://localhost:5173');
   const reportDashboardUrl = window.location.origin;
 
   return (
