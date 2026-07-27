@@ -20,8 +20,8 @@ function AppLauncher() {
 
   const token = Cookies.get('Authorization');
   const geoDashboardUrl = token 
-    ? `${import.meta.env.VITE_GEO_DASHBOARD_URL || 'http://localhost:5173'}?auth_token=${token}` 
-    : (import.meta.env.VITE_GEO_DASHBOARD_URL || 'http://localhost:5173');
+    ? `${import.meta.env.VITE_GEO_DASHBOARD_URL || 'http://localhost:5174'}?auth_token=${token}` 
+    : (import.meta.env.VITE_GEO_DASHBOARD_URL || 'http://localhost:5174');
   const reportDashboardUrl = window.location.origin;
 
   return (

@@ -42,26 +42,24 @@ function decodeJwt(token) {
 }
 
 function App() {
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    const urlToken = searchParams.get('auth_token');
-    if (urlToken) {
-      Cookies.set('Authorization', urlToken, { expires: 7 });
-      
-      // Decode user name from JWT token payload and save to UserName cookie
-      const payload = decodeJwt(urlToken);
-      if (payload && payload.name) {
-        Cookies.set('UserName', payload.name, { expires: 7 });
-      }
-      
-      searchParams.delete('auth_token');
-      const newSearch = searchParams.toString();
-      navigate(`${location.pathname}${newSearch ? '?' + newSearch : ''}`, { replace: true });
+  // 동기식 토큰 인터셉트 실행: 자식 컴포넌트가 마운트(checkAuth 실행)되기 전에 즉시 쿠키에 반영합니다.
+  const searchParams = new URLSearchParams(window.location.search);
+  const urlToken = searchParams.get('auth_token');
+  if (urlToken) {
+    Cookies.set('Authorization', urlToken, { expires: 7 });
+    
+    // JWT 토큰 페이로드에서 사용자 이름(name)을 추출해 UserName 쿠키에 즉시 저장
+    const payload = decodeJwt(urlToken);
+    if (payload && payload.name) {
+      Cookies.set('UserName', payload.name, { expires: 7 });
     }
-  }, [location, navigate]);
+    
+    // URL에서 auth_token 파라미터만 제거하고 히스토리 덮어쓰기 (새로고침 시에도 유지되도록)
+    searchParams.delete('auth_token');
+    const newSearch = searchParams.toString();
+    const newUrl = `${window.location.pathname}${newSearch ? '?' + newSearch : ''}`;
+    window.history.replaceState(null, '', newUrl);
+  }
 
   return (
     <>
