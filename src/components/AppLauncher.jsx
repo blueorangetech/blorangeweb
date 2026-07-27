@@ -97,27 +97,25 @@ function AppLauncher() {
                 gap: '12px',
                 padding: '10px 12px',
                 borderRadius: '12px',
-                color: '#334155',
+                color: '#374151',
                 textDecoration: 'none',
                 fontSize: '14px',
                 fontWeight: '600',
                 transition: 'all 0.15s ease'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8fafc';
-                e.currentTarget.style.color = '#0f172a';
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+                e.currentTarget.style.color = '#111827';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#334155';
+                e.currentTarget.style.color = '#374151';
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                <line x1="18" y1="20" x2="18" y2="10" />
-                <line x1="12" y1="20" x2="12" y2="4" />
-                <line x1="6" y1="20" x2="6" y2="14" />
-              </svg>
-              <span style={{ flex: 1 }}>리포트 대시보드</span>
+              <span className="material-symbols-outlined" style={{ color: '#f97316', fontSize: '18px', flexShrink: 0, userSelect: 'none' }}>
+                monitoring
+              </span>
+              <span style={{ flex: 1 }}>Creative Dash Board</span>
             </a>
             
             <a 
@@ -131,29 +129,26 @@ function AppLauncher() {
                 gap: '12px',
                 padding: '10px 12px',
                 borderRadius: '12px',
-                color: '#334155',
+                color: '#374151',
                 textDecoration: 'none',
                 fontSize: '14px',
                 fontWeight: '600',
                 transition: 'all 0.15s ease'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8fafc';
-                e.currentTarget.style.color = '#0f172a';
+                e.currentTarget.style.backgroundColor = '#f3f4f6';
+                e.currentTarget.style.color = '#111827';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = '#334155';
+                e.currentTarget.style.color = '#374151';
               }}
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-                <path d="M11 8v6" />
-                <path d="M8 11h6" />
-              </svg>
-              <span style={{ flex: 1 }}>GEO 대시보드</span>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <span className="material-symbols-outlined" style={{ color: '#2563eb', fontSize: '18px', flexShrink: 0, userSelect: 'none' }}>
+                data_exploration
+              </span>
+              <span style={{ flex: 1 }}>GEO Dash Board</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                 <polyline points="15 3 21 3 21 9"></polyline>
                 <line x1="10" y1="14" x2="21" y2="3"></line>
