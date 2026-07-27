@@ -25,6 +25,22 @@ function TitleUpdater() {
   return null;
 }
 
+function decodeJwt(token) {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window.atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (e) {
+    return null;
+  }
+}
+
 function App() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -34,6 +50,13 @@ function App() {
     const urlToken = searchParams.get('auth_token');
     if (urlToken) {
       Cookies.set('Authorization', urlToken, { expires: 7 });
+      
+      // Decode user name from JWT token payload and save to UserName cookie
+      const payload = decodeJwt(urlToken);
+      if (payload && payload.name) {
+        Cookies.set('UserName', payload.name, { expires: 7 });
+      }
+      
       searchParams.delete('auth_token');
       const newSearch = searchParams.toString();
       navigate(`${location.pathname}${newSearch ? '?' + newSearch : ''}`, { replace: true });
