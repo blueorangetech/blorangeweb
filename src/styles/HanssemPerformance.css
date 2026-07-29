@@ -1,323 +1,323 @@
 /* 한샘 성과 대시보드 전용 스타일 */
 
 .dashboard-section {
-    padding: 1.5rem 0;
+  padding: 1.5rem 0;
 }
 
 .section-header-with-action {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 0 1rem;
-    border-bottom: 2px solid #e0e0e0;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-    gap: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0 1rem;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .section-header-with-action h2 {
-    font-size: 1.2rem;
-    color: #333;
-    font-weight: 700;
+  font-size: 1.2rem;
+  color: #333;
+  font-weight: 700;
 }
 
 .period-btn {
-    padding: 0.5rem 1.2rem;
-    background: #667eea;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  padding: 0.5rem 1.2rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .period-btn:hover {
-    background: #5a6fd6;
-    transform: translateY(-1px);
+  background: #5a6fd6;
+  transform: translateY(-1px);
 }
 
 .dashboard-grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2.5rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
 }
 
 .dashboard-grid-5 {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
 }
 
 .dashboard-card {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
 }
 
 .chart-placeholder,
 .metrics-placeholder,
 .image-placeholder {
-    background: #ffffff;
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 220px;
-    position: relative;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .chart-placeholder {
-    min-height: 350px;
+  min-height: 350px;
 }
 
 .image-placeholder {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    padding: 0;
-    overflow: hidden;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  padding: 0;
+  overflow: hidden;
 }
 
 .image-placeholder img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 성과 지표 테이블 */
 .simple-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
 }
 
 .simple-table th,
 .simple-table td {
-    padding: 0.4rem;
-    text-align: center;
-    border-bottom: 1px solid #f5f5f5;
-    font-size: 0.95rem;
+  padding: 0.4rem;
+  text-align: center;
+  border-bottom: 1px solid #f5f5f5;
+  font-size: 0.95rem;
 }
 
 .simple-table th {
-    color: #999;
-    font-weight: 500;
-    text-transform: uppercase;
-    font-size: 0.8rem;
+  color: #999;
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.8rem;
 }
 
 .simple-table td {
-    color: #444;
-    font-weight: 500;
+  color: #444;
+  font-weight: 500;
 }
 
 /* 우수 소재 카드 */
 .best-creative-card {
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    border: 1px solid #eee;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 
 .best-creative-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
-    border-color: #667eea;
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+  border-color: #667eea;
 }
 
 .best-creative-card:hover .image-placeholder img {
-    transform: scale(1.1);
+  transform: scale(1.1);
 }
 
 .best-creative-title {
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: #222;
-    margin-bottom: 1.5rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #222;
+  margin-bottom: 1.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .metrics-placeholder.best-metrics-container {
-    min-height: auto !important;
-    padding: 1.5rem 2rem !important;
-    border: none !important;
-    background: transparent !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 0.8rem;
-    width: 100%;
-    box-shadow: none !important;
+  min-height: auto !important;
+  padding: 1.5rem 2rem !important;
+  border: none !important;
+  background: transparent !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 0.8rem;
+  width: 100%;
+  box-shadow: none !important;
 }
 
 /* 단순 차트 스타일 */
 .simple-bar-chart {
-    display: flex;
-    align-items: flex-end;
-    gap: 10px;
-    height: 150px;
-    width: 100%;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 150px;
+  width: 100%;
 }
 
 .simple-bar-chart .bar {
-    flex: 1;
-    background: #667eea;
-    border-radius: 4px 4px 0 0;
-    opacity: 0.6;
+  flex: 1;
+  background: #667eea;
+  border-radius: 4px 4px 0 0;
+  opacity: 0.6;
 }
 
 .simple-line-chart {
-    width: 100%;
-    height: 150px;
+  width: 100%;
+  height: 150px;
 }
 
 .line-svg {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 }
 
 
 .chart-footer {
-    padding: 1rem;
-    background: #fdfdfd;
-    text-align: center;
-    font-size: 0.95rem;
-    color: #888;
-    border-top: 1px solid #f0f0f0;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  padding: 1rem;
+  background: #fdfdfd;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #888;
+  border-top: 1px solid #f0f0f0;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .chart-footer:hover {
-    background: #f0f2ff;
-    color: #667eea;
+  background: #f0f2ff;
+  color: #667eea;
 }
 
 /* DatePicker Styles */
 .performance-datepicker-wrapper {
-    position: relative;
+  position: relative;
 }
 
 .react-datepicker-popper {
-    z-index: 1000 !important;
+  z-index: 1000 !important;
 }
 
 .react-datepicker {
-    font-family: inherit !important;
-    border-radius: 12px !important;
-    border: 1px solid #eee !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  font-family: inherit !important;
+  border-radius: 12px !important;
+  border: 1px solid #eee !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
 }
 
 .react-datepicker__header {
-    background-color: #f8f9fa !important;
-    border-bottom: 1px solid #eee !important;
-    border-top-left-radius: 12px !important;
-    border-top-right-radius: 12px !important;
+  background-color: #f8f9fa !important;
+  border-bottom: 1px solid #eee !important;
+  border-top-left-radius: 12px !important;
+  border-top-right-radius: 12px !important;
 }
 
 .react-datepicker__day--selected,
 .react-datepicker__day--in-range,
 .react-datepicker__day--in-selecting-range {
-    background-color: #667eea !important;
-    color: white !important;
+  background-color: #667eea !important;
+  color: white !important;
 }
 
 /* 성능 필터 그룹 스타일 */
 .performance-filter-group {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
 }
 
 .performance-input-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: #f8f9fa;
-    padding: 0.4rem 0.8rem;
-    border-radius: 8px;
-    border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #f8f9fa;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
 }
 
 .performance-input-wrapper label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #666;
-    white-space: nowrap;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
 }
 
 .performance-filter-input {
-    width: 100px;
-    border: none;
-    background: transparent;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #333;
-    text-align: right;
-    outline: none;
+  width: 100px;
+  border: none;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #333;
+  text-align: right;
+  outline: none;
 }
 
 .performance-filter-input::placeholder {
-    font-weight: 400;
-    color: #ccc;
-    font-size: 0.8rem;
+  font-weight: 400;
+  color: #ccc;
+  font-size: 0.8rem;
 }
 
 .filter-unit {
-    font-size: 0.8rem;
-    color: #888;
-    white-space: nowrap;
-    margin-left: 2px;
+  font-size: 0.8rem;
+  color: #888;
+  white-space: nowrap;
+  margin-left: 2px;
 }
 
 .performance-filter-btn {
-    padding: 0.5rem 1.2rem;
-    border-radius: 8px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
 }
 
 .performance-filter-btn.apply {
-    background: #333;
-    color: #fff;
+  background: #333;
+  color: #fff;
 }
 
 .performance-filter-btn.apply:hover {
-    background: #000;
-    transform: translateY(-1px);
+  background: #000;
+  transform: translateY(-1px);
 }
 
 .performance-filter-btn.reset {
-    background: #eee;
-    color: #666;
+  background: #eee;
+  color: #666;
 }
 
 .performance-filter-btn.reset:hover {
-    background: #e0e0e0;
+  background: #e0e0e0;
 }
 
 @media (max-width: 1024px) {
-    .performance-filter-group {
-        width: 100%;
-        justify-content: flex-start;
-        flex-wrap: wrap;
-    }
+  .performance-filter-group {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
 }

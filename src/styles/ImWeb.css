@@ -1,146 +1,162 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background-color: white;
-    color: #213547;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  color: #213547;
 }
 
 /* Main */
 .main {
-    width: 100%;
+  width: 100%;
 }
 
-.main .container {
-    display: flex;
-    flex-direction: row;
+/* 수평 메뉴 섹션 - Hanssem 필터 섹션과 동일한 스타일 */
+.imweb-filter-section {
+  background: #f8f9fa;
+  padding: 1.25rem 0;
 }
 
-.main .container .menu-wrapper {
-    width: 10%;
-    padding-top: 3rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.7rem;
+.imweb-filter-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
-.main .container .menu-item {
-    border: none;
-    border-radius: 8px;
-    text-align: center;
-    padding: 0.8rem;
-    background-color: #f8f9fa;
-    color: black;
-    font-weight: 400;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+.menu-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  background: white;
+  padding: 1.2rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  margin-top: 0;
+  width: 100%;
 }
 
-.main .container .menu-item:hover {
-    background-color: #e2e6ea;
+.menu-item {
+  border: none;
+  border-radius: 8px;
+  text-align: center;
+  padding: 0.8rem 1.8rem;
+  background-color: #eee;
+  color: #666;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 }
 
-.main .container .menu-item:active {
-    background-color: #C365FF;
-    color: white;
+.menu-item:hover {
+  background-color: #e0e0e0;
+  color: #333;
+  transform: translateY(-2px);
 }
 
-.main .container .menu-item.active {
-    background-color: #C365FF;
-    color: white;
-    font-weight: 500;
+.menu-item:active {
+  background-color: #C365FF;
+  color: white;
 }
 
-.main .container .dashboard-wrapper {
-    width: 90%;
-    border-left: 1px solid #e0e0e0;
+.menu-item.active {
+  background-color: #C365FF;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(195, 101, 255, 0.3);
+}
+
+/* 대시보드 영역 - 전체 너비 */
+.dashboard-wrapper {
+  width: 100%;
 }
 
 .main .container .chat-wrapper {
-    width: 15%;
-    background-color: #f8f9fa;
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 100px);
+  width: 15%;
+  background-color: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 100px);
 
 }
 
 /* Chat Styles */
 .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .chat-message {
-    background: white;
-    padding: 0.75rem;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: white;
+  padding: 0.75rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .chat-message p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #333;
-    word-wrap: break-word;
+  margin: 0;
+  font-size: 0.9rem;
+  color: #333;
+  word-wrap: break-word;
 }
 
 .chat-time {
-    display: block;
-    font-size: 0.7rem;
-    color: #888;
-    margin-top: 0.25rem;
+  display: block;
+  font-size: 0.7rem;
+  color: #888;
+  margin-top: 0.25rem;
 }
 
 .chat-input-container {
-    padding: 0.5rem;
-    background: white;
-    border-top: 1px solid #e0e0e0;
-    display: flex;
-    gap: 0.5rem;
+  padding: 0.5rem;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  gap: 0.5rem;
 }
 
 .chat-input {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    outline: none;
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  outline: none;
 }
 
 .chat-input:focus {
-    border-color: #1A6DFF;
+  border-color: #1A6DFF;
 }
 
 .chat-send-btn {
-    padding: 0.5rem 1rem;
-    background: #1A6DFF;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    font-weight: 500;
-    transition: background 0.2s;
+  padding: 0.5rem 1rem;
+  background: #1A6DFF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background 0.2s;
 }
 
 .chat-send-btn:hover {
-    background: #5568d3;
+  background: #5568d3;
 }
 
 .chat-send-btn:active {
-    background: #4451b8;
+  background: #4451b8;
 }
