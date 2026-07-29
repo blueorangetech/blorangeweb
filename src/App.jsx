@@ -16,6 +16,7 @@ function TitleUpdater() {
     '/imweb': '아임웹',
     '/hanssem': '한샘',
     '/hanssem_hf': '한샘 홈퍼니싱',
+    '/playground': '플레이그라운드',
     '/test': '제안용 대시보드',
   };
 
