@@ -1,33 +1,32 @@
 import { useEffect, useRef, useState } from 'react'
 import Cookies from 'js-cookie'
-import { DashboardHeader, Footer, LoginModal, UserManagement } from '../components'
+import { DashboardHeader, Footer, UserManagement, LoginRequiredCard } from '../components'
+import { uploadFile } from '../utils/fileUpload'
+import { useAuth } from '../context/AuthContext'
 import '../styles/ImWeb.css'
 
-import { uploadFile } from '../utils/fileUpload'
-import { checkPageAuth, logoutUser } from '../utils/auth'
 
 function Imweb() {
+  const {
+    isLoggedIn,
+    hasPermission,
+    userName,
+    currentUserInfo,
+    checkAuth,
+    logout,
+    openLoginModal,
+  } = useAuth();
+
   const tableauRef = useRef(null)
   const fileInputRef = useRef(null)
   const [selectedDashboard, setSelectedDashboard] = useState('integrated')
   const [uploadedFile, setUploadedFile] = useState(null)
   const [uploadStatus, setUploadStatus] = useState({ type: '', message: '' })
-  const [isLoggedIn, setIsLoggedIn] = useState(true)
-  const [hasPermission, setHasPermission] = useState(true)
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
-  const [currentUserInfo, setCurrentUserInfo] = useState({ role: '', is_master: false })
-
-  const checkAuth = async () => {
-  // 권한 검사 여부를 페이지별로 설정 (Imweb은 checkPermission: false로 세팅하여 권한 검증 패스)
-  const authResult = await checkPageAuth({ customerPath: 'imweb', checkPermission: false });
-  setIsLoggedIn(authResult.isLoggedIn);
-  setHasPermission(authResult.hasPermission);
-  setCurrentUserInfo(authResult.currentUserInfo);
-  }
 
   useEffect(() => {
-  checkAuth()
-  }, [])
+    // Imweb은 checkPermission: false로 세팅하여 권한 검증 패스
+    checkAuth('imweb', false);
+  }, [checkAuth])
 
   // 대시보드 URL 설정
   const dashboardUrls = {
@@ -68,15 +67,6 @@ function Imweb() {
   }
   }
 
-  const handleLogout = () => {
-  if (window.confirm('로그아웃 하시겠습니까?')) {
-    const resetState = logoutUser()
-    setIsLoggedIn(resetState.isLoggedIn)
-    setHasPermission(resetState.hasPermission)
-    setCurrentUserInfo(resetState.currentUserInfo)
-  }
-  }
-
   const menuItems = [
   { id: 'integrated', label: '통합 대시보드' },
   { id: 'media', label: '매체 별' },
@@ -91,16 +81,18 @@ function Imweb() {
     : []),
   ]
 
+
   return (
   <div className="app">
     <DashboardHeader
     title="데이터 대시보드"
     isLoggedIn={isLoggedIn}
-    userName={Cookies.get('UserName') || ''}
+    userName={userName}
     userRole={currentUserInfo.role}
-    onLogout={handleLogout}
-    onLoginClick={() => setIsLoginModalOpen(true)}
+    onLogout={logout}
+    onLoginClick={openLoginModal}
     />
+
 
     {/* 수평 메뉴 + 업로드 버튼 */}
     <section className="imweb-filter-section">
@@ -160,130 +152,39 @@ function Imweb() {
     </section>
 
     <main className="main">
-    {!isLoggedIn ? (
-      <div className="access-denied-container" style={{
-      padding: '100px 20px',
-      textAlign: 'center',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '24px',
-      width: '100%'
-      }}>
-      <div className="lock-icon" style={{
-        width: '80px',
-        height: '80px',
-        backgroundColor: '#f8f9fa',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#adb5bd',
-        marginBottom: '8px'
-      }}>
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-      </div>
-      <div className="text-content">
-        <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#111', marginBottom: '12px' }}>로그인이 필요한 메뉴입니다</h2>
-        <p style={{ color: '#666', fontSize: '1.1rem', lineHeight: '1.6' }}>
-        임웹 데이터 대시보드 기능은 승인된 관계자만 이용 가능합니다.
-        </p>
-      </div>
-      <button
-        onClick={() => setIsLoginModalOpen(true)}
-        style={{
-        background: '#0a6abf',
-        color: '#fff',
-        padding: '16px 40px',
-        borderRadius: '12px',
-        border: 'none',
-        fontSize: '1rem',
-        fontWeight: '700',
-        cursor: 'pointer',
-        transition: 'all 0.3s',
-        marginTop: '12px',
-        boxShadow: '0 4px 12px rgba(10, 106, 191, 0.2)'
-        }}
-      >
-        로그인하고 계속하기
-      </button>
-      </div>
-    ) : !hasPermission ? (
-      <div className="access-denied-container" style={{
-      padding: '100px 20px',
-      textAlign: 'center',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '24px',
-      width: '100%'
-      }}>
-      <div className="lock-icon" style={{
-        width: '80px',
-        height: '80px',
-        backgroundColor: '#fff1f0',
-        borderRadius: '50%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        color: '#ff4d4f',
-        marginBottom: '8px'
-      }}>
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="15" y1="9" x2="9" y2="15"></line>
-        <line x1="9" y1="9" x2="15" y2="15"></line>
-        </svg>
-      </div>
-      <div className="text-content">
-        <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#111', marginBottom: '12px' }}>접근 권한이 없습니다</h2>
-        <p style={{ color: '#666', fontSize: '1.1rem', lineHeight: '1.6' }}>
-        죄송합니다. 현재 계정으로는 임웹 대시보드에 접근할 수 없습니다.<br />
-        관리자에게 권한을 요청해주세요.
-        </p>
-      </div>
-      </div>
-    ) : (
-      <div className="dashboard-wrapper">
       {selectedDashboard === 'management' ? (
-        <div style={{ padding: '40px 0', background: '#f8f9fa', borderRadius: '24px', width: '100%' }}>
-        <UserManagement customerUrl="imweb" currentUserInfo={currentUserInfo} />
-        </div>
+        isLoggedIn && (currentUserInfo.role === 'master' || currentUserInfo.role === 'admin') ? (
+          <div style={{ padding: '40px 0', background: '#f8f9fa', borderRadius: '24px', width: '100%' }}>
+            <UserManagement customerUrl="imweb" currentUserInfo={currentUserInfo} />
+          </div>
+        ) : (
+          <LoginRequiredCard
+            serviceName="아임웹"
+            customTitle="권한 관리는 로그인 후 가능합니다"
+            customMessage="관리자 권한을 가진 계정으로 로그인해주세요."
+          />
+
+        )
       ) : (
-        <tableau-viz
-        ref={tableauRef}
-        id="tableau-viz"
-        src={dashboardUrls[selectedDashboard]}
-        width="100%"
-        height="808"
-        hide-tabs
-        toolbar="bottom"
-        />
+        <div className="dashboard-wrapper">
+          <tableau-viz
+            ref={tableauRef}
+            id="tableau-viz"
+            src={dashboardUrls[selectedDashboard]}
+            width="100%"
+            height="808"
+            hide-tabs
+            toolbar="bottom"
+          />
+        </div>
       )}
-      </div>
-    )}
     </main>
 
+
     <Footer />
-    <LoginModal
-    isOpen={isLoginModalOpen}
-    onClose={() => setIsLoginModalOpen(false)}
-    onLoginSuccess={(result) => {
-      setIsLoggedIn(true)
-      if (result.name) Cookies.set('UserName', result.name, { expires: 7 });
-      setCurrentUserInfo({
-      role: result.role || '',
-      is_master: result.is_master || result.role === 'master'
-      });
-      setIsLoginModalOpen(false)
-      checkAuth() // 권한 체크를 위해 다시 실행
-    }}
-    />
   </div>
   )
 }
+
 
 export default Imweb

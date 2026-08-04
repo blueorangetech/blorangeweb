@@ -63,9 +63,12 @@
 }
 
 .login-logo {
-  height: 32px;
-  margin-bottom: 16px;
+  height: 44px;
+  max-width: 250px;
+  width: auto;
+  margin-bottom: 8px;
 }
+
 
 .login-header h2 {
   font-size: 24px;

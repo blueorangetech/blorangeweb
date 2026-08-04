@@ -6,5 +6,8 @@ export { default as UserManagement } from './UserManagement';
 export { default as AppLauncher } from './AppLauncher';
 export { default as CreativeStudioView } from './CreativeStudioView';
 export { default as VariationStudioView } from './VariationStudioView';
+export { default as LoginRequiredCard } from './LoginRequiredCard';
+export { default as AccessDeniedCard } from './AccessDeniedCard';
+
 
 

@@ -1,0 +1,77 @@
+/* Playground Dedicated Styles */
+.playground-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Playground Filter & Tab Navigation Section */
+.playground-filter-section {
+  background: #f8f9fa;
+  padding: 1.25rem 24px;
+}
+
+.playground-header-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.playground-filter-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: white;
+  padding: 1.2rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  margin-top: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.playground-filter-btn {
+  padding: 0.8rem 1.8rem;
+  background: #eee;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.playground-filter-btn:hover {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.playground-filter-btn.active {
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+
+/* Feature Info Description Bar */
+.playground-info-bar {
+  margin-top: 12px;
+  padding: 12px 20px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.playground-info-bar strong {
+  color: #1e293b;
+  font-weight: 700;
+}

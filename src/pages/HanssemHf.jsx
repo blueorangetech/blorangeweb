@@ -1,34 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react';
-import Cookies from 'js-cookie';
-import { DashboardHeader, Footer, LoginModal, UserManagement } from '../components';
+import { DashboardHeader, Footer, UserManagement, LoginRequiredCard, AccessDeniedCard } from '../components';
 import { InsightView, PerformanceView, AllMaterialInsightView, ABCompareView } from '../components/hanssem_hf';
 import { bqDirectUpload } from '../utils/bqDirectUpload';
-import { checkPageAuth, logoutUser } from '../utils/auth';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Hanssem.css';
 
 function HanssemHf() {
+  const {
+    isLoggedIn,
+    hasPermission,
+    userName,
+    currentUserInfo,
+    checkAuth,
+    logout,
+    openLoginModal,
+  } = useAuth();
+
   const [activeFilter, setActiveFilter] = useState('insight');
   const [uploadStatus, setUploadStatus] = useState({ type: '', message: '' });
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState(Cookies.get('UserName') || '');
-  const [hasPermission, setHasPermission] = useState(true); // 초기값은 true로 두되 체크 후 변경
   const [startDate, setStartDate] = useState(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
   const [endDate, setEndDate] = useState(new Date());
-  const [currentUserInfo, setCurrentUserInfo] = useState({ role: '', is_master: false });
   const fileInputRef = useRef(null);
 
-  const checkAuth = async () => {
-    const authResult = await checkPageAuth({ customerPath: 'hanssem_hf', checkPermission: true });
-    setIsLoggedIn(authResult.isLoggedIn);
-    setHasPermission(authResult.hasPermission);
-    setUserName(authResult.userName);
-    setCurrentUserInfo(authResult.currentUserInfo);
-  };
-
   useEffect(() => {
-    checkAuth();
-  }, []);
+    checkAuth('hanssem_hf', true);
+  }, [checkAuth]);
 
   const handleFileUploadClick = () => {
     fileInputRef.current?.click();
@@ -46,30 +42,6 @@ function HanssemHf() {
       });
       // 파일 선택기 초기화
       e.target.value = '';
-    }
-  };
-
-  const handleLoginSuccess = (result) => {
-    setIsLoggedIn(true);
-    if (result.name) setUserName(result.name);
-
-    // 즉시 유저 정보 업데이트
-    setCurrentUserInfo({
-      role: result.role || '',
-      is_master: result.is_master || result.role === 'master'
-    });
-
-    setIsLoginModalOpen(false);
-    checkAuth(); // 로그인 성공 직후 권한 체크 다시 실행
-  };
-
-  const handleLogout = () => {
-    if (window.confirm('로그아웃 하시겠습니까?')) {
-      const resetState = logoutUser();
-      setIsLoggedIn(resetState.isLoggedIn);
-      setUserName(resetState.userName);
-      setHasPermission(resetState.hasPermission);
-      setCurrentUserInfo(resetState.currentUserInfo);
     }
   };
 
@@ -95,9 +67,10 @@ function HanssemHf() {
         isLoggedIn={isLoggedIn}
         userName={userName}
         userRole={currentUserInfo.role}
-        onLogout={handleLogout}
-        onLoginClick={() => setIsLoginModalOpen(true)}
+        onLogout={logout}
+        onLoginClick={openLoginModal}
       />
+
 
       {/* 필터 섹션 */}
       <section className="hanssem-filter-section">
@@ -113,7 +86,6 @@ function HanssemHf() {
               </button>
             ))}
 
-            {/* 성과 데이터 업로드 - header-container 우측 끝 */}
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <input
                 type="file"
@@ -156,106 +128,15 @@ function HanssemHf() {
         </div>
       </section>
 
-      {/* 메인 콘텐츠 영역 (컴포넌트 분리) */}
-      {!isLoggedIn && (activeFilter === 'insight' || activeFilter === 'performance' || activeFilter === 'all-material' || activeFilter === 'ab-compare' || activeFilter === 'management') ? (
-        <main className="hanssem-main">
-          <div className="access-denied-container" style={{
-            padding: '100px 20px',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '24px'
-          }}>
-            <div className="lock-icon" style={{
-              width: '80px',
-              height: '80px',
-              backgroundColor: '#f8f9fa',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#adb5bd',
-              marginBottom: '8px'
-            }}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-            </div>
-            <div className="text-content">
-              <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#111', marginBottom: '12px' }}>로그인이 필요한 메뉴입니다</h2>
-              <p style={{ color: '#666', fontSize: '1.1rem', lineHeight: '1.6' }}>
-                한샘 소재 데이터 대시보드의 통합 성과 분석 및 인사이트 기능은<br />
-                승인된 한샘 관계자만 이용 가능합니다.
-              </p>
-            </div>
-            <button
-              onClick={() => setIsLoginModalOpen(true)}
-              style={{
-                background: '#000',
-                color: '#fff',
-                padding: '16px 40px',
-                borderRadius: '12px',
-                border: 'none',
-                fontSize: '1rem',
-                fontWeight: '700',
-                cursor: 'pointer',
-                transition: 'all 0.3s',
-                marginTop: '12px',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = 'translateY(-2px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.15)';
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-              }}
-            >
-              로그인하고 계속하기
-            </button>
-          </div>
-        </main>
-      ) : isLoggedIn && !hasPermission && (activeFilter === 'insight' || activeFilter === 'performance' || activeFilter === 'all-material' || activeFilter === 'ab-compare' || activeFilter === 'management') ? (
-        <main className="hanssem-main">
-          <div className="access-denied-container" style={{
-            padding: '100px 20px',
-            textAlign: 'center',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '24px'
-          }}>
-            <div className="lock-icon" style={{
-              width: '80px',
-              height: '80px',
-              backgroundColor: '#fff1f0',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ff4d4f',
-              marginBottom: '8px'
-            }}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="15" y1="9" x2="9" y2="15"></line>
-                <line x1="9" y1="9" x2="15" y2="15"></line>
-              </svg>
-            </div>
-            <div className="text-content">
-              <h2 style={{ fontSize: '1.8rem', fontWeight: '800', color: '#111', marginBottom: '12px' }}>접근 권한이 없습니다</h2>
-              <p style={{ color: '#666', fontSize: '1.1rem', lineHeight: '1.6' }}>
-                죄송합니다. 현재 계정으로는 이 대시보드에 접근할 수 없습니다.<br />
-                관리자에게 대시보드 접근 권한을 요청해주세요.
-              </p>
-            </div>
-          </div>
-        </main>
+
+      {!isLoggedIn ? (
+        <LoginRequiredCard serviceName="한샘 홈퍼니싱" />
+      ) : !hasPermission ? (
+        <AccessDeniedCard serviceName="한샘 홈퍼니싱" />
       ) : (
+
         <>
+
           {activeFilter === 'insight' && (
             <InsightView
               startDate={startDate}
@@ -304,13 +185,9 @@ function HanssemHf() {
       }
 
       <Footer />
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
-      />
     </div>
   );
 }
+
 
 export default HanssemHf;

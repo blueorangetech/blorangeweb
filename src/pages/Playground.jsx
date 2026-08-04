@@ -1,59 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
-import { DashboardHeader, Footer, LoginModal, CreativeStudioView, VariationStudioView, UserManagement } from '../components';
-import { checkPageAuth, logoutUser } from '../utils/auth';
+import '../styles/Playground.css';
+import { DashboardHeader, Footer, CreativeStudioView, VariationStudioView, UserManagement, LoginRequiredCard, AccessDeniedCard } from '../components';
+import { useAuth } from '../context/AuthContext';
 
 function Playground() {
+  const {
+    isLoggedIn,
+    hasPermission,
+    userName,
+    currentUserInfo,
+    checkAuth,
+    logout,
+    openLoginModal,
+  } = useAuth();
+
   const [activeFilter, setActiveFilter] = useState('creative-studio');
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState(Cookies.get('UserName') || '');
-  const [hasPermission, setHasPermission] = useState(true);
-  const [currentUserInfo, setCurrentUserInfo] = useState({ role: '', is_master: false });
 
-  const checkAuth = async () => {
-    // Playground 페이지 권한 검증 설정
-    const authResult = await checkPageAuth({ customerPath: 'playground', checkPermission: true });
-    setIsLoggedIn(authResult.isLoggedIn);
-    setHasPermission(authResult.hasPermission);
-    setUserName(authResult.userName);
-    setCurrentUserInfo(authResult.currentUserInfo);
-  };
-
-  const handleLoginSuccess = (result) => {
-    setIsLoggedIn(true);
-    if (result.name) setUserName(result.name);
-
-    setCurrentUserInfo({
-      role: result.role || '',
-      is_master: result.is_master || result.role === 'master'
-    });
-
-    setIsLoginModalOpen(false);
-    checkAuth();
-  };
-
-  const handleLogout = () => {
-    if (window.confirm('로그아웃 하시겠습니까?')) {
-      const resetState = logoutUser();
-      setIsLoggedIn(resetState.isLoggedIn);
-      setUserName(resetState.userName);
-      setHasPermission(resetState.hasPermission);
-      setCurrentUserInfo(resetState.currentUserInfo);
-    }
-  };
+  useEffect(() => {
+    checkAuth('playground', true);
+  }, [checkAuth]);
 
   const filterButtons = [
-    { id: 'creative-studio', label: 'AI 소재 제작실' },
-    { id: 'variation-studio', label: '베리에이션 센터' },
+    { id: 'creative-studio', label: 'AI 제품 연출' },
+    { id: 'variation-studio', label: 'AI 배너 양산' },
     ...(currentUserInfo.role === 'master' || currentUserInfo.role === 'admin'
       ? [{ id: 'management', label: '권한 관리' }]
       : []),
   ];
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
 
   return (
     <div className="playground-app">
@@ -67,41 +40,62 @@ function Playground() {
         isLoggedIn={isLoggedIn}
         userName={userName}
         userRole={currentUserInfo.role}
-        onLogout={handleLogout}
-        onLoginClick={() => setIsLoginModalOpen(true)}
+        onLogout={logout}
+        onLoginClick={openLoginModal}
       />
-      <section className="hanssem-filter-section">
-        <div className="header-container">
-          <div className="filter-buttons">
+      <section className="playground-filter-section">
+        <div className="playground-header-container">
+          <div className="playground-filter-buttons">
             {filterButtons.map((filter) => (
               <button
                 key={filter.id}
-                className={`filter-btn ${activeFilter === filter.id ? 'active' : ''}`}
+                className={`playground-filter-btn ${activeFilter === filter.id ? 'active' : ''}`}
                 onClick={() => setActiveFilter(filter.id)}
               >
                 {filter.label}
               </button>
             ))}
           </div>
+
+
+          <div className="playground-info-bar">
+            <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#2563eb' }}>
+              info
+            </span>
+            <span>
+              {activeFilter === 'creative-studio' && (
+                <><strong>AI 제품 연출:</strong> 제품/소재 이미지를 고정한 채 AI 스튜디오 배경 연출, 조명 보정 및 디테일 개선을 수행합니다.</>
+              )}
+              {activeFilter === 'variation-studio' && (
+                <><strong>AI 배너 양산:</strong> 메인 메시지나 시드 이미지를 참고하여 네이버, 메타, 구글, 틱톡, 카카오 등 매체 규격별 배너를 일괄 자동 양산합니다.</>
+              )}
+              {activeFilter === 'management' && (
+                <><strong>권한 관리:</strong> 사용자 계정 승인 및 접근 권한을 통합 관리합니다.</>
+              )}
+            </span>
+          </div>
         </div>
       </section>
 
-      {activeFilter === 'creative-studio' && <CreativeStudioView />}
-      {activeFilter === 'variation-studio' && <VariationStudioView />}
-      {activeFilter === 'management' && isLoggedIn && hasPermission && (
-        <main className="hanssem-main">
-          <div className="section-header" style={{ borderBottom: 'none', textAlign: 'center', padding: '5rem 0' }}>
-            <UserManagement customerUrl="playground" currentUserInfo={currentUserInfo} />
-          </div>
-        </main>
+      {!isLoggedIn ? (
+        <LoginRequiredCard serviceName="Play Ground" />
+      ) : !hasPermission ? (
+        <AccessDeniedCard serviceName="Play Ground" />
+      ) : (
+        <>
+          {activeFilter === 'creative-studio' && <CreativeStudioView />}
+          {activeFilter === 'variation-studio' && <VariationStudioView />}
+          {activeFilter === 'management' && (
+            <main className="hanssem-main">
+              <div className="section-header" style={{ borderBottom: 'none', textAlign: 'center', padding: '5rem 0' }}>
+                <UserManagement customerUrl="playground" currentUserInfo={currentUserInfo} />
+              </div>
+            </main>
+          )}
+        </>
       )}
 
       <Footer />
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
-      />
     </div>
   );
 }

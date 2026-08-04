@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import { AuthProvider } from './context/AuthContext';
 import Imweb from './pages/Imweb';
 import Hanssem from './pages/Hanssem';
 import HanssemHf from './pages/HanssemHf';
@@ -16,7 +17,7 @@ function TitleUpdater() {
     '/imweb': '아임웹',
     '/hanssem': '한샘',
     '/hanssem_hf': '한샘 홈퍼니싱',
-    '/playground': '플레이그라운드',
+    '/playground': 'Play Ground',
     '/test': '제안용 대시보드',
   };
 
@@ -64,19 +65,20 @@ function App() {
   }
 
   return (
-  <>
-    <TitleUpdater />
-    <Routes>
-    <Route path="/imweb" element={<Imweb />} />
-    <Route path="/hanssem" element={<Hanssem />} />
-    <Route path="/hanssem_hf" element={<HanssemHf />} />
-    <Route path="/playground" element={<Playground />} />
-    <Route path="/test" element={<TestDashboard />} />
-    <Route path="/" element={<Navigate to="/imweb" />} />
-    <Route path="*" element={<NotFound />} />
-    </Routes>
-  </>
+    <AuthProvider>
+      <TitleUpdater />
+      <Routes>
+      <Route path="/imweb" element={<Imweb />} />
+      <Route path="/hanssem" element={<Hanssem />} />
+      <Route path="/hanssem_hf" element={<HanssemHf />} />
+      <Route path="/playground" element={<Playground />} />
+      <Route path="/test" element={<TestDashboard />} />
+      <Route path="/" element={<Navigate to="/imweb" />} />
+      <Route path="*" element={<NotFound />} />
+      </Routes>
+    </AuthProvider>
   );
 }
 
 export default App;
+
