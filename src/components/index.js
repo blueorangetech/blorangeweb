@@ -8,6 +8,7 @@ export { default as CreativeStudioView } from './CreativeStudioView';
 export { default as VariationStudioView } from './VariationStudioView';
 export { default as LoginRequiredCard } from './LoginRequiredCard';
 export { default as AccessDeniedCard } from './AccessDeniedCard';
+export { default as ImageLibrary } from './ImageLibrary';
 
 
 

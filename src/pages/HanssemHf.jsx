@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { DashboardHeader, Footer, UserManagement, LoginRequiredCard, AccessDeniedCard } from '../components';
+import { DashboardHeader, Footer, UserManagement, LoginRequiredCard, AccessDeniedCard, ImageLibrary } from '../components';
+
 import { InsightView, PerformanceView, AllMaterialInsightView, ABCompareView } from '../components/hanssem_hf';
 import { bqDirectUpload } from '../utils/bqDirectUpload';
 import { useAuth } from '../context/AuthContext';
@@ -50,10 +51,12 @@ function HanssemHf() {
     { id: 'insight', label: '매체 별 소재 인사이트' },
     { id: 'all-material', label: '통합 소재 대시보드' },
     { id: 'ab-compare', label: 'A/B 비교' },
+    { id: 'hanssem-hf-library', label: '소재 라이브러리' },
     ...(currentUserInfo.role === 'master' || currentUserInfo.role === 'admin'
       ? [{ id: 'management', label: '권한 관리' }]
       : []),
   ];
+
 
   return (
     <div className="hanssem-app">
@@ -169,6 +172,16 @@ function HanssemHf() {
               setEndDate={setEndDate}
             />
           )}
+          {activeFilter === 'hanssem-hf-library' && (
+            <main className="hanssem-main">
+              <ImageLibrary
+                pageName="all"
+                bucketName="hanssem_hf"
+                customTitle="한샘 HF (hanssem_hf) 에셋 라이브러리"
+              />
+            </main>
+          )}
+
           {(activeFilter === 'mypage' || activeFilter === 'management') && isLoggedIn && hasPermission && (
             <main className="hanssem-main">
               <div className="section-header" style={{ borderBottom: 'none', textAlign: 'center', padding: '5rem 0' }}>
