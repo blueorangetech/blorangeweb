@@ -9,6 +9,12 @@ export { default as VariationStudioView } from './VariationStudioView';
 export { default as LoginRequiredCard } from './LoginRequiredCard';
 export { default as AccessDeniedCard } from './AccessDeniedCard';
 export { default as ImageLibrary } from './ImageLibrary';
+export { default as ClientSidebar } from './common/ClientSidebar';
+export { default as CommonTrendView } from './common/TrendView';
+export { default as CommonCompareView } from './common/CompareView';
+
+
+
 
 
 

@@ -8,7 +8,7 @@
 
 .studio-container {
   display: grid;
-  grid-template-columns: 380px 1fr;
+  grid-template-columns: 360px 1fr;
   gap: 24px;
   max-width: 1400px;
   margin: 0 auto;
@@ -1162,4 +1162,33 @@ main.hanssem-main.creative-studio-main {
   max-width: 1400px;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* =====================================================
+   Embedded Mode: 대시보드 viewport-content 안에 삽입될 때
+   100vh 기반 고정 높이를 컨테이너 기준으로 재조정
+   ===================================================== */
+main.hanssem-main.creative-studio-main.embedded {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: unset !important;
+  max-width: 100% !important;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.studio-container.embedded {
+  max-width: 100%;
+  margin: 0;
+  grid-template-columns: 320px 1fr; /* 좌측 패널 축소 → 우측 이미지 영역 최대화 */
+  height: calc(100vh - 118px); /* 헤더(70px) + viewport-content padding top(24) + bottom(24) */
+  min-height: 560px;
+}
+
+/* embedded 모드: glass-card 및 preview-panel 높이 재정의 */
+.studio-container.embedded .glass-card,
+.studio-container.embedded .preview-panel {
+  height: calc(100vh - 118px);
+  min-height: 560px;
 }

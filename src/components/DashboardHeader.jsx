@@ -36,17 +36,17 @@ function DashboardHeader({ title, isLoggedIn, userName, userRole, onLogout, onLo
                 fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
               }}
             >
-              <span style={{ fontSize: '0.9rem', color: '#ccc', fontWeight: '600' }}>
+              <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '600' }}>
                 {' '}
-                <span style={{ fontWeight: '700', color: '#ffffff' }}>{userName}</span>
+                사용자: <span style={{ fontWeight: '700', color: '#0f172a' }}>{userName}</span>
                 {userRole && (
                   <span
                     style={{
                       marginLeft: '6px',
                       padding: '3px 8px',
                       borderRadius: '6px',
-                      background: 'rgba(255,255,255,0.15)',
-                      color: '#ffffff',
+                      background: '#f1f5f9',
+                      color: '#475569',
                       fontWeight: '700',
                       fontSize: '0.75rem',
                       textTransform: 'uppercase',
@@ -59,13 +59,23 @@ function DashboardHeader({ title, isLoggedIn, userName, userRole, onLogout, onLo
 
               <button
                 onClick={onLogout}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#fef2f2';
+                  e.currentTarget.style.borderColor = '#f87171';
+                  e.currentTarget.style.color = '#b91c1c';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.borderColor = '#fca5a5';
+                  e.currentTarget.style.color = '#dc2626';
+                }}
                 style={{
                   fontSize: '0.85rem',
-                  color: '#ffffff',
+                  color: '#dc2626',
                   backgroundColor: 'transparent',
                   padding: '6px 14px',
                   borderRadius: '8px',
-                  border: '1px solid rgba(255,255,255,0.4)',
+                  border: '1px solid #fca5a5',
                   fontWeight: '600',
                   cursor: 'pointer',
                   fontFamily: 'inherit',
@@ -93,8 +103,14 @@ function DashboardHeader({ title, isLoggedIn, userName, userRole, onLogout, onLo
           ) : (
             <button
               onClick={onLoginClick}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#0f172a';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#1e293b';
+              }}
               style={{
-                backgroundColor: '#667eea',
+                backgroundColor: '#1e293b',
                 color: '#ffffff',
                 fontSize: '0.9rem',
                 fontWeight: '600',
@@ -103,7 +119,8 @@ function DashboardHeader({ title, isLoggedIn, userName, userRole, onLogout, onLo
                 border: 'none',
                 cursor: 'pointer',
                 fontFamily: "'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-                boxShadow: '0 2px 6px rgba(102, 126, 234, 0.3)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
+                transition: 'all 0.2s',
               }}
             >
               로그인

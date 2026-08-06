@@ -1,0 +1,577 @@
+/* 상세 성과 비교 전용 스타일 (2 spaces 규정 준수) */
+
+.compare-section {
+  padding: 1.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  width: 100%;
+}
+
+.compare-card-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  border-left: 4px solid #2563eb;
+  padding-left: 0.75rem;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.02em;
+}
+
+/* 필터 제어 패널 */
+.compare-filter-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) !important;
+  gap: 0.75rem;
+}
+
+.filter-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.filter-box label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  outline: none;
+  background-color: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  height: 34px;
+}
+
+.filter-select:focus {
+  border-color: #2563eb;
+}
+
+.compare-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 0.75rem;
+}
+
+.compare-date-picker-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.4rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.action-btn:hover {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.action-btn.primary {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+}
+
+.action-btn.primary:hover {
+  background-color: #1d4ed8;
+}
+
+/* 성과 비교 요약 카드 */
+.comparison-summary-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.comparison-summary-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.comparison-card-header {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.comparison-values {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.comp-val-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.comp-val-row.bold {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.comp-diff-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.comp-diff-row.plus {
+  color: #ef4444;
+}
+
+.comp-diff-row.minus {
+  color: #2563eb;
+}
+
+.comp-diff-row.neutral {
+  color: #64748b;
+}
+
+/* 모달 스타일 */
+.compare-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.6);
+  z-index: 1100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.compare-modal-content {
+  background-color: #ffffff;
+  border-radius: 16px;
+  width: 780px;
+  max-width: 90vw;
+  height: 560px;
+  max-height: 85vh;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.compare-modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.compare-modal-header h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.close-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #64748b;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+}
+
+.close-btn:hover {
+  color: #0f172a;
+}
+
+.compare-modal-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 모달 좌측 셀렉터 영역 */
+.compare-modal-left {
+  flex: 1.2;
+  border-right: 1px solid #e2e8f0;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+}
+
+.search-input-wrapper {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 2.2rem 0.5rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: #2563eb;
+}
+
+.search-icon-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 1.1rem;
+}
+
+.metric-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.metric-group-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.metric-item-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #334155;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+}
+
+.metric-item-checkbox:hover {
+  background-color: #f1f5f9;
+}
+
+.metric-item-checkbox input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: #2563eb;
+}
+
+/* 모달 우측 드래그 순서 제어 영역 */
+.compare-modal-right {
+  flex: 1;
+  padding: 1.25rem;
+  background-color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-y: auto;
+}
+
+.selected-header {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.draggable-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.draggable-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  cursor: grab;
+}
+
+.draggable-item:active {
+  cursor: grabbing;
+  border-color: #2563eb;
+}
+
+.draggable-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.drag-handle {
+  color: #94a3b8;
+  font-weight: bold;
+  cursor: grab;
+  user-select: none;
+}
+
+.drag-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.remove-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: #94a3b8;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.remove-btn:hover {
+  color: #ef4444;
+}
+
+.compare-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* 📥 테이블 가로 텍스트 래핑 방지 및 강제 눕힘 */
+.detail-table th,
+.detail-table td {
+  white-space: nowrap !important;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* PDF 인쇄 시 영역 쪼개짐 방지 */
+.chart-card,
+.table-card,
+.compare-filter-panel,
+.ai-commentary-card {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
+}
+
+/* 우측 사이드바 가로 너비 보장 및 밀림 방지 */
+.overview-right-panel {
+  flex: 1;
+  min-width: 300px;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+}
+
+.ai-commentary-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.overview-layout {
+  align-items: stretch !important;
+}
+
+.comparison-summary-table th,
+.comparison-summary-table td {
+  text-align: center !important;
+}
+
+.chart-container-inner {
+  height: 260px !important;
+}
+
+@media print {
+  .overview-right-panel {
+    position: relative !important;
+    top: 0 !important;
+  }
+}
+
+/* 크리에이티브 대시보드 가로폭 일치화 오버라이드 */
+.hanssem-main,
+.summary-data-table-container {
+  max-width: none !important;
+  width: 100% !important;
+}
+
+.hanssem-main {
+  padding: 0 1rem 3rem !important;
+}
+
+.chart-grid {
+  gap: 1rem !important;
+}
+
+.chart-card.flip-container {
+  height: 620px !important;
+}
+
+/* Side-by-side grid layout for comparison columns */
+.compare-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  width: 100%;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .compare-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.compare-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Collapsible panel header styling */
+.accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #334155;
+  transition: background-color 0.2s ease;
+}
+
+.accordion-header:hover {
+  background-color: #f1f5f9;
+}
+
+.accordion-header .icon {
+  transition: transform 0.2s ease;
+}
+
+.accordion-header .icon.expanded {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 성과 비교 화면 전용 초소형 테이블 스타일 (가로 스크롤 방지 및 한눈에 보기 최적화) */
+.compare-section .detail-table th,
+.compare-section .detail-table td {
+  font-size: 0.72rem !important;
+  padding: 0.4rem 0.35rem !important;
+  letter-spacing: -0.03em;
+}
+
+/* 11대 지표 대조 분석 테이블(최상단)은 조금 더 여유있게 표시 */
+.compare-section .comparison-summary-table th,
+.compare-section .comparison-summary-table td {
+  font-size: 0.78rem !important;
+  padding: 0.5rem 0.6rem !important;
+}
+
+/* 성과 대조 카드 가로폭 및 타이틀 세로 띠 가림 방지 최적화 */
+.compare-section .table-card {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 1.5rem !important;
+  overflow: visible !important;
+}
+
+.compare-section .compare-card-title {
+  display: block !important;
+  position: relative !important;
+  z-index: 10 !important;
+  margin-bottom: 1.5rem !important;
+  padding-left: 0.75rem !important;
+  border-left-width: 4px !important;
+  border-left-style: solid !important;
+}
+
+.compare-section .detail-table-wrapper {
+  position: relative !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  overflow-x: auto !important;
+}
+
+
+

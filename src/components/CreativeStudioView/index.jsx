@@ -6,7 +6,7 @@ import '../../styles/CreativeStudioView.css';
 const SAMPLE_BEFORE_IMAGE = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600&auto=format&fit=crop';
 const SAMPLE_AFTER_IMAGE = 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=600&auto=format&fit=crop';
 
-function CreativeStudioView({ onGoToLibrary }) {
+function CreativeStudioView({ onGoToLibrary, embedded = false }) {
   const [imageUrl, setImageUrl] = useState('');
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState('');
@@ -174,8 +174,8 @@ function CreativeStudioView({ onGoToLibrary }) {
   const currentInputImage = filePreview || imageUrl || SAMPLE_BEFORE_IMAGE;
 
   return (
-    <main className="hanssem-main creative-studio-main">
-      <div className="studio-container">
+    <main className={`hanssem-main creative-studio-main${embedded ? ' embedded' : ''}`}>
+      <div className={`studio-container${embedded ? ' embedded' : ''}`}>
         <StudioControlPanel
           file={file}
           imageUrl={imageUrl}

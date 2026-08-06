@@ -9,7 +9,7 @@ import VariationHeroCard from './VariationHeroCard';
 import VariationDetailModal from './VariationDetailModal';
 import { PLACEMENT_SPECS_MAP, PLACEMENT_GROUPS } from './specs';
 
-function VariationStudioView() {
+function VariationStudioView({ embedded = false }) {
   const [sourceImage, setSourceImage] = useState('');
   const [filePreview, setFilePreview] = useState('');
   const [sourceCopy, setSourceCopy] = useState('');
@@ -151,12 +151,12 @@ function VariationStudioView() {
   };
 
   return (
-    <main className="variation-studio-main">
-      <div className="variation-container">
+    <main className={`variation-studio-main${embedded ? ' embedded' : ''}`}>
+      <div className={`variation-container${embedded ? ' embedded' : ''}`}>
         {/* 좌측 설정 제어판 */}
         <div className="control-panel glass-card">
           <div className="panel-header">
-            <h3>AI 소재 베리에이션 센터</h3>
+            <h3>AI 베리에이션 센터</h3>
             <span className="variation-badge">Variation AI v1</span>
           </div>
 

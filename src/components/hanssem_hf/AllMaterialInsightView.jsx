@@ -3,6 +3,7 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from 'date-fns/locale';
 import '../../styles/HanssemInsight.css';
+import '../../styles/HanssemCompare.css';
 import { CreativeCard } from './';
 import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
 import { chartData } from './common/filterMaps';
@@ -441,10 +442,36 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
 
   return (
     <>
-      <nav className="tab-navigation" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        {/* 상단: 날짜 필터 & 초기화 버튼 */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-          <div className="tab-datepicker-wrapper">
+      <div className="compare-filter-panel" style={{ marginBottom: '2rem' }}>
+        <div className="filter-grid">
+          {filterConfigs.map((config) => (
+            <div className="filter-box" key={config.id}>
+              <label>{config.label}</label>
+              <select
+                className="filter-select"
+                value={selectedFilters[config.id]?.[0] || 'all'}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSelectedFilters(prev => ({
+                    ...prev,
+                    [config.id]: val === 'all' ? ['all'] : [val]
+                  }));
+                }}
+              >
+                <option value="all">전체</option>
+                {config.options.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ))}
+        </div>
+
+        <div className="compare-action-row">
+          <div className="compare-date-picker-box">
+            <span className="control-label" style={{ fontWeight: 700 }}>기간 선택</span>
             <DatePicker
               selectsRange={true}
               startDate={startDate}
@@ -457,113 +484,69 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
               locale={ko}
               dateFormat="yyyy.MM.dd"
               customInput={
-                <button className="date-picker-btn">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, opacity: 0.75 }}>
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                  </svg>
-                  <span>
-                    {startDate && endDate
-                      ? `${startDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })} - ${endDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })}`
-                      : '기간 조건'}
-                  </span>
+                <button className="period-btn" style={{ fontWeight: 700 }}>
+                  {startDate && endDate
+                    ? `${startDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })} - ${endDate.toLocaleDateString('ko-KR', { year: '2-digit', month: '2-digit', day: '2-digit' })}`
+                    : '기간 선택'}
                 </button>
               }
             />
           </div>
-          <button
-            className="reset-btn"
-            onClick={() => {
-              setSelectedFilters({
-                media: ['all'],
-                device: ['all'],
-                ad_type: ['all'],
-                business_unit: ['all'],
-                creative_type: ['all'],
-                landing: ['all'],
-                ad_objective: ['all'],
-                targeting: ['all']
-              });
-              setStartDate(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-              setEndDate(new Date());
-              setOpenDropdown(null);
-              setSortConfig('cpa-asc');
-              handleResetPerformanceFilters();
-            }}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-              <path d="M21 3v5h-5" />
-              <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-              <path d="M8 16H3v5" />
-            </svg>
-            <span>조건 초기화</span>
-          </button>
-        </div>
 
-        {/* 하단: 나머지 드롭다운 필터들 */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', width: '100%' }}>
-          {filterConfigs.map((config) => (
-            <div key={config.id} className="custom-dropdown" style={{ flex: 1 }}>
-              <button
-                className="dropdown-toggle tab-dropdown-btn"
-                onClick={() => toggleDropdown(config.id)}
-                style={{ width: '100%' }}
-              >
-                <span className="dropdown-label">
-                  {getDropdownLabel(config.id, config.label)}
-                </span>
-                <span className={`arrow ${openDropdown === config.id ? 'open' : ''}`}>▼</span>
-              </button>
-
-              {openDropdown === config.id && (
-                <ul className="dropdown-menu multi-select">
-                  <li className="dropdown-search" style={{ padding: '8px', cursor: 'default' }} onClick={(e) => e.stopPropagation()}>
-                    <input
-                      type="text"
-                      placeholder={`${config.label} 검색...`}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '8px',
-                        boxSizing: 'border-box',
-                        border: '1px solid #ddd',
-                        borderRadius: '6px',
-                        fontSize: '0.9rem',
-                        outline: 'none'
-                      }}
-                    />
-                  </li>
-                  {searchQuery === '' && (
-                    <li className={selectedFilters[config.id].includes('all') ? 'active' : ''} onClick={() => handleFilterSelect(config.id, 'all')}>
-                      <div className="checkbox">{selectedFilters[config.id].includes('all') ? '✓' : ''}</div>
-                      <span>전체</span>
-                    </li>
-                  )}
-                  {config.options
-                    .filter(option => option.toLowerCase().includes(searchQuery.toLowerCase()))
-                    .map(option => (
-                      <li key={option} className={selectedFilters[config.id].includes(option) ? 'active' : ''} onClick={() => handleFilterSelect(config.id, option)}>
-                        <div className="checkbox" style={{ marginTop: option.includes('(') ? '4px' : '0' }}>
-                          {selectedFilters[config.id].includes(option) ? '✓' : ''}
-                        </div>
-                        <span className="option-text">{formatFilterLabel(option, config.id)}</span>
-                      </li>
-                    ))}
-                  {config.options.filter(option => option.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
-                    <li style={{ padding: '10px', textAlign: 'center', color: '#999', cursor: 'default' }} onClick={(e) => e.stopPropagation()}>
-                      검색 결과가 없습니다
-                    </li>
-                  )}
-                </ul>
-              )}
-            </div>
-          ))}
+          <div className="btn-group">
+            <button
+              className="action-btn"
+              onClick={async () => {
+                if (isExporting || isFullLoading) {
+                  if (isFullLoading) alert('데이터 로딩 중입니다.');
+                  return;
+                }
+                setIsExporting(true);
+                try {
+                  const exportData = [...filteredData];
+                  exportData.sort((a, b) => {
+                    const dA = a.date || '';
+                    const dB = b.date || '';
+                    return String(dA).localeCompare(String(dB));
+                  });
+                  const headers = ['날짜', '소재유형', '카테고리', '타게팅', '주 메시지', '서브 메시지', '소재 고유명', '소진비용', '노출', '클릭', '총 사용자', '주문 건수', '주문 금액'];
+                  const rows = exportData.map(item => [
+                    `"${item.date || ''}"`,
+                    `"${item.creative_type || ''}"`,
+                    `"${item.landing || ''}"`,
+                    `"${item.targeting || ''}"`,
+                    `"${item.utm_content_3 || ''}"`,
+                    `"${item.utm_content_4 || ''}"`,
+                    `"${item.utm_content_5 || ''}"`,
+                    item.cost || item.total_cost || 0,
+                    item.impressions || 0,
+                    item.clicks || 0,
+                    item.total_users || item.users || 0,
+                    item.total_orders || item.orders || 0,
+                    item.total_revenue || item.revenue || 0
+                  ]);
+                  const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+                  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                  const link = document.createElement('a');
+                  const url = URL.createObjectURL(blob);
+                  link.setAttribute('href', url);
+                  link.setAttribute('download', `Material_Insight_Data_${new Date().toISOString().slice(0, 10)}.csv`);
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                } finally {
+                  setIsExporting(false);
+                }
+              }}
+            >
+              엑셀 추출
+            </button>
+            <button className="action-btn" onClick={() => resetAllFilters()}>
+              조건 초기화
+            </button>
+          </div>
         </div>
-      </nav>
+      </div>
 
       {/* 필터와 메인 영역 사이: 데이터 테이블 추가 */}
       <div className="summary-data-table-container">

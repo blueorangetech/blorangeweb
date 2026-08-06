@@ -41,7 +41,7 @@ function StudioControlPanel({
   return (
     <div className="control-panel glass-card">
       <div className="panel-header">
-        <h3>AI 소재 제작 옵션</h3>
+        <h3>AI 제품 연출</h3>
         <span className="api-badge">PhotoRoom API v2</span>
       </div>
 
