@@ -2,29 +2,14 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from 'date-fns/locale';
-import '../../styles/HanssemInsight.css';
-import '../../styles/HanssemCompare.css';
-import { CreativeCard } from './';
-import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
+import '../../../styles/HanssemInsight.css';
+import '../../../styles/HanssemCompare.css';
+import CreativeCard from './CreativeCard';
+import { getCanonicalMedia, mediaLogos } from '../../../utils/mediaUtils';
 import { chartData } from './common/filterMaps';
+import { fetchDataTable, fetchMediaMaterialData } from '../../../api/hanssemHfApi';
 
-const MEDIA_LIKE_MAP = {
-  "네이버": ['%GFA%', '%NAVER%'],
-  "당근": ['%당근%'],
-  "카카오": ['%카카오%', '%KAKAO%'],
-  "메타": ['%메타%', '%META%', '%FACEBOOK%', '%INSTAGRAM%'],
-  "구글": ['%구글%', '%GOOGLE%'],
-  "유튜브": ['%유튜브%', '%YOUTUBE%'],
-  "크리테오": ['%크리테오%', '%CRITEO%'],
-  "페이코": ['%PAYCO%'],
-  "애플": ['%APPLE%'],
-  "에피어": ['%APPIER%'],
-  "버즈빌": ['%BUZZVIL%'],
-  "RTB": ['%RTB%'],
-  "몰로코": ['%MOLOCO%']
-};
-
-function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }) {
+function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
   // 필터 상태 통합 관리
   const [selectedFilters, setSelectedFilters] = useState({
     media: ['all'],
@@ -52,6 +37,36 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
 
   const [realData, setRealData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: '', type: 'success' });
+    }, 3000);
+  };
+
+  const resetAllFilters = () => {
+    setSelectedFilters({
+      media: ['all'],
+      device: ['all'],
+      ad_type: ['all'],
+      business_unit: ['all'],
+      creative_type: ['all'],
+      landing: ['all'],
+      ad_objective: ['all'],
+      targeting: ['all']
+    });
+    setOpenDropdown(null);
+    setSortConfig('roas-desc');
+    setOrderFilterInput(0);
+    setCostFilterInput(0);
+    setRoasFilterInput(0);
+    setAppliedOrder(0);
+    setAppliedCost(0);
+    setAppliedRoas(0);
+  };
 
   // 무한 스크롤 관련 상태
   const [offset, setOffset] = useState(0);
@@ -73,72 +88,48 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
   const [tablePage, setTablePage] = useState(1);
   const ITEMS_PER_PAGE = 5;
 
+  // 탭 메뉴 데이터 및 옵션은 동적 생성을 위해 아래 필터링된 데이터 부분으로 이동했습니다.
+
   const [realTableData, setRealTableData] = useState([]);
 
-  // 날짜 및 필터가 바뀌면 데이터와 오프셋 초기화
+  // 날짜가 바뀌면 데이터와 오프셋 초기화
   useEffect(() => {
     setRealData([]);
     setRealTableData([]);
     setOffset(0);
     setHasMore(true);
-  }, [startDate, endDate, selectedFilters, appliedCost, appliedRoas, appliedOrder]);
+  }, [startDate, endDate]);
 
   // 데이터 테이블용 Fetch
   useEffect(() => {
     if (!startDate || !endDate) return;
 
-    const fetchTableData = async () => {
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-      const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      };
-
-      const startStr = formatDate(startDate);
-      const endStr = formatDate(endDate);
-
+    const fetchTableDataFn = async () => {
       const validFilters = {};
       Object.entries(selectedFilters).forEach(([key, values]) => {
         if (!values.includes('all')) {
-          if (key === 'media') {
-            const likeValues = [];
-            values.forEach(v => {
-              const v_upper = v.toUpperCase();
-              if (MEDIA_LIKE_MAP[v_upper]) {
-                likeValues.push(...MEDIA_LIKE_MAP[v_upper]);
-              } else {
-                likeValues.push(`%${v_upper}%`);
-              }
-            });
-            validFilters[key] = { op: 'like', values: likeValues };
-          } else {
-            validFilters[key] = values;
-          }
+          validFilters[key] = values;
         }
       });
-      const filterParam = Object.keys(validFilters).length > 0 ? `&filters=${encodeURIComponent(JSON.stringify(validFilters))}` : '';
-      const perfParams = `&min_cost=${appliedCost}&min_roas=${appliedRoas}&min_distribution=${appliedOrder}`;
 
       try {
-        // all_material이 아닌 data_table에 대해서도, 공통이므로 data_table로 테이블 조회 (필요 시 report_type을 상황에 맞게)
-        // 만약 전체 통합 소재 대시보드의 데이터 테이블용 별도 쿼리(예: all_data_table)가 없다면 data_table을 사용합니다.
-        const response = await fetch(
-          `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem_hf&table_id=performance_raw&report_type=data_table&start_date=${startStr}&end_date=${endStr}${filterParam}${perfParams}`
-        );
-        if (response.ok) {
-          const result = await response.json();
-          setRealTableData(Array.isArray(result) ? result : (result.data || []));
-        }
+        const data = await fetchDataTable({
+          startDate,
+          endDate,
+          filters: Object.keys(validFilters).length > 0 ? validFilters : undefined,
+          minCost: appliedCost || undefined,
+          minRoas: appliedRoas || undefined,
+          minDistribution: appliedOrder || undefined,
+        });
+        setRealTableData(data);
       } catch (error) {
         console.error('Table Data Fetch Error:', error);
       }
     };
 
-    fetchTableData();
+    fetchTableDataFn();
   }, [startDate, endDate, selectedFilters, appliedCost, appliedRoas, appliedOrder]);
+
 
   // 실제 데이터 가져오기 (useEffect)
   useEffect(() => {
@@ -146,53 +137,28 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
 
     const fetchBigQueryData = async () => {
       setIsLoading(true);
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-      const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      };
-
-      const startStr = formatDate(startDate);
-      const endStr = formatDate(endDate);
-
       const validFilters = {};
       Object.entries(selectedFilters).forEach(([key, values]) => {
         if (!values.includes('all')) {
-          if (key === 'media') {
-            const likeValues = [];
-            values.forEach(v => {
-              const v_upper = v.toUpperCase();
-              if (MEDIA_LIKE_MAP[v_upper]) {
-                likeValues.push(...MEDIA_LIKE_MAP[v_upper]);
-              } else {
-                likeValues.push(`%${v_upper}%`);
-              }
-            });
-            validFilters[key] = { op: 'like', values: likeValues };
-          } else {
-            validFilters[key] = values;
-          }
+          validFilters[key] = values;
         }
       });
-      const filterParam = Object.keys(validFilters).length > 0 ? `&filters=${encodeURIComponent(JSON.stringify(validFilters))}` : '';
-      const perfParams = `&min_cost=${appliedCost}&min_roas=${appliedRoas}&min_distribution=${appliedOrder}`;
 
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem_hf&table_id=performance_raw&report_type=all_material&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}${filterParam}${perfParams}`
-        );
-        if (!response.ok) throw new Error('데이터 로드 실패');
-        const result = await response.json();
-
-        const newData = Array.isArray(result) ? result : (result.data || []);
+        const newData = await fetchMediaMaterialData({
+          startDate,
+          endDate,
+          limit: LIMIT,
+          offset,
+          filters: Object.keys(validFilters).length > 0 ? validFilters : undefined,
+          minCost: appliedCost || undefined,
+          minRoas: appliedRoas || undefined,
+          minDistribution: appliedOrder || undefined,
+        });
 
         if (newData.length < LIMIT) {
           setHasMore(false);
         }
-
         setRealData(prev => offset === 0 ? newData : [...prev, ...newData]);
       } catch (error) {
         console.error('BigQuery Fetch Error:', error);
@@ -204,6 +170,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
 
     fetchBigQueryData();
   }, [startDate, endDate, offset, selectedFilters, appliedCost, appliedRoas, appliedOrder]);
+
 
   // 스크롤 감지 (Intersection Observer)
   const lastElementRef = useRef();
@@ -223,7 +190,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
     return () => observer.disconnect();
   }, [isLoading, hasMore]);
 
-  // 필서 선택 처리
+  // 필터 선택 처리
   const handleFilterSelect = (type, value) => {
     setSelectedFilters(prev => {
       if (value === 'all') {
@@ -262,7 +229,18 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
 
   // 동적 구성: 각 필드 고유값 추출
   const filterOptions = useMemo(() => {
-    const options = {
+    const sortedOptions = {
+      media: [],
+      device: [],
+      ad_type: [],
+      business_unit: [],
+      creative_type: [],
+      landing: [],
+      ad_objective: [],
+      targeting: []
+    };
+
+    const sets = {
       media: new Set(),
       device: new Set(),
       ad_type: new Set(),
@@ -273,37 +251,34 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
       targeting: new Set()
     };
 
-    displayData.forEach(item => {
-      if (item.media) options.media.add(getCanonicalMedia(item.media));
-      if (item.device) options.device.add(item.device);
-      if (item.ad_type) options.ad_type.add(item.ad_type);
-      if (item.business_unit) options.business_unit.add(item.business_unit);
-      if (item.creative_type) options.creative_type.add(item.creative_type);
-      if (item.landing) options.landing.add(item.landing);
-      if (item.ad_objective) options.ad_objective.add(item.ad_objective);
-      if (item.targeting) options.targeting.add(item.targeting);
+    const dataForOptions = realTableData.length > 0 ? realTableData : chartData;
+    dataForOptions.forEach(item => {
+      if (item.media) sets.media.add(getCanonicalMedia(item.media));
+      if (item.device) sets.device.add(item.device);
+      if (item.ad_type) sets.ad_type.add(item.ad_type);
+      if (item.business_unit) sets.business_unit.add(item.business_unit);
+      if (item.creative_type) sets.creative_type.add(item.creative_type);
+      if (item.landing) sets.landing.add(item.landing);
+      if (item.ad_objective) sets.ad_objective.add(item.ad_objective);
+      if (item.targeting) sets.targeting.add(item.targeting);
     });
 
-    const sortedOptions = {
-      media: Object.keys(mediaLogos), // 매체는 기존 로고 기준도 유지
-      device: Array.from(options.device).sort(),
-      ad_type: Array.from(options.ad_type).sort(),
-      business_unit: Array.from(options.business_unit).sort(),
-      creative_type: Array.from(options.creative_type).sort(),
-      landing: Array.from(options.landing).sort(),
-      ad_objective: Array.from(options.ad_objective).sort(),
-      targeting: Array.from(options.targeting).sort()
-    };
+    Object.keys(sets).forEach(key => {
+      sortedOptions[key] = Array.from(sets[key]).sort();
+    });
 
-    // 데이터에 있는 매체 중 로고맵에 없는 매체도 추가 (옵셔널)
-    Array.from(options.media).forEach(m => {
-      if (!sortedOptions.media.includes(m)) {
-        sortedOptions.media.push(m);
-      }
+    const logos = Object.keys(mediaLogos);
+    sortedOptions.media.sort((a, b) => {
+      const idxA = logos.indexOf(a);
+      const idxB = logos.indexOf(b);
+      if (idxA === -1 && idxB === -1) return a.localeCompare(b);
+      if (idxA === -1) return 1;
+      if (idxB === -1) return -1;
+      return idxA - idxB;
     });
 
     return sortedOptions;
-  }, [displayData]);
+  }, [realTableData]);
 
   const filterConfigs = useMemo(() => [
     { id: 'media', label: '매체', options: filterOptions.media },
@@ -317,13 +292,30 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
   ], [filterOptions]);
 
   const filteredData = useMemo(() => {
-    let data = displayData;
+    let data = displayData.filter(item => {
+      const matchesMedia = selectedFilters.media.includes('all') || selectedFilters.media.includes(getCanonicalMedia(item.media));
+      const matchesDevice = selectedFilters.device.includes('all') || selectedFilters.device.includes(item.device);
+      const matchesAdType = selectedFilters.ad_type.includes('all') || selectedFilters.ad_type.includes(item.ad_type);
+      const matchesBusinessUnit = selectedFilters.business_unit.includes('all') || selectedFilters.business_unit.includes(item.business_unit);
+      const matchesCreativeType = selectedFilters.creative_type.includes('all') || selectedFilters.creative_type.includes(item.creative_type);
+      const matchesLanding = selectedFilters.landing.includes('all') || selectedFilters.landing.includes(item.landing);
+      const matchesAdObjective = selectedFilters.ad_objective.includes('all') || selectedFilters.ad_objective.includes(item.ad_objective);
+      const matchesTargeting = selectedFilters.targeting.includes('all') || selectedFilters.targeting.includes(item.targeting);
 
-    // 데이터 정렬 로직
+      const matchesMinOrder = Number(item.total_orders || item.orders || 0) >= appliedOrder;
+      const matchesMinCost = Number(item.total_cost || item.cost || 0) >= appliedCost;
+
+      const costVal = Number(item.total_cost || item.cost || 0);
+      const revenueVal = Number(item.total_revenue || item.revenue || 0);
+      const itemRoas = costVal > 0 ? (revenueVal / costVal) * 100 : 0;
+      const matchesMinRoas = itemRoas >= appliedRoas;
+
+      return matchesMedia && matchesDevice && matchesAdType && matchesBusinessUnit && matchesCreativeType && matchesLanding && matchesAdObjective && matchesTargeting && matchesMinOrder && matchesMinCost && matchesMinRoas;
+    });
+
     const sorted = [...data].sort((a, b) => {
       const [field, order] = sortConfig.split('-');
-      
-      // 호환성을 위한 정렬 필드 매핑
+
       const getVal = (obj, fieldKey) => {
         if (fieldKey === 'cost') return parseFloat(obj.total_cost || obj.cost || 0);
         if (fieldKey === 'orders') return parseFloat(obj.total_orders || obj.orders || 0);
@@ -339,7 +331,6 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
       const valA = getVal(a, field);
       const valB = getVal(b, field);
 
-      // 0은 항상 맨 뒤로 보냄 (오름차순/내림차순 공통)
       if (valA === 0 && valB !== 0) return 1;
       if (valA !== 0 && valB === 0) return -1;
       if (valA === 0 && valB === 0) return 0;
@@ -352,12 +343,36 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
     });
 
     return sorted;
-  }, [displayData, sortConfig]);
+  }, [displayData, selectedFilters, appliedOrder, appliedCost, appliedRoas, sortConfig]);
+
+  // 테이블용 필터 적용된 데이터 계산
+  const filteredTableData = useMemo(() => {
+    return realTableData.filter(item => {
+      const matchesMedia = selectedFilters.media.includes('all') || selectedFilters.media.includes(getCanonicalMedia(item.media));
+      const matchesDevice = selectedFilters.device.includes('all') || selectedFilters.device.includes(item.device);
+      const matchesAdType = selectedFilters.ad_type.includes('all') || selectedFilters.ad_type.includes(item.ad_type);
+      const matchesBusinessUnit = selectedFilters.business_unit.includes('all') || selectedFilters.business_unit.includes(item.business_unit);
+      const matchesCreativeType = selectedFilters.creative_type.includes('all') || selectedFilters.creative_type.includes(item.creative_type);
+      const matchesLanding = selectedFilters.landing.includes('all') || selectedFilters.landing.includes(item.landing);
+      const matchesAdObjective = selectedFilters.ad_objective.includes('all') || selectedFilters.ad_objective.includes(item.ad_objective);
+      const matchesTargeting = selectedFilters.targeting.includes('all') || selectedFilters.targeting.includes(item.targeting);
+
+      const matchesMinOrder = Number(item.total_orders || item.orders || 0) >= appliedOrder;
+      const matchesMinCost = Number(item.total_cost || item.cost || 0) >= appliedCost;
+
+      const costVal = Number(item.total_cost || item.cost || 0);
+      const revenueVal = Number(item.total_revenue || item.revenue || 0);
+      const itemRoas = costVal > 0 ? (revenueVal / costVal) * 100 : 0;
+      const matchesMinRoas = itemRoas >= appliedRoas;
+
+      return matchesMedia && matchesDevice && matchesAdType && matchesBusinessUnit && matchesCreativeType && matchesLanding && matchesAdObjective && matchesTargeting && matchesMinOrder && matchesMinCost && matchesMinRoas;
+    });
+  }, [realTableData, selectedFilters, appliedOrder, appliedCost, appliedRoas]);
 
   // 테이블 요약 데이터 계산 로직
   const summaryTableData = useMemo(() => {
     const aggr = {};
-    realTableData.forEach(item => {
+    filteredTableData.forEach(item => {
       // 그룹 단위: 날짜
       // (BigQuery 등에서 받은 날짜가 YYYY-MM-DD 문자열을 가지도록 앞 10자리만 절삭)
       const dateStr = item.date ? String(item.date).substring(0, 10) : '해당없음';
@@ -403,7 +418,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
         ctr, cpc, consult_cvr, consult_cpa, dist_cvr, dist_cpa, dist_rate, inflow_cvr, purchase_cvr, roas, atv
       };
     }).sort((a, b) => b.key.localeCompare(a.key)); // 날짜(key) 기준 최신순 정렬
-  }, [realTableData]);
+  }, [filteredData]);
 
   // 테이블 데이터 페이징 처리
   useEffect(() => {
@@ -497,8 +512,8 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
             <button
               className="action-btn"
               onClick={async () => {
-                if (isExporting || isFullLoading) {
-                  if (isFullLoading) alert('데이터 로딩 중입니다.');
+                if (isExporting || isLoading) {
+                  if (isLoading) showToast('데이터 로딩 중입니다.', 'error');
                   return;
                 }
                 setIsExporting(true);
@@ -509,15 +524,17 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
                     const dB = b.date || '';
                     return String(dA).localeCompare(String(dB));
                   });
-                  const headers = ['날짜', '소재유형', '카테고리', '타게팅', '주 메시지', '서브 메시지', '소재 고유명', '소진비용', '노출', '클릭', '총 사용자', '주문 건수', '주문 금액'];
+                  const headers = ['날짜', '매체', '디바이스', '광고유형', '사업부/기획전', '소재분류', '랜딩', '광고목표', '타게팅', '소진비용', '노출', '클릭', '총 사용자', '주문 건수', '주문 금액'];
                   const rows = exportData.map(item => [
                     `"${item.date || ''}"`,
+                    `"${item.media || ''}"`,
+                    `"${item.device || ''}"`,
+                    `"${item.ad_type || ''}"`,
+                    `"${item.business_unit || ''}"`,
                     `"${item.creative_type || ''}"`,
                     `"${item.landing || ''}"`,
+                    `"${item.ad_objective || ''}"`,
                     `"${item.targeting || ''}"`,
-                    `"${item.utm_content_3 || ''}"`,
-                    `"${item.utm_content_4 || ''}"`,
-                    `"${item.utm_content_5 || ''}"`,
                     item.cost || item.total_cost || 0,
                     item.impressions || 0,
                     item.clicks || 0,
@@ -530,7 +547,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
                   const link = document.createElement('a');
                   const url = URL.createObjectURL(blob);
                   link.setAttribute('href', url);
-                  link.setAttribute('download', `Material_Insight_Data_${new Date().toISOString().slice(0, 10)}.csv`);
+                  link.setAttribute('download', `Media_Insight_Data_${new Date().toISOString().slice(0, 10)}.csv`);
                   document.body.appendChild(link);
                   link.click();
                   document.body.removeChild(link);
@@ -699,8 +716,31 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
           {!hasMore && realData.length > 0 && <div style={{ color: '#999' }}>모든 데이터를 불러왔습니다.</div>}
         </div>
       </main>
+
+      {toast.show && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: toast.type === 'error' ? '#ef4444' : '#10b981',
+          color: '#ffffff',
+          padding: '12px 24px',
+          borderRadius: '8px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontWeight: 'bold',
+          fontSize: '0.95rem'
+        }}>
+          <span>{toast.type === 'error' ? '⚠️' : '✓'}</span>
+          <span>{toast.message}</span>
+        </div>
+      )}
     </>
   );
 }
 
-export default AllMaterialInsightView;
+export default InsightView;

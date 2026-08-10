@@ -1,56 +1,48 @@
 import React, { useState } from 'react';
-import { getCanonicalMedia, mediaLogos } from '../../utils/mediaUtils';
+import { getCanonicalMedia, mediaLogos } from '../../../utils/mediaUtils';
 
-function CreativeCard({ data }) {
+function CreativeCard({ data, onImageResolved }) {
   const [isFlipped, setIsFlipped] = useState(false);
 
 
   const canonicalMedia = getCanonicalMedia(data.media);
 
-  // 대체 이미지
-  const randomImages = [
-    'https://upload.wikimedia.org/wikipedia/commons/7/7b/%ED%95%9C%EC%83%98_%EB%A1%9C%EA%B3%A0.jpg',
-  ];
+  // 설정 가능한 대체 이미지
+  const DEFAULT_FALLBACK_IMAGE = import.meta.env.VITE_DEFAULT_FALLBACK_IMAGE || 'https://upload.wikimedia.org/wikipedia/commons/7/7b/%ED%95%9C%EC%83%98_%EB%A1%9C%EA%B3%A0.jpg';
 
-  // 제목 기반 고정 랜덤 인덱스 생성
-  const getSafeIndex = (str) => {
-    const target = str || "";
-    let hash = 0;
-    for (let i = 0; i < target.length; i++) {
-      hash = target.charCodeAt(i) + ((hash << 5) - hash);
+  // Cloud Storage 이미지 경로 구성
+  const STORAGE_BASE_URL = 'https://storage.googleapis.com/hanssem_hf';
+
+  const buildImageUrl = (ext = 'png') => {
+    if (!data.creative_type) return DEFAULT_FALLBACK_IMAGE;
+    const buSegment = data.business_unit ? `${data.business_unit}/` : '';
+    const mediaSegment = data.media ? `${data.media}/` : '';
+    let typeName = data.creative_type.trim();
+    if (/\.(png|jpg|jpeg|webp)$/i.test(typeName)) {
+      return `${STORAGE_BASE_URL}/${buSegment}${mediaSegment}${typeName}`;
     }
-    return Math.abs(hash) % randomImages.length;
+    return `${STORAGE_BASE_URL}/${buSegment}${mediaSegment}${typeName}.${ext}`;
   };
 
-  // 이미지 선정을 위한 고유값 (제목이 없으면 매체+클릭수 등으로 조합)
-  const itemName = data.title || data.creative_name || data.ad_name || `${data.media}_${data.clicks}`;
-
-  // Cloud Storage 이미지 경로 구성: 기본 주소 + utm_content
-  const STORAGE_BASE_URL = 'https://storage.googleapis.com/hanssem_rh/';
-  // 이미지 이미지 소스 상태 관리 (확장자 jpg/png 대응)
-  const [imgSrc, setImgSrc] = useState(
-    data.utm_content
-      ? `${STORAGE_BASE_URL}${data.utm_content_5}.jpg`
-      : (data.img || randomImages[getSafeIndex(itemName)])
-  );
+  // 이미지 소스 상태 관리 (.png -> .jpg -> 대체 이미지 로드)
+  const [imgSrc, setImgSrc] = useState(() => buildImageUrl('png'));
 
   // props 변경 시 이미지 경로 초기화
   React.useEffect(() => {
-    setImgSrc(
-      data.utm_content
-        ? `${STORAGE_BASE_URL}${data.utm_content_5}.jpg`
-        : (data.img || randomImages[getSafeIndex(itemName)])
-    );
-  }, [data.utm_content, data.img, itemName]);
+    const url = buildImageUrl('png');
+    setImgSrc(url);
+    if (onImageResolved) onImageResolved(url);
+  }, [data.creative_type, data.business_unit, data.media]);
 
   const handleImgError = () => {
-    // .jpg 로 로드 실패 시 .png 로 재시도
-    if (imgSrc.endsWith('.jpg') && data.utm_content_5) {
-      setImgSrc(`${STORAGE_BASE_URL}${data.utm_content_5}.png`);
-    } else {
-      // 최종 실패 시 랜덤 이미지로 대체
-      setImgSrc(randomImages[getSafeIndex(itemName)]);
+    let nextUrl = DEFAULT_FALLBACK_IMAGE;
+    if (imgSrc.endsWith('.png') && data.creative_type) {
+      nextUrl = buildImageUrl('jpg');
+    } else if (imgSrc.endsWith('.jpg') && data.creative_type) {
+      nextUrl = buildImageUrl('jpeg');
     }
+    setImgSrc(nextUrl);
+    if (onImageResolved) onImageResolved(nextUrl);
   };
 
   const toggleFlip = (e) => {
@@ -87,24 +79,28 @@ function CreativeCard({ data }) {
               </div>
             )}
             <h3 className="creative-title" title={data.media || data.creative_name}>
-              {data.media || data.creative_name || data.utm_content_5 || '소재 정보 없음'}
+              {data.media || data.creative_name || '소재 정보 없음'}
             </h3>
             <div className="metrics-summary">
               <div className="metric-item">
-                <span className="label">상담신청</span>
-                <span className="value">{formatInt(data.consultation)} 건</span>
+                <span className="label">광고비</span>
+                <span className="value">{formatInt(data.total_cost)} 원</span>
               </div>
               <div className="metric-item">
-                <span className="label">배분수</span>
-                <span className="value">{formatInt(data.distribution)} 건</span>
+                <span className="label">유입 전환율</span>
+                <span className="value">{formatDecimal(data.inflow_cvr)} %</span>
               </div>
               <div className="metric-item">
-                <span className="label">배분 CVR</span>
-                <span className="value">{formatDecimal(data.cvr)} %</span>
+                <span className="label">주문 건수</span>
+                <span className="value">{formatInt(data.total_orders)} 건</span>
               </div>
               <div className="metric-item">
-                <span className="label">배분 CPA</span>
-                <span className="value highlighting">{formatInt(data.cpa)} 원</span>
+                <span className="label">구매 CVR</span>
+                <span className="value highlighting">{formatDecimal(data.purchase_cvr)} %</span>
+              </div>
+              <div className="metric-item">
+                <span className="label">ROAS</span>
+                <span className="value highlighting">{formatInt(data.roas)} %</span>
               </div>
             </div>
           </div>
@@ -121,8 +117,8 @@ function CreativeCard({ data }) {
           </div>
           <div className="back-content">
             <div className="detail-row">
-              <span>소재 고유명</span>
-              <strong>{data.utm_content_5}</strong>
+              <span>소재명</span>
+              <strong>{data.creative_type}</strong>
             </div>
             <div className="detail-row">
               <span>노출수</span>
@@ -137,45 +133,33 @@ function CreativeCard({ data }) {
               <strong>{formatDecimal(data.ctr)} %</strong>
             </div>
             <div className="detail-row">
-              <span>광고비</span>
-              <strong>{formatInt(data.cost)} 원</strong>
-            </div>
-            <div className="detail-row">
               <span>CPC</span>
               <strong>{formatInt(data.cpc)} 원</strong>
             </div>
             <div className="detail-row">
-              <span>상담신청</span>
-              <strong>{formatInt(data.consultation)} 건</strong>
+              <span>광고비</span>
+              <strong>{formatInt(data.total_cost)} 원</strong>
             </div>
             <div className="detail-row">
-              <span>배분수</span>
-              <strong>{formatInt(data.distribution)} 건</strong>
+              <span>유입 전환율</span>
+              <strong>{formatDecimal(data.inflow_cvr)} %</strong>
             </div>
             <div className="detail-row">
-              <span>배분 CVR</span>
-              <strong>{formatDecimal(data.cvr)} %</strong>
+              <span>주문 건수</span>
+              <strong>{formatInt(data.total_orders)} 건</strong>
             </div>
             <div className="detail-row">
-              <span>배분률</span>
-              <strong>{formatDecimal(data.distribution_cvr)} %</strong>
+              <span>주문 금액</span>
+              <strong>{formatInt(data.total_revenue)} 원</strong>
             </div>
             <div className="detail-row">
-              <span>배분 CPA</span>
-              <strong>{formatInt(data.cpa)} 원</strong>
-            </div>
-            <div className="detail-row">
-              <span>확정건수</span>
-              <strong>{formatInt(data.confirm)} 건</strong>
-            </div>
-            <div className="detail-row">
-              <span>확정률</span>
-              <strong>{formatDecimal(data.confirm_cvr)} %</strong>
+              <span>CVR</span>
+              <strong>{formatDecimal(data.purchase_cvr)} %</strong>
             </div>
             <div className="detail-divider"></div>
-            <div className="detail-row  highlight">
-              <span>확정 CPA</span>
-              <strong>{formatInt(data.confirm_cpa)} 원</strong>
+            <div className="detail-row highlight">
+              <span>ROAS</span>
+              <strong>{formatInt(data.roas)} %</strong>
             </div>
           </div>
           <div className="chart-footer" onClick={toggleFlip}>

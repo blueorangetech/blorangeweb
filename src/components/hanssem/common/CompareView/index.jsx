@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import '../../styles/HanssemPerformance.css';
-import '../../styles/HanssemCompare.css';
+import '../../../../styles/HanssemPerformance.css';
+import '../../../../styles/HanssemCompare.css';
 
-// 📂 하위 컴포넌트 임포트
-import CompareFilterSection from './compare/CompareFilterSection';
-import CompareChartCard from './compare/CompareChartCard';
-import CompareDetailTable from './compare/CompareDetailTable';
-import ColumnEditorModal from './compare/ColumnEditorModal';
+// 하위 컴포넌트 임포트
+import CompareFilterSection from './CompareFilterSection';
+import CompareChartCard from './CompareChartCard';
+import CompareDetailTable from './CompareDetailTable';
+import ColumnEditorModal from './ColumnEditorModal';
+import * as hanssemApi from '../../../../api/hanssemApi';
+import * as hanssemHfApi from '../../../../api/hanssemHfApi';
 
 // 데이터 포맷 유틸리티
 const formatInt = (val) => Math.round(val || 0).toLocaleString('ko-KR');
@@ -95,9 +97,7 @@ const downloadCSV = (headers, rows, filename) => {
 };
 
 function CommonCompareView({ datasetId, startDate, endDate, setStartDate, setEndDate }) {
-  // -----------------------------------------------------
   // 📅 기간 선택 상태
-  // -----------------------------------------------------
   const startDate1 = startDate;
   const endDate1 = endDate;
   const setStartDate1 = setStartDate;
@@ -140,7 +140,7 @@ function CommonCompareView({ datasetId, startDate, endDate, setStartDate, setEnd
   const [isLoading1, setIsLoading1] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
 
-  // 기본 노출할 열 설정 (여기에서 키를 추가/제거하여 기본값을 쉽게 바꿀 수 있습니다)
+  // 기본 노출할 열 설정
   const DEFAULT_VISIBLE_KEYS = useMemo(() => {
     return datasetId === 'hanssem_hf'
       ? ['cost', 'impressions', 'clicks', 'ctr', 'cpc', 'orders', 'revenue', 'roas']
@@ -165,21 +165,10 @@ function CommonCompareView({ datasetId, startDate, endDate, setStartDate, setEnd
     const fetchData1 = async () => {
       if (!startDate1 || !endDate1) return;
       setIsLoading1(true);
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-      const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      };
-
+      const api = datasetId === 'hanssem_hf' ? hanssemHfApi : hanssemApi;
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/search/bigquery/date?dataset_id=${datasetId}&table_id=performance_raw&report_type=media_material_for_csv&start_date=${formatDate(startDate1)}&end_date=${formatDate(endDate1)}`
-        );
-        const result = await res.json();
-        setRawData1(Array.isArray(result) ? result : (result.data || []));
+        const data = await api.fetchMaterialForCsv({ startDate: startDate1, endDate: endDate1 });
+        setRawData1(data);
       } catch (error) {
         console.error('Target 1 fetch error:', error);
       } finally {
@@ -194,21 +183,10 @@ function CommonCompareView({ datasetId, startDate, endDate, setStartDate, setEnd
     const fetchData2 = async () => {
       if (!startDate2 || !endDate2) return;
       setIsLoading2(true);
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-      const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      };
-
+      const api = datasetId === 'hanssem_hf' ? hanssemHfApi : hanssemApi;
       try {
-        const res = await fetch(
-          `${API_BASE_URL}/search/bigquery/date?dataset_id=${datasetId}&table_id=performance_raw&report_type=media_material_for_csv&start_date=${formatDate(startDate2)}&end_date=${formatDate(endDate2)}`
-        );
-        const result = await res.json();
-        setRawData2(Array.isArray(result) ? result : (result.data || []));
+        const data = await api.fetchMaterialForCsv({ startDate: startDate2, endDate: endDate2 });
+        setRawData2(data);
       } catch (error) {
         console.error('Target 2 fetch error:', error);
       } finally {

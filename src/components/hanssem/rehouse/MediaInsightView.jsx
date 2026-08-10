@@ -2,29 +2,40 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from 'date-fns/locale';
-import '../../styles/HanssemInsight.css';
-import '../../styles/HanssemCompare.css';
-import { CreativeCard } from './';
-import { categoryMap, targetingMap, placementMap, chartData } from './common/filterMaps';
-import InsightSummaryTable from './common/InsightSummaryTable';
-import InsightPerformanceFilter from './common/InsightPerformanceFilter';
+import '../../../styles/HanssemInsight.css';
+import '../../../styles/HanssemCompare.css';
+import CreativeCard from './CreativeCard';
+import { getCanonicalMedia, mediaLogos } from '../../../utils/mediaUtils';
+import { categoryMap, targetingMap, placementMap, chartData } from './filterMaps';
+import InsightSummaryTable from './InsightSummaryTable';
+import InsightPerformanceFilter from './InsightPerformanceFilter';
 import { useInsightData } from './hooks/useInsightData';
 
 const initialFilters = {
-  creative_name: ['all'],
+  media: ['all'],
+  media_detail: ['all'],
+  classification: ['all'],
+  placement: ['all'],
+  category: ['all'],
   explore: ['all'],
   main_copy: ['all'],
-  sub_copy: ['all']
+  sub_copy: ['all'],
+  creative_name: ['all'],
 };
 
 const filterMappings = {
-  creative_name: { field: 'utm_content_5' },
+  media: { field: 'media', transform: getCanonicalMedia },
+  media_detail: { field: 'media_detail' },
+  classification: { field: 'classification' },
+  placement: { field: 'utm_content_2', map: placementMap },
+  category: { field: 'utm_content_1' },
   explore: { field: 'utm_content_8', map: targetingMap },
   main_copy: { field: 'utm_content_3' },
-  sub_copy: { field: 'utm_content_4' }
+  sub_copy: { field: 'utm_content_4' },
+  creative_name: { field: 'utm_content_5' }
 };
 
-function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }) {
+function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
   const [isExporting, setIsExporting] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null);
 
@@ -38,7 +49,7 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
     appliedDistribution, appliedCost,
     handleApplyPerformanceFilters, handleResetPerformanceFilters,
     sortConfig, setSortConfig, resetAllFilters
-  } = useInsightData('all_material', startDate, endDate, initialFilters, filterMappings, chartData);
+  } = useInsightData('media_material', startDate, endDate, initialFilters, filterMappings, chartData);
 
   const filterConfigs = useMemo(() => {
     const getOptions = (key, defaultOptions) => {
@@ -51,8 +62,13 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
     };
 
     return [
-      { id: 'creative_name', label: '소재 고유명', options: getOptions('creative_name') },
+      { id: 'classification', label: '집행 구분', options: getOptions('classification') },
+      { id: 'media', label: '매체', options: getOptions('media', Object.keys(mediaLogos)) },
+      { id: 'media_detail', label: '매체 상세', options: getOptions('media_detail') },
       { id: 'explore', label: '타게팅', options: getOptions('explore', Object.keys(targetingMap)) },
+      { id: 'placement', label: '소재 유형', options: getOptions('placement', Object.keys(placementMap)) },
+      { id: 'category', label: '카테고리', options: getOptions('category') },
+      { id: 'creative_name', label: '소재 고유명', options: getOptions('creative_name') },
       { id: 'main_copy', label: '주 메시지', options: getOptions('main_copy') },
       { id: 'sub_copy', label: '서브 메시지', options: getOptions('sub_copy') },
     ];
@@ -61,19 +77,22 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
   const summaryTableData = useMemo(() => {
     const aggr = {};
     fullFilteredData.forEach(item => {
-      const creativeStr = item.utm_content_5 || '기타';
-      if (!aggr[creativeStr]) {
-        aggr[creativeStr] = {
-          key: creativeStr, cost: 0, impressions: 0, clicks: 0,
+      const mediaStr = item.media || '기타';
+      const placementStr = item.utm_content_2 ? item.utm_content_2.toUpperCase() : '';
+      const groupKey = placementStr ? `${mediaStr} ${placementStr}` : mediaStr;
+
+      if (!aggr[groupKey]) {
+        aggr[groupKey] = {
+          key: groupKey, cost: 0, impressions: 0, clicks: 0,
           consultations: 0, distributions: 0, confirms: 0
         };
       }
-      aggr[creativeStr].cost += Number(item.cost || 0);
-      aggr[creativeStr].impressions += Number(item.impressions || 0);
-      aggr[creativeStr].clicks += Number(item.clicks || 0);
-      aggr[creativeStr].consultations += Number(item.consultation || 0);
-      aggr[creativeStr].distributions += Number(item.distribution || 0);
-      aggr[creativeStr].confirms += Number(item.confirm || 0);
+      aggr[groupKey].cost += Number(item.cost || 0);
+      aggr[groupKey].impressions += Number(item.impressions || 0);
+      aggr[groupKey].clicks += Number(item.clicks || 0);
+      aggr[groupKey].consultations += Number(item.consultation || 0);
+      aggr[groupKey].distributions += Number(item.distribution || 0);
+      aggr[groupKey].confirms += Number(item.confirm || 0);
     });
 
     return Object.values(aggr).map(row => {
@@ -163,42 +182,24 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
                     const dB = b.date?.value || b.date || '';
                     return String(dA).localeCompare(String(dB));
                   });
-                  const headers = [
-                    '날짜', '소재 고유명', '타게팅', '주 메시지', '서브 메시지',
-                    '소진비용', '노출수', '클릭수', '상담신청', '배분', '확정건수'
-                  ];
+                  const headers = ['날짜', '매체', '매체 상세', '집행 구분', '소재 유형', '카테고리', '타게팅', '주 메세지', '서브 메세지', '소재 고유명', '소진비용', '노출수', '클릭수', '상담신청', '배분', '확정건수'];
                   const rows = exportData.map(item => {
                     let dateStr = '';
                     if (item.date) {
                       const rawDate = typeof item.date === 'object' && item.date.value ? item.date.value : String(item.date);
                       dateStr = rawDate.substring(0, 10);
                     }
-                    return [
-                      `"${dateStr}"`,
-                      `"${item.utm_content_5 || ''}"`,
-                      `"${item.utm_content_8 || ''}"`,
-                      `"${item.utm_content_3 || ''}"`,
-                      `"${item.utm_content_4 || ''}"`,
-                      item.cost || 0,
-                      item.impressions || 0,
-                      item.clicks || 0,
-                      item.consultation || 0,
-                      item.distribution || 0,
-                      item.confirm || 0
-                    ];
+                    return [`"${dateStr}"`, `"${item.media || ''}"`, `"${item.media_detail || ''}"`, `"${item.classification || ''}"`, `"${item.utm_content_2 || ''}"`, `"${item.utm_content_1 || ''}"`, `"${item.utm_content_8 || ''}"`, `"${item.utm_content_3 || ''}"`, `"${item.utm_content_4 || ''}"`, `"${item.utm_content_5 || ''}"`, item.cost || 0, item.impressions || 0, item.clicks || 0, item.consultation || 0, item.distribution || 0, item.confirm || 0];
                   });
                   const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
                   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                   const link = document.createElement('a');
                   const url = URL.createObjectURL(blob);
                   link.setAttribute('href', url);
-                  link.setAttribute('download', `Material_Insight_Data_${new Date().toISOString().slice(0, 10)}.csv`);
+                  link.setAttribute('download', `Media_Insight_Data_${new Date().toISOString().slice(0, 10)}.csv`);
                   document.body.appendChild(link);
                   link.click();
                   document.body.removeChild(link);
-                } catch (error) {
-                  console.error("Excel Export Error: ", error);
-                  alert("엑셀 데이터 추출 중 오류가 발생했습니다.");
                 } finally {
                   setIsExporting(false);
                 }
@@ -246,4 +247,4 @@ function AllMaterialInsightView({ startDate, endDate, setStartDate, setEndDate }
   );
 }
 
-export default AllMaterialInsightView;
+export default InsightView;

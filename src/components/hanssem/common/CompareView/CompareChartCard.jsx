@@ -35,7 +35,7 @@ export default function CompareChartCard({
               <YAxis yAxisId="left" orientation="left" stroke={chartConfig.barColor} fontSize={11} axisLine={false} tickLine={false} />
               <YAxis yAxisId="right" orientation="right" stroke={chartConfig.lineColor} fontSize={11} axisLine={false} tickLine={false} unit={datasetId === 'hanssem_hf' ? '%' : ''} />
               <Tooltip
-                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                contentStyle={{fontSize: '14px', borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                 formatter={(value, name) => {
                   if (name === chartConfig.lineLabel) {
                     return [datasetId === 'hanssem_hf' ? formatPercent(value) : formatWon(value), name];
@@ -43,7 +43,7 @@ export default function CompareChartCard({
                   return [value.toLocaleString('ko-KR') + '건', name];
                 }}
               />
-              <Legend wrapperStyle={{ paddingTop: '10px' }} />
+              <Legend wrapperStyle={{fontSize: '14px', paddingTop: '10px' }} />
               <Bar yAxisId="left" dataKey={chartConfig.barKey} name={chartConfig.barLabel} fill={chartConfig.barColor} radius={[4, 4, 0, 0]} maxBarSize={20} />
               <Line yAxisId="right" type="monotone" dataKey={chartConfig.lineKey} name={chartConfig.lineLabel} stroke={chartConfig.lineColor} strokeWidth={2.5} dot={{ r: 4 }} />
             </ComposedChart>

@@ -8,7 +8,8 @@ const MENU_STRUCTURE = [
     icon: 'monitoring',
     subItems: [
       { id: 'report-overview', label: 'Overview' },
-      { id: 'report-detail', label: '상세 성과 비교' }
+      { id: 'report-detail', label: '상세 성과 비교' },
+      { id: 'report-chat', label: 'Data Chat' }
     ]
   },
   {
@@ -29,7 +30,7 @@ const MENU_STRUCTURE = [
     icon: 'pie_chart',
     subItems: [
       { id: 'mediamix-campaign', label: '캠페인/매체별 성과' },
-      { id: 'mediamix-target', label: '카테고리/타겟 성과' },
+      { id: 'mediamix-target', label: '미디어믹스 점검' },
       { id: 'mediamix-simulation', label: 'AI 시뮬레이션' }
     ]
   },

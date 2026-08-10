@@ -1,0 +1,508 @@
+/* 한샘 미디어믹스 전용 스타일 (2 spaces 규정 준수) */
+
+.mediamix-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+/* 필터 패널 */
+.mediamix-filter-panel {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.mediamix-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.mediamix-filter-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mediamix-filter-box label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.mediamix-filter-select {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background-color: #f8fafc;
+  color: #1e293b;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.mediamix-filter-select:hover {
+  background-color: #ffffff;
+  border-color: #94a3b8;
+}
+
+.mediamix-filter-select:focus {
+  border-color: #2563eb;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.mediamix-action-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 16px;
+}
+
+.mediamix-left-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mediamix-date-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mediamix-date-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.mediamix-datepicker-wrapper {
+  position: relative;
+}
+
+.mediamix-datepicker-input {
+  padding: 8px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  width: 210px;
+  text-align: center;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.mediamix-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mediamix-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mediamix-btn-primary {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: 1px solid #2563eb;
+}
+
+.mediamix-btn-primary:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.mediamix-btn-secondary {
+  background-color: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.mediamix-btn-secondary:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+/* 그리드 레이아웃 */
+.mediamix-dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1200px) {
+  .mediamix-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mediamix-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.mediamix-card-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 테이블 스타일 */
+.mediamix-table-wrapper {
+  overflow-x: auto;
+  margin-top: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.mediamix-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+  font-size: 0.85rem;
+}
+
+.mediamix-table th,
+.mediamix-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.mediamix-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+}
+
+.mediamix-table td:first-child,
+.mediamix-table th:first-child {
+  text-align: left;
+  font-weight: 600;
+  background-color: #f8fafc;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.mediamix-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.mediamix-table tr.total-row {
+  background-color: #eff6ff;
+  font-weight: 700;
+  color: #1e3a8a;
+}
+
+.mediamix-table tr.total-row td {
+  border-top: 2px solid #3b82f6;
+  border-bottom: 1px solid #bfdbfe;
+}
+
+.mediamix-table tr.avg-row {
+  background-color: #f0fdf4;
+  font-weight: 700;
+  color: #14532d;
+}
+
+.mediamix-table tr.avg-row td {
+  border-bottom: 2px solid #10b981;
+}
+
+/* 그래프 영역 */
+.mediamix-graph-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.mediamix-metric-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mediamix-graph-container {
+  width: 100%;
+  height: 350px;
+  margin-bottom: 24px;
+}
+
+/* 효율 범위 테이블 */
+.mediamix-stats-section {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 20px;
+  margin-top: 12px;
+}
+
+.mediamix-stats-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 12px;
+}
+
+.mediamix-stats-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.mediamix-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.mediamix-stats-table th,
+.mediamix-stats-table td {
+  padding: 12px;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.mediamix-stats-table th:last-child,
+.mediamix-stats-table td:last-child {
+  border-right: none;
+}
+
+.mediamix-stats-table th {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 700;
+}
+
+.mediamix-stats-table td {
+  background-color: #ffffff;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* 툴팁 증감율 데코레이션 */
+.tooltip-change {
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-left: 6px;
+}
+
+.tooltip-change.up {
+  color: #ef4444;
+}
+
+.tooltip-change.down {
+  color: #3b82f6;
+}
+
+.tooltip-change.flat {
+  color: #94a3b8;
+}
+
+/* 입력 행 및 컨트롤 스타일 */
+.mediamix-table input[type="text"],
+.mediamix-table input[type="number"] {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  text-align: right;
+  background-color: #ffffff;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.mediamix-table input[type="text"]:focus,
+.mediamix-table input[type="number"]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+.mediamix-table select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  background-color: #ffffff;
+  outline: none;
+  cursor: pointer;
+}
+
+.mediamix-table select:focus {
+  border-color: #2563eb;
+}
+
+.mediamix-table td.read-only-cell {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* 임계치 경고 음영 스타일 */
+.warning-highlight {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  font-weight: 700 !important;
+  transition: background-color 0.3s ease;
+}
+
+/* AI 코멘트 카드 */
+.ai-comment-card {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 12px;
+}
+
+.ai-comment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 12px;
+}
+
+.ai-comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 20px;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.ai-comment-list li {
+  list-style-type: disc;
+}
+
+.ai-comment-list strong {
+  color: #0f172a;
+}
+
+/* Excel Spreadsheet View Styling */
+.mediamix-table.excel-style {
+  border-collapse: collapse;
+  border: 1px solid #cbd5e1;
+}
+
+.mediamix-table.excel-style th,
+.mediamix-table.excel-style td {
+  border: 1px solid #cbd5e1 !important;
+  padding: 4px 6px !important; /* tight padding like excel */
+  height: 32px;
+  vertical-align: middle;
+}
+
+/* Excel Row Numbers & Column Letters */
+.excel-col-letters th {
+  background-color: #e2e8f0 !important;
+  color: #475569 !important;
+  font-size: 0.75rem !important;
+  text-align: center !important;
+  font-weight: normal !important;
+  border: 1px solid #cbd5e1 !important;
+  padding: 2px !important;
+  height: 20px !important;
+}
+
+.excel-headers th {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  text-align: center !important;
+  border: 1px solid #cbd5e1 !important;
+  padding: 6px 4px !important;
+}
+
+.excel-row-num {
+  background-color: #e2e8f0 !important;
+  color: #475569 !important;
+  font-size: 0.75rem !important;
+  text-align: center !important;
+  font-weight: normal !important;
+  width: 30px !important;
+  user-select: none;
+  border: 1px solid #cbd5e1 !important;
+}
+
+/* SpreadSheet Inputs and Selects (Borderless by default, focused with Green Excel border) */
+.mediamix-table.excel-style input[type="text"],
+.mediamix-table.excel-style input[type="number"],
+.mediamix-table.excel-style select {
+  border: none !important;
+  background: transparent !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 4px 8px !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  font-size: 0.8rem !important;
+  font-family: inherit !important;
+  transition: none !important;
+}
+
+.mediamix-table.excel-style td:focus-within {
+  outline: 2px solid #217346 !important; /* Excel Green outline */
+  outline-offset: -1px;
+  z-index: 10;
+  position: relative;
+  background-color: #ffffff !important;
+}
+
+.mediamix-table.excel-style input[type="text"]:focus,
+.mediamix-table.excel-style input[type="number"]:focus,
+.mediamix-table.excel-style select:focus {
+  background-color: #ffffff !important;
+}
+
+/* Alignments */
+.mediamix-table.excel-style input[type="number"] {
+  text-align: right;
+}
+.mediamix-table.excel-style input[type="text"] {
+  text-align: left;
+}
+
+/* Green header top border accent */
+.mediamix-table.excel-style thead tr:first-child th {
+  border-top: 3px solid #217346 !important;
+}
+
+

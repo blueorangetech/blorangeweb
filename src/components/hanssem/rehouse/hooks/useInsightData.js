@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { fetchBigQuery, formatDate } from '../../../../api/bigquery';
 
 export function useInsightData(reportType, startDate, endDate, initialFilters, filterMappings, fallbackData) {
   // 1. 필터 및 드롭다운 상태
@@ -43,26 +44,15 @@ export function useInsightData(reportType, startDate, endDate, initialFilters, f
 
     const fetchFullData = async () => {
       setIsFullDataLoading(true);
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-      const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      };
-
-      const startStr = formatDate(startDate);
-      const endStr = formatDate(endDate);
-
       try {
-        // _for_csv 엔드포인트 호출
-        const response = await fetch(
-          `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=${reportType}_for_csv&start_date=${startStr}&end_date=${endStr}`
-        );
-        if (!response.ok) throw new Error('전체 데이터 로드 실패');
-        const result = await response.json();
-        setFullData(Array.isArray(result) ? result : (result.data || []));
+        const data = await fetchBigQuery({
+          datasetId: 'hanssem',
+          tableId: 'performance_raw',
+          reportType: `${reportType}_for_csv`,
+          startDate: formatDate(startDate),
+          endDate: formatDate(endDate),
+        });
+        setFullData(data);
       } catch (error) {
         console.error('Full Data Fetch Error:', error);
         setFullData([]);
@@ -74,6 +64,7 @@ export function useInsightData(reportType, startDate, endDate, initialFilters, f
     fetchFullData();
   }, [startDate, endDate, reportType]);
 
+
   // -----------------------------------------------------
   // 페이징 데이터 페칭 (무한 스크롤 적용)
   // -----------------------------------------------------
@@ -82,31 +73,20 @@ export function useInsightData(reportType, startDate, endDate, initialFilters, f
 
     const fetchBigQueryData = async () => {
       setIsLoading(true);
-      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-      const formatDate = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      };
-
-      const startStr = formatDate(startDate);
-      const endStr = formatDate(endDate);
-
       try {
-        const response = await fetch(
-          `${API_BASE_URL}/search/bigquery/date?dataset_id=hanssem&table_id=performance_raw&report_type=${reportType}&start_date=${startStr}&end_date=${endStr}&limit=${LIMIT}&offset=${offset}`
-        );
-        if (!response.ok) throw new Error('데이터 로드 실패');
-        const result = await response.json();
-
-        const newData = Array.isArray(result) ? result : (result.data || []);
+        const newData = await fetchBigQuery({
+          datasetId: 'hanssem',
+          tableId: 'performance_raw',
+          reportType,
+          startDate: formatDate(startDate),
+          endDate: formatDate(endDate),
+          limit: LIMIT,
+          offset,
+        });
 
         if (newData.length < LIMIT) {
           setHasMore(false);
         }
-
         setRealData(prev => offset === 0 ? newData : [...prev, ...newData]);
       } catch (error) {
         console.error('BigQuery Fetch Error:', error);
@@ -118,6 +98,7 @@ export function useInsightData(reportType, startDate, endDate, initialFilters, f
 
     fetchBigQueryData();
   }, [startDate, endDate, offset, reportType]);
+
 
   // -----------------------------------------------------
   // 스크롤 감지 옵저버
