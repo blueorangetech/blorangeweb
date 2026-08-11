@@ -6,14 +6,14 @@
   border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   box-sizing: border-box;
   flex-shrink: 0;
   transition: width 0.3s ease;
   position: sticky;
   top: 70px;
   height: calc(100vh - 70px);
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .sidebar-menu {
@@ -21,6 +21,8 @@
   flex-direction: column;
   gap: 0.5rem;
   padding: 0 1rem;
+  flex: 1;
+  overflow-y: auto;
 }
 
 /* 1단계 대분류 스타일 */
@@ -148,13 +150,14 @@
   color: #64748b;
 }
 
-/* Sidebar Header for collapse button */
-.sidebar-header {
+/* Sidebar Footer for collapse button */
+.sidebar-footer {
   display: flex;
   justify-content: flex-end;
-  padding: 0 1rem 1rem 1rem;
-  border-bottom: 1px solid #f1f5f9;
-  margin-bottom: 0.5rem;
+  padding: 1rem 1rem 0 1rem;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
 .sidebar-collapse-btn {
@@ -181,9 +184,9 @@
   width: 72px;
 }
 
-.client-sidebar.collapsed .sidebar-header {
+.client-sidebar.collapsed .sidebar-footer {
   justify-content: center;
-  padding: 0 0.5rem 1rem 0.5rem;
+  padding: 1rem 0.5rem 0 0.5rem;
 }
 
 .client-sidebar.collapsed .sidebar-menu {

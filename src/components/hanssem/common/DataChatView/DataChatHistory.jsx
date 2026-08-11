@@ -1,4 +1,5 @@
 import React from 'react';
+import { marked } from 'marked';
 import logoImage from '../../../../assets/blueorange_logo.png';
 
 export default function DataChatHistory({ chatHistory, isTyping, chatEndRef }) {
@@ -54,7 +55,7 @@ export default function DataChatHistory({ chatHistory, isTyping, chatEndRef }) {
                 border: isUser ? 'none' : '1px solid #f1f5f9',
                 fontSize: '0.95rem',
                 lineHeight: 1.6,
-                whiteSpace: 'pre-line',
+                whiteSpace: isUser ? 'pre-line' : 'normal',
                 wordBreak: 'break-word',
                 fontWeight: isUser ? 600 : 500
               }}
@@ -62,23 +63,11 @@ export default function DataChatHistory({ chatHistory, isTyping, chatEndRef }) {
               {isUser ? (
                 chat.content
               ) : (
-                /* AI 답변용 마크다운 간단 파싱 */
+                /* AI 답변용 마크다운 파싱 (marked 적용) */
                 <div 
                   className="chat-markdown"
                   dangerouslySetInnerHTML={{
-                    __html: chat.content
-                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                      .split('\n')
-                      .map(line => {
-                        if (line.trim().startsWith('* ')) {
-                          return `<li>${line.trim().substring(2)}</li>`;
-                        }
-                        return `<p>${line}</p>`;
-                      })
-                      .join('')
-                      // li 감싸기
-                      .replace(/(<li>.*?<\/li>)/gs, '<ul>$1</ul>')
-                      .replace(/<\/ul><ul>/g, '')
+                    __html: marked.parse(chat.content)
                   }}
                 />
               )}

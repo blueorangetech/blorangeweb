@@ -44,6 +44,7 @@ function DataChatView({ datasetId }) {
           message: text,
           dataset_id: datasetId,
           dataset_name: serviceTitle,
+          history: chatHistory,
         }),
       });
 
@@ -154,6 +155,32 @@ function DataChatView({ datasetId }) {
         .chat-markdown ul, .chat-markdown ol { margin: 0 0 10px 20px; padding: 0; }
         .chat-markdown li { margin-bottom: 5px; line-height: 1.5; }
         .chat-markdown strong { color: #1e3a8a; font-weight: 700; }
+        
+        /* 테이블 스타일 추가 */
+        .chat-markdown table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 14px 0;
+          font-size: 0.88rem;
+          background-color: #ffffff;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+          border-radius: 6px;
+          overflow: hidden;
+        }
+        .chat-markdown th, .chat-markdown td {
+          border: 1px solid #e2e8f0;
+          padding: 10px 14px;
+          text-align: left;
+          font-weight: 500;
+        }
+        .chat-markdown th {
+          background-color: #f8fafc;
+          color: #1e293b;
+          font-weight: 600;
+        }
+        .chat-markdown tr:nth-child(even) {
+          background-color: #fafafa;
+        }
       `}</style>
 
       {chatHistory.length === 0 ? (

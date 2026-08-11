@@ -92,18 +92,6 @@ function ClientSidebar({ activeMenu, onMenuChange, enabledMenuIds = [], menuStru
 
   return (
     <div className={`client-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-      <div className="sidebar-header">
-        <button
-          className="sidebar-collapse-btn"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          title={isCollapsed ? '메뉴 펼치기' : '메뉴 접기'}
-        >
-          <span className="material-symbols-outlined">
-            {isCollapsed ? 'menu' : 'menu_open'}
-          </span>
-        </button>
-      </div>
-
       <div className="sidebar-menu">
         {menuStructure.map((category) => {
           const isOpen = !!openCategories[category.id];
@@ -146,6 +134,17 @@ function ClientSidebar({ activeMenu, onMenuChange, enabledMenuIds = [], menuStru
         })}
       </div>
 
+      <div className="sidebar-footer">
+        <button
+          className="sidebar-collapse-btn"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          title={isCollapsed ? '메뉴 펼치기' : '메뉴 접기'}
+        >
+          <span className="material-symbols-outlined">
+            {isCollapsed ? 'menu' : 'menu_open'}
+          </span>
+        </button>
+      </div>
     </div>
   );
 }
