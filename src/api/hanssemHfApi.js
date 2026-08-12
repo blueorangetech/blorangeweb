@@ -138,41 +138,12 @@ export const fetchMaterialMonthly = ({ startDate, endDate }) =>
 /**
  * Creative A/B 소재 성과 데이터 및 비주얼 비교 분석 요청
  */
-export const runAiCompare = async (payloadA, payloadB) => {
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const response = await fetch(`${API_BASE_URL}/api/ai/compare`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      material_a: payloadA,
-      material_b: payloadB
-    })
-  });
-  if (!response.ok) {
-    throw new Error('AI 분석 서버와 통신 실패');
-  }
-  return response.json();
+import { aiApi } from './aiApi';
+
+export const runAiCompare = (payloadA, payloadB) => {
+  return aiApi.compareAssets(payloadA, payloadB);
 };
 
-/**
- * 우수 에셋 다중 이미지 및 성과 데이터 공통점 종합 분석 요청
- */
-export const runAiCommonality = async (payloadAssets) => {
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  const response = await fetch(`${API_BASE_URL}/api/ai/commonality`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      assets: payloadAssets
-    })
-  });
-  if (!response.ok) {
-    throw new Error('AI 분석 서버와 통신 실패');
-  }
-  return response.json();
+export const runAiCommonality = (payloadAssets) => {
+  return aiApi.analyzeCommonality(payloadAssets);
 };
-

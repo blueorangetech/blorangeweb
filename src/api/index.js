@@ -8,3 +8,7 @@
 export { fetchBigQuery, formatDate } from './bigquery';
 export * as hanssemApi from './hanssemApi';
 export * as hanssemHfApi from './hanssemHfApi';
+
+export { ApiClient, mainClient } from './client';
+export { LibraryApi } from './libraryApi';
+export { aiApi, AiApi } from './aiApi';

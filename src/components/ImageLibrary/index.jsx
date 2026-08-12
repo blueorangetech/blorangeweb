@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 import DeleteConfirmModal from './DeleteConfirmModal';
 import FolderTreePopover from './FolderTreePopover';
 import LibraryCard from './LibraryCard';
 import LibraryLightbox from './LibraryLightbox';
 import '../../styles/ImageLibrary.css';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import { LibraryApi } from '../../api';
 
 /**
  * 에셋 라이브러리 메인 컴포넌트 (src/components/ImageLibrary/index.jsx)
@@ -29,23 +28,15 @@ function ImageLibrary({ pageName = 'playground', bucketName, customTitle, allowF
   const fileInputRef = useRef(null);
   const activeFolder = selectedFolder;
 
-  const buildApiUrl = (endpoint) => {
-    const url = new URL(`${API_BASE_URL}${endpoint}`);
-    if (bucketName) {
-      url.searchParams.append('bucket_name', bucketName);
-    }
-    return url.toString();
-  };
+  // bucketName이 변경될 때마다 LibraryApi 인스턴스를 재생성
+  const libraryApi = useMemo(() => new LibraryApi(bucketName), [bucketName]);
 
   // 폴더 목록 조회 (광고주 전용 집행 소재 라이브러리일 때만 수행)
   const fetchFolders = async () => {
     try {
-      const response = await fetch(buildApiUrl('/api/library/folders/list'));
-      if (response.ok) {
-        const data = await response.json();
-        if (data.folders) {
-          setDynamicFolders(data.folders);
-        }
+      const data = await libraryApi.getFolders();
+      if (data.folders) {
+        setDynamicFolders(data.folders);
       }
     } catch (err) {
       console.error('Failed to fetch bucket subfolders:', err);
@@ -58,11 +49,7 @@ function ImageLibrary({ pageName = 'playground', bucketName, customTitle, allowF
     setError(null);
     try {
       const folderParam = activeFolder || 'all';
-      const response = await fetch(buildApiUrl(`/api/library/${folderParam}`));
-      if (!response.ok) {
-        throw new Error(`라이브러리를 불러오는데 실패했습니다. (상태 코드: ${response.status})`);
-      }
-      const data = await response.json();
+      const data = await libraryApi.getImages(folderParam);
       setImages(data);
     } catch (err) {
       console.error('Failed to fetch library images:', err);
@@ -99,7 +86,7 @@ function ImageLibrary({ pageName = 'playground', bucketName, customTitle, allowF
     if (e) e.stopPropagation();
     try {
       const folderParam = activeFolder || 'all';
-      const downloadUrl = buildApiUrl(`/api/library/${folderParam}/${encodeURIComponent(filename)}/download`);
+      const downloadUrl = libraryApi.getDownloadUrl(folderParam, filename);
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = filename || 'download_image';
@@ -125,12 +112,7 @@ function ImageLibrary({ pageName = 'playground', bucketName, customTitle, allowF
 
     try {
       const folderParam = activeFolder || 'all';
-      const response = await fetch(buildApiUrl(`/api/library/${folderParam}/${encodeURIComponent(filename)}`), {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('이미지 삭제 실패');
-      }
+      await libraryApi.deleteImage(folderParam, filename);
       showToast('이미지가 성공적으로 삭제되었습니다.');
       if (selectedImage && selectedImage.filename === filename) {
         setSelectedImage(null);
@@ -151,15 +133,7 @@ function ImageLibrary({ pageName = 'playground', bucketName, customTitle, allowF
     setUploading(true);
     try {
       const folderParam = activeFolder || 'root';
-      const response = await fetch(buildApiUrl(`/api/library/${folderParam}/upload`), {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || '파일 업로드에 실패했습니다.');
-      }
+      await libraryApi.uploadImage(folderParam, formData);
 
       showToast('이미지가 성공적으로 업로드되었습니다!');
       fetchImages();

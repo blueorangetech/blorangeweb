@@ -119,7 +119,7 @@ function AppLauncher() {
               <span className="material-symbols-outlined" style={{ color: '#f97316', fontSize: '18px', flexShrink: 0, userSelect: 'none' }}>
                 monitoring
               </span>
-              <span style={{ flex: 1 }}>Reporting Dash Board</span>
+              <span style={{ flex: 1 }}>AI Dash Board</span>
             </a>
             
             <a 

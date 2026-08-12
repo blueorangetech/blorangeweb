@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import StudioControlPanel from './StudioControlPanel';
 import StudioPreviewCanvas from './StudioPreviewCanvas';
 import '../../styles/CreativeStudioView.css';
+import { aiApi } from '../../api';
 
 const SAMPLE_BEFORE_IMAGE = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600&auto=format&fit=crop';
 const SAMPLE_AFTER_IMAGE = 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=600&auto=format&fit=crop';
@@ -117,16 +118,7 @@ function CreativeStudioView({ onGoToLibrary, embedded = false }) {
         }
       };
 
-      const response = await fetch('http://localhost:8000/api/ai/photoroom', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.detail || 'PhotoRoom API 호출 중 오류가 발생했습니다.');
-      }
+      const result = await aiApi.processPhotoRoom(payload);
 
       if (result.status === 'success') {
         const aiTextResponse = result.response || '';

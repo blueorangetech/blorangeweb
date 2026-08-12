@@ -5,6 +5,11 @@ const UserManagement = ({ customerUrl, currentUserInfo, siteId = 'analytics' }) 
   const [allUsers, setAllUsers] = useState([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [authSearch, setAuthSearch] = useState('');
+  const [unauthSearch, setUnauthSearch] = useState('');
+  const [authPage, setAuthPage] = useState(1);
+  const [unauthPage, setUnauthPage] = useState(1);
+  const ITEMS_PER_PAGE = 7;
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
     title: '',
@@ -182,6 +187,31 @@ const UserManagement = ({ customerUrl, currentUserInfo, siteId = 'analytics' }) 
     return '';
   };
 
+  // ─── 유저 필터링 및 페이징 계산 ───
+  const authorizedUsers = allUsers.filter(u => (u.access_list && u.access_list[siteId]?.[customerUrl]) || u.is_master);
+  const filteredAuthUsers = authorizedUsers.filter(u => 
+    u.name.toLowerCase().includes(authSearch.toLowerCase()) ||
+    u.user_id.toLowerCase().includes(authSearch.toLowerCase())
+  );
+  const totalAuthPages = Math.ceil(filteredAuthUsers.length / ITEMS_PER_PAGE) || 1;
+  const safeAuthPage = Math.min(authPage, totalAuthPages);
+  const paginatedAuthUsers = filteredAuthUsers.slice(
+    (safeAuthPage - 1) * ITEMS_PER_PAGE,
+    safeAuthPage * ITEMS_PER_PAGE
+  );
+
+  const unauthorizedUsers = allUsers.filter(u => !(u.access_list && u.access_list[siteId]?.[customerUrl]) && !u.is_master);
+  const filteredUnauthUsers = unauthorizedUsers.filter(u => 
+    u.name.toLowerCase().includes(unauthSearch.toLowerCase()) ||
+    u.user_id.toLowerCase().includes(unauthSearch.toLowerCase())
+  );
+  const totalUnauthPages = Math.ceil(filteredUnauthUsers.length / ITEMS_PER_PAGE) || 1;
+  const safeUnauthPage = Math.min(unauthPage, totalUnauthPages);
+  const paginatedUnauthUsers = filteredUnauthUsers.slice(
+    (safeUnauthPage - 1) * ITEMS_PER_PAGE,
+    safeUnauthPage * ITEMS_PER_PAGE
+  );
+
   return (
     <div className="management-container" style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'left', padding: '0 20px', position: 'relative' }}>
       {/* 커스텀 Confirm 팝업 모달 */}
@@ -298,18 +328,68 @@ const UserManagement = ({ customerUrl, currentUserInfo, siteId = 'analytics' }) 
           border: '1px solid #eee',
           minHeight: '500px'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: '700' }}>권한이 있는 유저</h3>
             <span style={{ fontSize: '0.9rem', color: '#666', background: '#f0f0f0', padding: '4px 12px', borderRadius: '12px' }}>
-              {allUsers.filter(u => (u.access_list && u.access_list[siteId]?.[customerUrl]) || u.is_master).length}명
+              {filteredAuthUsers.length}명
             </span>
+          </div>
+
+          {/* 검색 바 */}
+          <div style={{ marginBottom: '16px', position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="이름 또는 ID 검색..."
+              value={authSearch}
+              onChange={(e) => {
+                setAuthSearch(e.target.value);
+                setAuthPage(1);
+              }}
+              style={{
+                width: '100%',
+                padding: '10px 16px 10px 36px',
+                borderRadius: '12px',
+                border: '1px solid #e5e7eb',
+                fontSize: '0.9rem',
+                outline: 'none',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#000'}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            />
+            <svg 
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}
+              width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            {authSearch && (
+              <button
+                onClick={() => { setAuthSearch(''); setAuthPage(1); }}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#9ca3af',
+                  padding: '4px'
+                }}
+              >
+                ✕
+              </button>
+            )}
           </div>
 
           <div className="user-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {isLoadingUsers ? (
               <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>로딩 중...</div>
-            ) : allUsers.filter(u => (u.access_list && u.access_list[siteId]?.[customerUrl]) || u.is_master).length > 0 ? (
-              allUsers.filter(u => (u.access_list && u.access_list[siteId]?.[customerUrl]) || u.is_master).map(user => (
+            ) : paginatedAuthUsers.length > 0 ? (
+              paginatedAuthUsers.map(user => (
                 <div key={user.user_id} style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -420,10 +500,74 @@ const UserManagement = ({ customerUrl, currentUserInfo, siteId = 'analytics' }) 
               ))
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: '#999', backgroundColor: '#f9f9f9', borderRadius: '16px' }}>
-                권한을 보유한 사용자가 없습니다.
+                {authSearch ? '검색 결과가 없습니다.' : '권한을 보유한 사용자가 없습니다.'}
               </div>
             )}
           </div>
+
+          {/* 페이지네이션 (좌측) */}
+          {totalAuthPages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginTop: '24px' }}>
+              <button
+                disabled={safeAuthPage === 1}
+                onClick={() => setAuthPage(prev => Math.max(prev - 1, 1))}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: '#ffffff',
+                  color: safeAuthPage === 1 ? '#d1d5db' : '#374151',
+                  cursor: safeAuthPage === 1 ? 'not-allowed' : 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  transition: 'all 0.2s'
+                }}
+              >
+                이전
+              </button>
+              {Array.from({ length: totalAuthPages }, (_, i) => i + 1).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setAuthPage(p)}
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderRadius: '8px',
+                    border: '1px solid',
+                    borderColor: safeAuthPage === p ? '#000000' : '#e5e7eb',
+                    backgroundColor: safeAuthPage === p ? '#000000' : '#ffffff',
+                    color: safeAuthPage === p ? '#ffffff' : '#374151',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    fontWeight: '700',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                disabled={safeAuthPage === totalAuthPages}
+                onClick={() => setAuthPage(prev => Math.min(prev + 1, totalAuthPages))}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: '#ffffff',
+                  color: safeAuthPage === totalAuthPages ? '#d1d5db' : '#374151',
+                  cursor: safeAuthPage === totalAuthPages ? 'not-allowed' : 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  transition: 'all 0.2s'
+                }}
+              >
+                다음
+              </button>
+            </div>
+          )}
         </div>
 
         {/* 우측: 전체 유저 리스트 */}
@@ -435,18 +579,68 @@ const UserManagement = ({ customerUrl, currentUserInfo, siteId = 'analytics' }) 
           border: '1px solid #eee',
           minHeight: '500px'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 style={{ fontSize: '1.2rem', fontWeight: '700' }}>전체 유저 리스트</h3>
             <span style={{ fontSize: '0.9rem', color: '#666', background: '#f0f0f0', padding: '4px 12px', borderRadius: '12px' }}>
-              {allUsers.filter(u => !(u.access_list && u.access_list[siteId]?.[customerUrl]) && !u.is_master).length}명
+              {filteredUnauthUsers.length}명
             </span>
+          </div>
+
+          {/* 검색 바 (우측) */}
+          <div style={{ marginBottom: '16px', position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="이름 또는 ID 검색..."
+              value={unauthSearch}
+              onChange={(e) => {
+                setUnauthSearch(e.target.value);
+                setUnauthPage(1);
+              }}
+              style={{
+                width: '100%',
+                padding: '10px 16px 10px 36px',
+                borderRadius: '12px',
+                border: '1px solid #e5e7eb',
+                fontSize: '0.9rem',
+                outline: 'none',
+                boxSizing: 'border-box',
+                transition: 'border-color 0.2s',
+              }}
+              onFocus={(e) => e.target.style.borderColor = '#000'}
+              onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+            />
+            <svg 
+              style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }}
+              width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            {unauthSearch && (
+              <button
+                onClick={() => { setUnauthSearch(''); setUnauthPage(1); }}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: '#9ca3af',
+                  padding: '4px'
+                }}
+              >
+                ✕
+              </button>
+            )}
           </div>
 
           <div className="user-list" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {isLoadingUsers ? (
               <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>로딩 중...</div>
-            ) : allUsers.filter(u => !(u.access_list && u.access_list[siteId]?.[customerUrl]) && !u.is_master).length > 0 ? (
-              allUsers.filter(u => !(u.access_list && u.access_list[siteId]?.[customerUrl]) && !u.is_master).map(user => (
+            ) : paginatedUnauthUsers.length > 0 ? (
+              paginatedUnauthUsers.map(user => (
                 <div key={user.user_id} style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -532,10 +726,74 @@ const UserManagement = ({ customerUrl, currentUserInfo, siteId = 'analytics' }) 
               ))
             ) : (
               <div style={{ textAlign: 'center', padding: '40px', color: '#999', backgroundColor: '#f9f9f9', borderRadius: '16px' }}>
-                모든 사용자가 권한을 보유하고 있습니다.
+                {unauthSearch ? '검색 결과가 없습니다.' : '모든 사용자가 권한을 보유하고 있습니다.'}
               </div>
             )}
           </div>
+
+          {/* 페이지네이션 (우측) */}
+          {totalUnauthPages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginTop: '24px' }}>
+              <button
+                disabled={safeUnauthPage === 1}
+                onClick={() => setUnauthPage(prev => Math.max(prev - 1, 1))}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: '#ffffff',
+                  color: safeUnauthPage === 1 ? '#d1d5db' : '#374151',
+                  cursor: safeUnauthPage === 1 ? 'not-allowed' : 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  transition: 'all 0.2s'
+                }}
+              >
+                이전
+              </button>
+              {Array.from({ length: totalUnauthPages }, (_, i) => i + 1).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setUnauthPage(p)}
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    borderRadius: '8px',
+                    border: '1px solid',
+                    borderColor: safeUnauthPage === p ? '#000000' : '#e5e7eb',
+                    backgroundColor: safeUnauthPage === p ? '#000000' : '#ffffff',
+                    color: safeUnauthPage === p ? '#ffffff' : '#374151',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem',
+                    fontWeight: '700',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                disabled={safeUnauthPage === totalUnauthPages}
+                onClick={() => setUnauthPage(prev => Math.min(prev + 1, totalUnauthPages))}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  border: '1px solid #e5e7eb',
+                  backgroundColor: '#ffffff',
+                  color: safeUnauthPage === totalUnauthPages ? '#d1d5db' : '#374151',
+                  cursor: safeUnauthPage === totalUnauthPages ? 'not-allowed' : 'pointer',
+                  fontSize: '0.8rem',
+                  fontWeight: '600',
+                  transition: 'all 0.2s'
+                }}
+              >
+                다음
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@
  * 모든 페이지별 API 모듈의 기반 함수
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+import { mainClient } from './client';
 
 /**
  * 날짜 객체를 YYYY-MM-DD 문자열로 변환
@@ -45,28 +45,25 @@ export async function fetchBigQuery({
   minRoas,
   filters,
 }) {
-  const params = new URLSearchParams({
+  const queryParams = {
     dataset_id: datasetId,
     table_id: tableId,
     report_type: reportType,
     start_date: startDate,
     end_date: endDate,
-  });
+  };
 
   if (limit !== undefined) {
-    params.set('limit', limit);
-    params.set('offset', offset);
+    queryParams.limit = limit;
+    queryParams.offset = offset;
   }
-  if (minCost !== undefined) params.set('min_cost', minCost);
-  if (minDistribution !== undefined) params.set('min_distribution', minDistribution);
-  if (minRoas !== undefined) params.set('min_roas', minRoas);
+  if (minCost !== undefined) queryParams.min_cost = minCost;
+  if (minDistribution !== undefined) queryParams.min_distribution = minDistribution;
+  if (minRoas !== undefined) queryParams.min_roas = minRoas;
   if (filters && Object.keys(filters).length > 0) {
-    params.set('filters', JSON.stringify(filters));
+    queryParams.filters = JSON.stringify(filters);
   }
 
-  const response = await fetch(`${API_BASE_URL}/search/bigquery/date?${params.toString()}`);
-  if (!response.ok) throw new Error(`BigQuery fetch failed: ${response.status}`);
-
-  const result = await response.json();
+  const result = await mainClient.get('/search/bigquery/date', queryParams);
   return Array.isArray(result) ? result : (result.data || []);
 }
