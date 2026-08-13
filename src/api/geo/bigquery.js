@@ -3,7 +3,7 @@
  * 모든 페이지별 API 모듈의 기반 함수
  */
 
-import { mainClient } from './client';
+import { mainClient } from '../client';
 
 /**
  * 날짜 객체를 YYYY-MM-DD 문자열로 변환
@@ -17,20 +17,6 @@ export const formatDate = (date) => {
 
 /**
  * /search/bigquery/date 엔드포인트 공통 호출 함수
- *
- * @param {object} params
- * @param {string} params.datasetId       - BigQuery 데이터셋 ID (예: 'hanssem', 'hanssem_hf')
- * @param {string} params.tableId         - 테이블 ID (기본: 'performance_raw')
- * @param {string} params.reportType      - query_processor report_type 키
- * @param {string} params.startDate       - 시작일 YYYY-MM-DD
- * @param {string} params.endDate         - 종료일 YYYY-MM-DD
- * @param {number} [params.limit]         - 페이지당 행 수 (없으면 전체)
- * @param {number} [params.offset]        - 오프셋 (기본: 0)
- * @param {number} [params.minCost]       - 최소 비용 필터
- * @param {number} [params.minDistribution] - 최소 전환(배분/주문) 필터
- * @param {number} [params.minRoas]       - 최소 ROAS 필터
- * @param {object} [params.filters]       - 동적 필터 (컬럼명: 값 배열 또는 like 구조)
- * @returns {Promise<Array>}              - 조회 결과 배열
  */
 export async function fetchBigQuery({
   datasetId,

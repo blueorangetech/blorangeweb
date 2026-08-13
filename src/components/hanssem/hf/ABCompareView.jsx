@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from 'date-fns/locale';
-import { fetchCompareData } from '../../../api/hanssemHfApi';
+import { fetchCompareData } from '../../../api/geo/hanssemHfApi';
 import ABTestCompareTab from './ABTestCompareTab';
 import CommonalityAnalysisTab from './CommonalityAnalysisTab';
 import '../../../styles/HanssemInsight.css';

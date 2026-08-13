@@ -1,9 +1,9 @@
-import { mainClient } from './client';
+import { mainClient } from '../client';
 
 /**
- * src/api/libraryApi.js
+ * src/api/geo/libraryApi.js
  *
- * 이미지 라이브러리 관련 백엔드 API 서비스 클래스
+ * 이미지 라이브러리 관련 백엔드 API 서비스 클래스 (GEO 메인 서버 호출)
  */
 export class LibraryApi {
   constructor(bucketName) {

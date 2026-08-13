@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { fetchBigQuery, formatDate } from '../../../../api/bigquery';
+import { fetchBigQuery, formatDate } from '../../../../api/geo/bigquery';
 
 export function useInsightData(reportType, startDate, endDate, initialFilters, filterMappings, fallbackData) {
   // 1. 필터 및 드롭다운 상태

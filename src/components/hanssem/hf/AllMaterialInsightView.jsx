@@ -7,7 +7,7 @@ import '../../../styles/HanssemCompare.css';
 import CreativeCard from './CreativeCard';
 import { getCanonicalMedia, mediaLogos } from '../../../utils/mediaUtils';
 import { chartData } from './common/filterMaps';
-import { fetchDataTable, fetchAllMaterialData } from '../../../api/hanssemHfApi';
+import { fetchDataTable, fetchAllMaterialData } from '../../../api/geo/hanssemHfApi';
 
 const MEDIA_LIKE_MAP = {
   "네이버": ['%GFA%', '%NAVER%'],

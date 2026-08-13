@@ -1,3 +1,10 @@
+import { csvUploadApi } from '../api';
+
+/**
+ * src/utils/bqDirectUpload.js
+ *
+ * BigQuery 직업 업로드 기능 유틸리티 (중앙 csvUploadApi 사용)
+ */
 export const bqDirectUpload = async ({ file, datasetId, tableId, truncate = true, setUploadStatus }) => {
   if (!file) return;
 
@@ -10,21 +17,7 @@ export const bqDirectUpload = async ({ file, datasetId, tableId, truncate = true
     formData.append('table_id', tableId);
     formData.append('truncate', truncate.toString());
 
-    const CSV_UPLOAD_BASE_URL = import.meta.env.VITE_CSV_UPLOAD_BASE_URL || import.meta.env.VITE_API_BASE_URL;
-
-    const response = await fetch(
-      `${CSV_UPLOAD_BASE_URL}/csv/upload/direct`,
-      {
-        method: 'POST',
-        body: formData
-      }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || '업로드 중 오류가 발생했습니다.');
-    }
+    const result = await csvUploadApi.uploadDirect(formData);
 
     if (result.status === 'success') {
       setUploadStatus({

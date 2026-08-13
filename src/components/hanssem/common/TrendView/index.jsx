@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../../../../styles/HanssemPerformance.css';
-import * as hanssemApi from '../../../../api/hanssemApi';
-import * as hanssemHfApi from '../../../../api/hanssemHfApi';
+import * as hanssemApi from '../../../../api/geo/hanssemApi';
+import * as hanssemHfApi from '../../../../api/geo/hanssemHfApi';
 
 // 하위 컴포넌트 임포트
 import TrendControls from './TrendControls';

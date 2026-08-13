@@ -110,72 +110,77 @@ export function logoutUser() {
  */
 export async function checkPageAuth({ customerPath = '', checkPermission = true } = {}) {
   const savedName = Cookies.get('UserName') || '';
+  const token = Cookies.get('Authorization');
 
-  // 1. 권한 검사를 수행하지 않는 페이지인 경우 (checkPermission: false)
+  // 토큰이 있는 경우, 항상 권한 서버에 토큰을 보내 사용자 정보를 갱신합니다.
+  if (token) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/${customerPath}?site_id=analytics`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        let userName = savedName;
+        if (data.name) {
+          userName = data.name;
+          Cookies.set('UserName', data.name, { expires: 7 });
+        }
+        return {
+          isLoggedIn: true,
+          hasPermission: true,
+          userName: userName,
+          currentUserInfo: {
+            role: data.role || '',
+            is_master: data.is_master || data.role === 'master'
+          }
+        };
+      } else {
+        // 검증 실패 시, 권한 체크 강제 페이지가 아니면(checkPermission = false) 로그인 상태만 유지하고 진입 허용
+        if (!checkPermission) {
+          return {
+            isLoggedIn: true,
+            hasPermission: true,
+            userName: savedName,
+            currentUserInfo: { role: '', is_master: false }
+          };
+        }
+      }
+    } catch (err) {
+      console.error(`Auth check error for ${customerPath}:`, err);
+      if (!checkPermission) {
+        return {
+          isLoggedIn: true,
+          hasPermission: true,
+          userName: savedName,
+          currentUserInfo: { role: '', is_master: false }
+        };
+      }
+    }
+  }
+
+  // 권한 검사를 수행하지 않는 페이지이면서 토큰이 없거나 무효한 경우
   if (!checkPermission) {
     const userName = savedName || '게스트';
     if (!savedName) {
       Cookies.set('UserName', '게스트', { expires: 7 });
     }
     return {
-      isLoggedIn: true,
+      isLoggedIn: !!token,
       hasPermission: true,
       userName: userName,
       currentUserInfo: { role: '', is_master: false }
     };
   }
 
-  // 2. 권한 검사를 수행하는 페이지인 경우 (checkPermission: true)
-  const token = Cookies.get('Authorization');
-
-  if (!token) {
-    return {
-      isLoggedIn: false,
-      hasPermission: false,
-      userName: savedName,
-      currentUserInfo: { role: '', is_master: false }
-    };
-  }
-
-  try {
-    const response = await fetch(`${API_BASE_URL}/auth/${customerPath}?site_id=analytics`, {
-      method: 'GET',
-      headers: {
-        'Authorization': token
-      }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      let userName = savedName;
-      if (data.name) {
-        userName = data.name;
-        Cookies.set('UserName', data.name, { expires: 7 });
-      }
-      return {
-        isLoggedIn: true,
-        hasPermission: true,
-        userName: userName,
-        currentUserInfo: {
-          role: data.role || '',
-          is_master: data.is_master || data.role === 'master'
-        }
-      };
-    } else {
-      return {
-        isLoggedIn: true,
-        hasPermission: false,
-        userName: savedName,
-        currentUserInfo: { role: '', is_master: false }
-      };
-    }
-  } catch (err) {
-    console.error(`Auth check error for ${customerPath}:`, err);
-    return {
-      isLoggedIn: true,
-      hasPermission: false,
-      userName: savedName,
-      currentUserInfo: { role: '', is_master: false }
-    };
-  }
+  // 권한 검사가 필요하지만 토큰이 유효하지 않은 경우
+  return {
+    isLoggedIn: false,
+    hasPermission: false,
+    userName: savedName,
+    currentUserInfo: { role: '', is_master: false }
+  };
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import CreativeCard from './CreativeCard';
 import CustomSelect from './common/CustomSelect';
-import { runAiCommonality } from '../../../api/hanssemHfApi';
+import { runAiCommonality } from '../../../api/geo/hanssemHfApi';
 
 function CommonalityAnalysisTab({ fetchedData, renderDatePicker }) {
   const { mediaOptions, deviceOptions } = useMemo(() => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import CreativeCard from './CreativeCard';
 import CustomSelect from './common/CustomSelect';
-import { runAiCompare } from '../../../api/hanssemHfApi';
+import { runAiCompare } from '../../../api/geo/hanssemHfApi';
 
 
 function ABTestCompareTab({ fetchedData, renderDatePicker }) {

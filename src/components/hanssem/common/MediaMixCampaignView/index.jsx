@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import '../../../../styles/HanssemMediaMix.css';
-import * as hanssemApi from '../../../../api/hanssemApi';
-import * as hanssemHfApi from '../../../../api/hanssemHfApi';
-import { formatDate } from '../../../../api/bigquery';
+import * as hanssemApi from '../../../../api/geo/hanssemApi';
+import * as hanssemHfApi from '../../../../api/geo/hanssemHfApi';
+import { formatDate } from '../../../../api/geo/bigquery';
 
 // 하위 컴포넌트 임포트
 import MediaMixFilterPanel from './MediaMixFilterPanel';

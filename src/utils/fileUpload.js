@@ -1,30 +1,23 @@
+import { csvUploadApi } from '../api';
+
+/**
+ * src/utils/fileUpload.js
+ *
+ * GCS 업로드 및 파일 데이터 분할 처리 유틸리티 (중앙 csvUploadApi 사용)
+ */
 export const uploadFile = async (file, setUploadStatus) => {
   if (file) {
     setUploadStatus({ type: 'loading', message: '파일 업로드 중...' })
 
     try {
-      // 1. 업로드 URL 요청
+      // 1. 업로드 URL 요청 (중앙 API 호출)
       const formData1 = new FormData()
       formData1.append('filename', file.name)
       
-      const CSV_UPLOAD_BASE_URL = import.meta.env.VITE_CSV_UPLOAD_BASE_URL || import.meta.env.VITE_API_BASE_URL
-
-      const urlResponse = await fetch(
-        `${CSV_UPLOAD_BASE_URL}/csv/upload/request-upload-url`,
-        {
-          method: 'POST',
-          body: formData1
-        }
-      )
-
-      if (!urlResponse.ok) {
-        throw new Error('업로드 URL 요청 실패')
-      }
-
-      const { upload_url, blob_name } = await urlResponse.json()
+      const { upload_url, blob_name } = await csvUploadApi.requestUploadUrl(formData1);
       console.log('업로드 URL 받음:', upload_url)
 
-      // 2. GCS에 직접 업로드 (대용량 파일도 가능!)
+      // 2. GCS에 직접 업로드 (GCS 서명된 URL로 direct PUT 전송)
       setUploadStatus({ type: 'loading', message: 'GCS에 업로드 중...' })
       const uploadResponse = await fetch(upload_url, {
         method: 'PUT',
@@ -40,24 +33,12 @@ export const uploadFile = async (file, setUploadStatus) => {
 
       console.log('GCS 업로드 완료!')
 
-      // 3. 서버에 처리 요청
+      // 3. 서버에 처리 요청 (중앙 API 호출)
       setUploadStatus({ type: 'loading', message: '파일 처리 중...' })
       const formData2 = new FormData()
       formData2.append('blob_name', blob_name)
 
-      const processResponse = await fetch(
-        `${CSV_UPLOAD_BASE_URL}/csv/upload/process-uploaded-file`,
-        {
-          method: 'POST',
-          body: formData2
-        }
-      )
-
-      if (!processResponse.ok) {
-        throw new Error('파일 처리 실패')
-      }
-
-      const result = await processResponse.json()
+      const result = await csvUploadApi.processUploadedFile(formData2);
       console.log('처리 완료:', result)
 
       setUploadStatus({

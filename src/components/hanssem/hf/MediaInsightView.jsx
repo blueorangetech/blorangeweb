@@ -7,7 +7,7 @@ import '../../../styles/HanssemCompare.css';
 import CreativeCard from './CreativeCard';
 import { getCanonicalMedia, mediaLogos } from '../../../utils/mediaUtils';
 import { chartData } from './common/filterMaps';
-import { fetchDataTable, fetchMediaMaterialData } from '../../../api/hanssemHfApi';
+import { fetchDataTable, fetchMediaMaterialData } from '../../../api/geo/hanssemHfApi';
 
 function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
   // 필터 상태 통합 관리

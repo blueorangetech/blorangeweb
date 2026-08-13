@@ -7,8 +7,8 @@ import CompareFilterSection from './CompareFilterSection';
 import CompareChartCard from './CompareChartCard';
 import CompareDetailTable from './CompareDetailTable';
 import ColumnEditorModal from './ColumnEditorModal';
-import * as hanssemApi from '../../../../api/hanssemApi';
-import * as hanssemHfApi from '../../../../api/hanssemHfApi';
+import * as hanssemApi from '../../../../api/geo/hanssemApi';
+import * as hanssemHfApi from '../../../../api/geo/hanssemHfApi';
 
 // 데이터 포맷 유틸리티
 const formatInt = (val) => Math.round(val || 0).toLocaleString('ko-KR');
