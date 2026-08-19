@@ -29,20 +29,30 @@ function Atria() {
     checkAuth('atria', true);
   }, [checkAuth]);
 
+  // 활성화할 메뉴 ID 목록
+  const enabledMenuIds = [
+    'budget-naver',
+    ...(currentUserInfo?.role === 'master' || currentUserInfo?.role === 'admin' ? ['etc-account'] : [])
+  ];
+
   // 메뉴 구조 정의
   const menuStructure = [
     {
-      group: '예산 및 운영 관리',
-      items: [
-        { id: 'budget-naver', label: '네이버 검색광고', icon: 'payments' },
+      id: 'budget',
+      label: '예산 및 운영 관리',
+      icon: 'payments',
+      subItems: [
+        { id: 'budget-naver', label: '네이버 검색광고' },
       ],
     },
     ...(currentUserInfo?.role === 'master' || currentUserInfo?.role === 'admin'
       ? [
           {
-            group: '설정 및 관리',
-            items: [
-              { id: 'etc-account', label: '계정 관리', icon: 'manage_accounts' },
+            id: 'etc',
+            label: '설정 및 관리',
+            icon: 'settings',
+            subItems: [
+              { id: 'etc-account', label: '계정 관리' },
             ],
           },
         ]
@@ -53,29 +63,29 @@ function Atria() {
     switch (apiStatus) {
       case 'connected':
         return (
-          <span className="api-badge-compact connected" title="네이버 검색광고 API 실시간 정상 연동 중">
-            <span className="badge-dot" />
+          <span className="api-status-badge connected" title="네이버 검색광고 API 실시간 정상 연동 중">
+            <span className="status-dot" />
             <span className="badge-text">API 실시간 연동</span>
           </span>
         );
       case 'error':
         return (
-          <span className="api-badge-compact error" title="네이버 API 통신 오류">
-            <span className="badge-dot" />
+          <span className="api-status-badge error" title="네이버 API 통신 오류">
+            <span className="status-dot" />
             <span className="badge-text">API 연동 오류</span>
           </span>
         );
       case 'loading':
         return (
-          <span className="api-badge-compact loading" title="연결 상태 확인 중">
-            <span className="material-symbols-outlined badge-spinner">progress_activity</span>
+          <span className="api-status-badge loading" title="연결 상태 확인 중">
+            <span className="status-dot" />
             <span className="badge-text">연결 확인 중...</span>
           </span>
         );
       default:
         return (
-          <span className="api-badge-compact mock" title="모의 데이터 모드">
-            <span className="badge-dot" />
+          <span className="api-status-badge mock" title="모의 데이터 모드">
+            <span className="status-dot" />
             <span className="badge-text">Mock 모드</span>
           </span>
         );
@@ -86,8 +96,8 @@ function Atria() {
     <div className="atria-app">
       <DashboardHeader
         title={
-          <div className="header-title-container">
-            <span className="header-title-text">아리아케어 대시보드</span>
+          <div className="header-title-container" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span className="header-title-text">Atria 대시보드</span>
             {renderApiStatusBadge()}
           </div>
         }
@@ -103,11 +113,11 @@ function Atria() {
       ) : !hasPermission ? (
         <AccessDeniedCard />
       ) : (
-        <div className="atria-main-layout">
+        <div className="atria-dashboard-layout">
           <ClientSidebar
-            title="아리아케어 관리"
             activeMenu={activeMenu}
-            onMenuSelect={setActiveMenu}
+            onMenuChange={setActiveMenu}
+            enabledMenuIds={enabledMenuIds}
             menuStructure={menuStructure}
           />
           

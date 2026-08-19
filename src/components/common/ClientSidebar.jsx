@@ -59,7 +59,7 @@ function ClientSidebar({ activeMenu, onMenuChange, enabledMenuIds = [], menuStru
   // 현재 활성화된 메뉴가 속한 대분류 카테고리를 자동으로 열어줍니다.
   useEffect(() => {
     const parentCategory = menuStructure.find(cat =>
-      cat.subItems.some(sub => sub.id === activeMenu)
+      (cat.subItems || cat.items || []).some(sub => sub.id === activeMenu)
     );
     if (parentCategory) {
       setOpenCategories(prev => ({
@@ -95,6 +95,7 @@ function ClientSidebar({ activeMenu, onMenuChange, enabledMenuIds = [], menuStru
       <div className="sidebar-menu">
         {menuStructure.map((category) => {
           const isOpen = !!openCategories[category.id];
+          const subItemsList = category.subItems || category.items || [];
           return (
             <div
               key={category.id}
@@ -115,7 +116,7 @@ function ClientSidebar({ activeMenu, onMenuChange, enabledMenuIds = [], menuStru
                 </span>
               </div>
               <div className="sidebar-sub-menu">
-                {category.subItems.map((subItem) => {
+                {subItemsList.map((subItem) => {
                   const isEnabled = enabledMenuIds.includes(subItem.id);
                   const isActive = activeMenu === subItem.id;
                   return (

@@ -15,18 +15,18 @@ export function ExcelUploadPreviewModal({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-backdrop" onClick={() => !excelSubmitting && onClose()}>
-      <div className="modal-content excel-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={() => !excelSubmitting && onClose()}>
+      <div className="budget-modal excel-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title-wrap">
             <span className="material-symbols-outlined modal-icon-excel">upload_file</span>
             <div>
-              <h3>엑셀 대량 예산 수정</h3>
+              <h4>엑셀 대량 예산 수정</h4>
               <p className="modal-subtitle">수정된 엑셀 파일을 업로드하여 광고그룹 예산을 일괄 적용합니다.</p>
             </div>
           </div>
           <button 
-            className="modal-close-btn" 
+            className="close-btn" 
             onClick={onClose}
             disabled={excelSubmitting}
           >
@@ -34,7 +34,7 @@ export function ExcelUploadPreviewModal({
           </button>
         </div>
 
-        <div className="modal-body">
+        <div className="excel-modal-body">
           {/* File upload dropzone */}
           <div className="excel-upload-dropzone">
             <input
@@ -93,24 +93,27 @@ export function ExcelUploadPreviewModal({
                 <table className="excel-preview-table">
                   <thead>
                     <tr>
-                      <th style={{ width: '45px', textAlign: 'center' }}>행</th>
-                      <th>광고그룹 ID</th>
-                      <th>광고그룹명</th>
-                      <th style={{ textAlign: 'right' }}>수정 예산</th>
-                      <th style={{ textAlign: 'center' }}>예산 사용</th>
-                      <th>검증 상태</th>
+                      <th style={{ width: '48px', textAlign: 'center' }}>행</th>
+                      <th>광고그룹 정보</th>
+                      <th style={{ textAlign: 'right', width: '130px' }}>수정 예산</th>
+                      <th style={{ textAlign: 'center', width: '90px' }}>예산 사용</th>
+                      <th style={{ width: '180px' }}>검증 상태</th>
                     </tr>
                   </thead>
                   <tbody>
                     {excelPreviewData.items.map((item, idx) => (
                       <tr key={idx} className={item.isValid ? 'row-valid' : 'row-invalid'}>
-                        <td style={{ color: '#94a3b8', textAlign: 'center' }}>{item.rowNumber}</td>
-                        <td style={{ fontWeight: '600' }}>{item.adgroupId}</td>
-                        <td>{item.name || '-'}</td>
-                        <td style={{ textAlign: 'right', fontWeight: '700' }}>
+                        <td style={{ color: '#94a3b8', textAlign: 'center', fontWeight: '600' }}>{item.rowNumber}</td>
+                        <td>
+                          <div className="adgroup-name-wrap">
+                            <div className="adgroup-name-text">{item.name || '-'}</div>
+                            <div className="adgroup-id-chip">{item.adgroupId}</div>
+                          </div>
+                        </td>
+                        <td style={{ textAlign: 'right', fontWeight: '700', whiteSpace: 'nowrap' }}>
                           {item.useBudget && item.budget > 0 ? `${item.budget.toLocaleString()}원` : '제한 없음'}
                         </td>
-                        <td style={{ textAlign: 'center' }}>
+                        <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
                           <span className={`use-budget-pill ${item.useBudget ? 'on' : 'off'}`}>
                             {item.useBudget ? 'ON' : 'OFF'}
                           </span>

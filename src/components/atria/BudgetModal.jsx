@@ -33,66 +33,62 @@ export function BudgetModal({
           </button>
         </div>
         
-        <div className="modal-body">
-          {/* Target Info Card */}
-          <div className="modal-target-card">
-            <span className="target-badge">{modalTarget.type === 'campaign' ? '캠페인' : '광고그룹'}</span>
+        <div className="budget-modal-body">
+          {/* 1. 맨 윗줄: 대상 정보 배너 */}
+          <div className="modal-target-banner">
+            <span className={`target-badge ${modalTarget.type}`}>{modalTarget.type === 'campaign' ? '캠페인' : '광고그룹'}</span>
             <strong className="target-name">{modalTarget.name}</strong>
+            {modalTarget.id && <span className="target-id">{modalTarget.id}</span>}
           </div>
 
-          {/* 3 Budget Option Cards */}
-          <div className="budget-options-grid">
+          {/* 2. 아래 줄: 옵션 카드 가로 그리드 배치 */}
+          <div className={`budget-options-row ${modalTarget.type === 'campaign' ? 'two-cols' : 'three-cols'}`}>
             {modalTarget.type === 'adgroup' && (
               <label className={`budget-option-card ${budgetOption === 'campaign' ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="budgetOption"
-                  value="campaign"
-                  checked={budgetOption === 'campaign'}
-                  onChange={() => setBudgetOption('campaign')}
-                />
-                <div className="option-content">
-                  <div className="option-title-row">
-                    <span className="option-title">캠페인 예산한도 적용</span>
-                    <span className="option-tag">기본값</span>
-                  </div>
-                  <p className="option-desc">상위 캠페인의 일일 예산을 공유하여 함께 소진합니다.</p>
+                <div className="option-header-row">
+                  <input
+                    type="radio"
+                    name="budgetOption"
+                    value="campaign"
+                    checked={budgetOption === 'campaign'}
+                    onChange={() => setBudgetOption('campaign')}
+                  />
+                  <span className="option-title">캠페인 예산한도 적용</span>
+                  <span className="option-tag">기본값</span>
                 </div>
+                <p className="option-desc">상위 캠페인의 일일 예산을 공유하여 함께 소진합니다.</p>
               </label>
             )}
 
             <label className={`budget-option-card ${budgetOption === 'unlimited' ? 'selected' : ''}`}>
-              <input
-                type="radio"
-                name="budgetOption"
-                value="unlimited"
-                checked={budgetOption === 'unlimited'}
-                onChange={() => setBudgetOption('unlimited')}
-              />
-              <div className="option-content">
-                <div className="option-title-row">
-                  <span className="option-title">제한 없음</span>
-                </div>
-                <p className="option-desc">일일 예산 한도를 두지 않고 잔액이 있는 한 계속 노출합니다.</p>
+              <div className="option-header-row">
+                <input
+                  type="radio"
+                  name="budgetOption"
+                  value="unlimited"
+                  checked={budgetOption === 'unlimited'}
+                  onChange={() => setBudgetOption('unlimited')}
+                />
+                <span className="option-title">제한 없음</span>
               </div>
+              <p className="option-desc">일일 예산 한도를 두지 않고 잔액이 있는 한 계속 노출합니다.</p>
             </label>
 
             <label className={`budget-option-card ${budgetOption === 'custom' ? 'selected' : ''}`}>
-              <input
-                type="radio"
-                name="budgetOption"
-                value="custom"
-                checked={budgetOption === 'custom'}
-                onChange={() => setBudgetOption('custom')}
-              />
-              <div className="option-content">
-                <div className="option-title-row">
-                  <span className="option-title">특정 금액 한도 설정</span>
-                </div>
-                <p className="option-desc">독립적인 일일 예산 금액을 직접 지정하여 관리합니다.</p>
+              <div className="option-header-row">
+                <input
+                  type="radio"
+                  name="budgetOption"
+                  value="custom"
+                  checked={budgetOption === 'custom'}
+                  onChange={() => setBudgetOption('custom')}
+                />
+                <span className="option-title">특정 금액 한도 설정</span>
               </div>
+              <p className="option-desc">독립적인 일일 예산 금액을 직접 지정하여 관리합니다.</p>
             </label>
           </div>
+
 
           {/* Custom Budget Amount Input Box */}
           {budgetOption === 'custom' && (
@@ -104,8 +100,8 @@ export function BudgetModal({
                   value={inputBudget} 
                   onChange={(e) => setInputBudget(e.target.value)}
                   placeholder="예: 50000"
-                  min="10000"
-                  step="10000"
+                  min="50"
+                  step="10"
                   autoFocus
                 />
                 <span className="budget-unit">원</span>
@@ -118,9 +114,9 @@ export function BudgetModal({
                 <button type="button" onClick={() => setInputBudget(prev => Number(prev || 0) + 100000)}>+10만</button>
                 <button type="button" onClick={() => setInputBudget(prev => Number(prev || 0) + 500000)}>+50만</button>
                 <button type="button" onClick={() => setInputBudget(prev => Number(prev || 0) + 1000000)}>+100만</button>
-                <button type="button" className="btn-reset" onClick={() => setInputBudget(10000)}>초기화</button>
+                <button type="button" className="btn-reset" onClick={() => setInputBudget(0)}>초기화</button>
               </div>
-              <span className="budget-limits-hint">* 네이버 규정상 한도 설정 시 최소 10,000원 이상 입력해야 합니다.</span>
+              <span className="budget-limits-hint">* 네이버 공식 규정상 한도 설정 시 최소 50원 이상(10원 단위) 입력해야 합니다.</span>
             </div>
           )}
         </div>

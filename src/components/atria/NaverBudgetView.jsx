@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { manageNaverApi } from '../../api';
 import { FavoriteGroupsSection } from './FavoriteGroupsSection';
 import { CampaignsTableSection } from './CampaignsTableSection';
@@ -6,8 +7,12 @@ import { BudgetModal } from './BudgetModal';
 import { FavoriteAssignmentModal } from './FavoriteAssignmentModal';
 import { ExcelUploadPreviewModal } from './ExcelUploadPreviewModal';
 import { ExcelDownloadWidget } from './ExcelDownloadWidget';
+import { BudgetLogDrawer } from './BudgetLogDrawer';
 
 export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
+  const { userName } = useAuth();
+  const currentUserName = userName || '관리자';
+
   // 날짜 조회 기간 설정: 어제가 소속한 월 범위
   const getDefaultDateRange = () => {
     const now = new Date();
@@ -30,6 +35,8 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
   const [expandedCampaignId, setExpandedCampaignId] = useState(null);
   const [adgroups, setAdgroups] = useState({});
   const [loadingAdgroups, setLoadingAdgroups] = useState(false);
+
+  const [isLogDrawerOpen, setIsLogDrawerOpen] = useState(false);
 
   const [selectedFavoriteGroupId, setSelectedFavoriteGroupId] = useState(null);
   const [favoriteGroups, setFavoriteGroups] = useState([]);
@@ -58,7 +65,7 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
   const [submittingBudget, setSubmittingBudget] = useState(false);
 
   // ON 상태 필터 토글
-  const [showOnlyOn, setShowOnlyOn] = useState(false);
+  const [showOnlyOn, setShowOnlyOn] = useState(true);
 
   // 토스트 알림 State
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -272,8 +279,11 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
       .filter(item => item.isValid)
       .map(item => ({
         adgroupId: item.adgroupId,
+        name: item.name,
         budget: item.budget,
-        useBudget: item.useBudget
+        useBudget: item.useBudget,
+        prevBudget: item.currentBudget,
+        parentCampaignId: item.parentCampaignId,
       }));
 
     if (validItems.length === 0) {
@@ -283,7 +293,7 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
 
     setExcelSubmitting(true);
     try {
-      const res = await manageNaverApi.updateAdgroupBudgets(validItems, customer);
+      const res = await manageNaverApi.updateAdgroupBudgets(validItems, customer, currentUserName);
       showToast(`일괄 수정 완료: 성공 ${res.successCount}건 / 실패 ${res.failureCount}건`, res.status === 'success' ? 'success' : 'error');
       setIsExcelModalOpen(false);
       setExcelPreviewData(null);
@@ -315,7 +325,7 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
     }
     setLoadingFavorites(true);
     try {
-      await manageNaverApi.createFavoriteGroup(name, budget, customer);
+      await manageNaverApi.createFavoriteGroup(name, budget, customer, currentUserName);
       setNewGroupName('');
       setNewGroupBudget('');
       const groups = await fetchFavoriteGroups();
@@ -340,7 +350,7 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
     }
     setLoadingFavorites(true);
     try {
-      await manageNaverApi.updateFavoriteGroup(groupId, name, budget, customer);
+      await manageNaverApi.updateFavoriteGroup(groupId, name, budget, customer, currentUserName);
       setEditingBudgetGroupId(null);
       const groups = await fetchFavoriteGroups();
       const selectedGroup = groups.find(item => item.id === selectedFavoriteGroupId);
@@ -369,34 +379,42 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
     }
   };
 
-  const toggleGroupMembership = async (e, group, target) => {
-    e.stopPropagation();
-    const isMember = group.members.some(member => member.adgroupId === target.adgroupId);
-    const pendingKey = `${group.id}:${target.adgroupId}`;
-    setPendingFavoriteKeys(prev => new Set(prev).add(pendingKey));
-    try {
-      if (isMember) {
-        await manageNaverApi.removeFavoriteGroupMember(group.id, target.adgroupId, customer);
-      } else {
-        await manageNaverApi.addFavoriteGroupMember(
-          group.id,
-          target.adgroupId,
-          target.parentCampaignId,
-          customer
-        );
+  const handleSaveFavoriteAssignment = async (selectedIds, initialSelectedIds, target) => {
+    const targetAdgroupId = target.adgroupId || target.id;
+    const parentCampaignId = target.parentCampaignId;
+
+    const toAdd = [];
+    const toRemove = [];
+
+    favoriteGroups.forEach(group => {
+      const wasMember = initialSelectedIds.has(group.id);
+      const isNowMember = selectedIds.has(group.id);
+      if (!wasMember && isNowMember) {
+        toAdd.push(group.id);
+      } else if (wasMember && !isNowMember) {
+        toRemove.push(group.id);
       }
+    });
+
+    if (toAdd.length === 0 && toRemove.length === 0) {
+      return;
+    }
+
+    try {
+      for (const groupId of toAdd) {
+        await manageNaverApi.addFavoriteGroupMember(groupId, targetAdgroupId, parentCampaignId, customer);
+      }
+      for (const groupId of toRemove) {
+        await manageNaverApi.removeFavoriteGroupMember(groupId, targetAdgroupId, customer);
+      }
+
       const groups = await fetchFavoriteGroups();
       const selectedGroup = groups.find(item => item.id === selectedFavoriteGroupId);
       if (selectedGroup) await loadFavoriteGroupAdgroups(selectedGroup);
-      showToast(isMember ? '즐겨찾기 그룹에서 제외했습니다.' : '즐겨찾기 그룹에 추가했습니다.');
+      showToast('즐겨찾기 그룹 설정이 저장되었습니다.');
     } catch (err) {
-      showToast(`즐겨찾기 반영 실패: ${err.message}`, 'error');
-    } finally {
-      setPendingFavoriteKeys(prev => {
-        const next = new Set(prev);
-        next.delete(pendingKey);
-        return next;
-      });
+      showToast(`즐겨찾기 설정 저장 실패: ${err.message}`, 'error');
+      throw err;
     }
   };
 
@@ -411,9 +429,13 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
       initialOption = type === 'adgroup' ? 'campaign' : 'unlimited';
     }
 
+    const targetId = type === 'campaign' 
+      ? (target.nccCampaignId || target.id) 
+      : (target.nccAdgroupId || target.id);
+
     setModalTarget({
       type,
-      id: target.nccCampaignId || target.nccAdgroupId,
+      id: targetId,
       name: target.name,
       currentBudget,
       currentUseBudget,
@@ -437,20 +459,28 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
     } else {
       targetUseBudget = true;
       targetBudget = Number(inputBudget);
-      if (isNaN(targetBudget) || targetBudget < 10000) {
-        showToast('특정 금액 설정 시 최소 10,000원 이상 입력해야 합니다.', 'error');
+      if (isNaN(targetBudget) || targetBudget < 50) {
+        showToast('특정 금액 설정 시 최소 50원 이상 입력해야 합니다.', 'error');
         return;
       }
     }
 
     setSubmittingBudget(true);
     try {
-      const { type, id, parentCampaignId } = modalTarget;
+      const { type, id, parentCampaignId, name, currentBudget, currentUseBudget } = modalTarget;
       let res;
+      const metaOptions = {
+        name,
+        parentCampaignId,
+        prevBudget: currentBudget,
+        prevUseBudget: currentUseBudget,
+        userName: currentUserName,
+      };
+
       if (type === 'campaign') {
-        res = await manageNaverApi.updateCampaignBudget(id, targetBudget, targetUseBudget, customer);
+        res = await manageNaverApi.updateCampaignBudget(id, targetBudget, targetUseBudget, customer, metaOptions);
       } else {
-        res = await manageNaverApi.updateAdgroupBudget(id, targetBudget, targetUseBudget, customer);
+        res = await manageNaverApi.updateAdgroupBudget(id, targetBudget, targetUseBudget, customer, metaOptions);
       }
 
       if (res.status === 'success') {
@@ -558,6 +588,14 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
             <span>ON 상태만 보기</span>
           </label>
           <button 
+            className="header-log-btn"
+            onClick={() => setIsLogDrawerOpen(true)}
+            title="예산 변경 이력(로그) 보기"
+          >
+            <span className="material-symbols-outlined">history</span>
+            <span>변경 이력</span>
+          </button>
+          <button 
             className="refresh-btn" 
             onClick={async () => {
               fetchCampaigns();
@@ -661,8 +699,7 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
       <FavoriteAssignmentModal
         assignmentTarget={assignmentTarget}
         favoriteGroups={favoriteGroups}
-        pendingFavoriteKeys={pendingFavoriteKeys}
-        onToggleMembership={toggleGroupMembership}
+        onSave={handleSaveFavoriteAssignment}
         onClose={() => setAssignmentTarget(null)}
       />
 
@@ -695,6 +732,13 @@ export function NaverBudgetView({ customer = 'atria', onApiStatusChange }) {
 
       {/* 엑셀 다운로드 로딩 플로팅 위젯 */}
       <ExcelDownloadWidget isVisible={excelDownloading} />
+
+      {/* 예산 변경 이력 슬라이딩 드로어 */}
+      <BudgetLogDrawer
+        isOpen={isLogDrawerOpen}
+        onClose={() => setIsLogDrawerOpen(false)}
+        customer={customer}
+      />
 
       {/* 토스트 알림 */}
       {toast.show && (

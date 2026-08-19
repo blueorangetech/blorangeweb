@@ -783,7 +783,8 @@
   color: #0f172a;
 }
 
-.modal-body {
+.detail-modal .modal-body,
+.variation-modal .modal-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;

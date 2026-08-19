@@ -41,12 +41,12 @@ export class ManageNaverApi {
     });
   }
 
-  createFavoriteGroup(name, budget, customer = 'atria') {
-    return this.client.post('/manage/naver/favorite-groups', { name, budget }, { customer });
+  createFavoriteGroup(name, budget, customer = 'atria', userName) {
+    return this.client.post('/manage/naver/favorite-groups', { name, budget, userName }, { customer });
   }
 
-  updateFavoriteGroup(groupId, name, budget, customer = 'atria') {
-    return this.client.put(`/manage/naver/favorite-groups/${groupId}`, { name, budget }, { customer });
+  updateFavoriteGroup(groupId, name, budget, customer = 'atria', userName) {
+    return this.client.put(`/manage/naver/favorite-groups/${groupId}`, { name, budget, userName }, { customer });
   }
 
   deleteFavoriteGroup(groupId, customer = 'atria') {
@@ -129,17 +129,24 @@ export class ManageNaverApi {
     return response.json();
   }
 
-  updateAdgroupBudgets(items, customer = 'atria') {
-    return this.client.put('/manage/naver/adgroups/bulk-budget', { items }, { customer });
+  updateAdgroupBudgets(items, customer = 'atria', userName) {
+    return this.client.put('/manage/naver/adgroups/bulk-budget', { items, userName }, { customer });
   }
 
   /**
    * 캠페인 예산 변경
    */
-  updateCampaignBudget(campaignId, budget, useBudget, customer = 'atria') {
+  updateCampaignBudget(campaignId, budget, useBudget, customer = 'atria', options = {}) {
     return this.client.put(
       `/manage/naver/campaigns/${campaignId}/budget`,
-      { budget, useBudget },
+      {
+        budget,
+        useBudget,
+        name: options.name,
+        prevBudget: options.prevBudget,
+        prevUseBudget: options.prevUseBudget,
+        userName: options.userName,
+      },
       { customer }
     );
   }
@@ -147,13 +154,51 @@ export class ManageNaverApi {
   /**
    * 광고그룹 예산 변경
    */
-  updateAdgroupBudget(adgroupId, budget, useBudget, customer = 'atria') {
+  updateAdgroupBudget(adgroupId, budget, useBudget, customer = 'atria', options = {}) {
     return this.client.put(
       `/manage/naver/adgroups/${adgroupId}/budget`,
-      { budget, useBudget },
+      {
+        budget,
+        useBudget,
+        name: options.name,
+        parentCampaignId: options.parentCampaignId,
+        prevBudget: options.prevBudget,
+        prevUseBudget: options.prevUseBudget,
+        userName: options.userName,
+      },
       { customer }
     );
+  }
+
+  /**
+   * 예산 변경 이력(로그) 조회
+   */
+  getBudgetLogs(params = {}) {
+    const {
+      customer = 'atria',
+      media = 'naver',
+      startDate,
+      endDate,
+      targetType,
+      changeType,
+      search,
+      page = 1,
+      pageSize = 50,
+    } = params;
+
+    return this.client.get('/manage/naver/logs', {
+      customer,
+      media,
+      startDate,
+      endDate,
+      targetType: targetType !== 'all' ? targetType : undefined,
+      changeType: changeType !== 'all' ? changeType : undefined,
+      search: search || undefined,
+      page,
+      pageSize,
+    });
   }
 }
 
 export const manageNaverApi = new ManageNaverApi();
+
