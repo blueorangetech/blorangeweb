@@ -10,6 +10,7 @@ export { default as LoginRequiredCard } from './LoginRequiredCard';
 export { default as AccessDeniedCard } from './AccessDeniedCard';
 export { default as ImageLibrary } from './ImageLibrary/index.jsx';
 export { default as ClientSidebar } from './common/ClientSidebar';
+export * from './atria';
 
 
 

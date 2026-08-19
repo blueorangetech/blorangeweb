@@ -20,7 +20,7 @@ function TitleUpdater() {
       '/imweb': '아임웹',
       '/hanssem': '한샘',
       '/hanssem_hf': '한샘 홈퍼니싱',
-      '/atria': '아트리아',
+      '/atria': 'Atria',
       '/playground': 'Play Ground',
       '/test': '제안용 대시보드',
     };

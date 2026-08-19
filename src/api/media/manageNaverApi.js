@@ -33,6 +33,106 @@ export class ManageNaverApi {
     });
   }
 
+  getFavoriteGroups(customer = 'atria', startDate, endDate) {
+    return this.client.get('/manage/naver/favorite-groups', {
+      customer,
+      start_date: startDate,
+      end_date: endDate
+    });
+  }
+
+  createFavoriteGroup(name, budget, customer = 'atria') {
+    return this.client.post('/manage/naver/favorite-groups', { name, budget }, { customer });
+  }
+
+  updateFavoriteGroup(groupId, name, budget, customer = 'atria') {
+    return this.client.put(`/manage/naver/favorite-groups/${groupId}`, { name, budget }, { customer });
+  }
+
+  deleteFavoriteGroup(groupId, customer = 'atria') {
+    return this.client.delete(`/manage/naver/favorite-groups/${groupId}`, { customer });
+  }
+
+  addFavoriteGroupMember(groupId, adgroupId, parentCampaignId, customer = 'atria') {
+    return this.client.put(
+      `/manage/naver/favorite-groups/${groupId}/adgroups/${adgroupId}`,
+      { parentCampaignId },
+      { customer }
+    );
+  }
+
+  removeFavoriteGroupMember(groupId, adgroupId, customer = 'atria') {
+    return this.client.delete(
+      `/manage/naver/favorite-groups/${groupId}/adgroups/${adgroupId}`,
+      { customer }
+    );
+  }
+
+  async downloadFavoriteGroupExcel(groupId, customer = 'atria', startDate, endDate) {
+    const url = this.client.buildUrl(`/manage/naver/favorite-groups/${groupId}/export`, {
+      customer,
+      start_date: startDate,
+      end_date: endDate
+    });
+    const response = await fetch(url);
+    if (!response.ok) {
+      let message = '엑셀 파일을 다운로드하지 못했습니다.';
+      try {
+        const error = await response.json();
+        message = error.detail || message;
+      } catch {
+        // JSON 오류 응답이 아닌 경우 기본 메시지를 사용한다.
+      }
+      throw new Error(message);
+    }
+    return response.blob();
+  }
+
+  async downloadAllAdgroupsExcel(customer = 'atria', startDate, endDate) {
+    const url = this.client.buildUrl('/manage/naver/adgroups/export-excel', {
+      customer,
+      start_date: startDate,
+      end_date: endDate
+    });
+    const response = await fetch(url);
+    if (!response.ok) {
+      let message = '전체 광고그룹 엑셀 파일을 다운로드하지 못했습니다.';
+      try {
+        const error = await response.json();
+        message = error.detail || message;
+      } catch {
+        // ignore
+      }
+      throw new Error(message);
+    }
+    return response.blob();
+  }
+
+  async uploadAdgroupBudgetExcel(file, customer = 'atria') {
+    const formData = new FormData();
+    formData.append('file', file);
+    const url = this.client.buildUrl('/manage/naver/adgroups/upload-excel', { customer });
+    const response = await fetch(url, {
+      method: 'POST',
+      body: formData
+    });
+    if (!response.ok) {
+      let message = '엑셀 파일 업로드에 실패했습니다.';
+      try {
+        const error = await response.json();
+        message = error.detail || message;
+      } catch {
+        // ignore
+      }
+      throw new Error(message);
+    }
+    return response.json();
+  }
+
+  updateAdgroupBudgets(items, customer = 'atria') {
+    return this.client.put('/manage/naver/adgroups/bulk-budget', { items }, { customer });
+  }
+
   /**
    * 캠페인 예산 변경
    */
