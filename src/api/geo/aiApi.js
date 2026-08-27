@@ -35,6 +35,35 @@ export class AiApi {
       assets: payloadAssets,
     });
   }
+
+  uploadPsd(file, { pageName = 'playground', bucketName } = {}) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('page_name', pageName);
+    if (bucketName) formData.append('bucket_name', bucketName);
+    return this.client.post('/api/ai/psd/documents', formData);
+  }
+
+  getPsdDocument(documentId, bucketName) {
+    return this.client.get(`/api/ai/psd/documents/${documentId}`,
+      bucketName ? { bucket_name: bucketName } : {});
+  }
+
+  revisePsd(documentId, payload) {
+    return this.client.post(`/api/ai/psd/documents/${documentId}/revisions`, payload);
+  }
+
+  generatePsdVariations(documentId, payload) {
+    return this.client.post(`/api/ai/psd/documents/${documentId}/variations`, payload);
+  }
+
+  adjustPsdPlacementVariation(documentId, placementKey, payload) {
+    return this.client.post(`/api/ai/psd/documents/${documentId}/variations/${placementKey}/adjust`, payload);
+  }
+
+  regeneratePsdPlacementLayerImage(documentId, placementKey, payload) {
+    return this.client.post(`/api/ai/psd/documents/${documentId}/variations/${placementKey}/regenerate-image`, payload);
+  }
 }
 
 export const aiApi = new AiApi();

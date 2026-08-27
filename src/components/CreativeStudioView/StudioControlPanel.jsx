@@ -19,7 +19,6 @@ function StudioControlPanel({
   virtualModelPose,
   virtualModelScene,
   virtualModelPrompt,
-  recommendedPrompts,
   onDragOver,
   onDrop,
   onFileChange,
@@ -35,7 +34,6 @@ function StudioControlPanel({
   setVirtualModelScene,
   setVirtualModelPrompt,
   onOptionChange,
-  onApplyRecommendedPrompt,
   onGenerate
 }) {
   return (
@@ -98,8 +96,8 @@ function StudioControlPanel({
             {[
               { id: 'transparent', label: '투명 배경', icon: 'layers_clear', desc: '배경을 지우고 피사체만 추출' },
               { id: 'color', label: '단색 컬러', icon: 'palette', desc: '원하는 색상으로 배경 채우기' },
-              { id: 'generated', label: 'AI 배경 생성', icon: 'auto_awesome', desc: '문장 묘사 기반 AI 배경 합성' },
-              { id: 'virtualModel', label: '가상 모델 피팅', icon: 'checkroom', desc: '상품을 가상 피팅 모델에 합성' },
+              { id: 'virtualModel', label: '가상 모델', icon: 'checkroom', desc: '상품을 가상 피팅 모델에 합성' },
+              { id: 'generated', label: 'AI 배경', icon: 'auto_awesome', desc: '문장 묘사 기반 AI 배경 합성' },
             ].map((t) => (
               <button
                 key={t.id}
@@ -144,22 +142,10 @@ function StudioControlPanel({
               <textarea
                 value={backgroundPrompt}
                 onChange={(e) => setBackgroundPrompt(e.target.value)}
-                placeholder="생성하고 싶은 배경의 묘사를 영어로 입력하세요..."
+                placeholder="생성하고 싶은 배경을 입력하세요..."
                 rows={4}
               />
-              <div className="recommend-chips">
-                <span className="chips-title">추천 프롬프트:</span>
-                {recommendedPrompts.map((p, idx) => (
-                  <button
-                    key={idx}
-                    className="prompt-chip"
-                    onClick={() => onApplyRecommendedPrompt(p)}
-                    title={p}
-                  >
-                    {idx + 1}. {p.substring(0, 20)}...
-                  </button>
-                ))}
-              </div>
+              
             </div>
           )}
 

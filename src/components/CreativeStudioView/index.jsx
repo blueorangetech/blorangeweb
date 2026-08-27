@@ -7,14 +7,14 @@ import { aiApi } from '../../api';
 const SAMPLE_BEFORE_IMAGE = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=600&auto=format&fit=crop';
 const SAMPLE_AFTER_IMAGE = 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?q=80&w=600&auto=format&fit=crop';
 
-function CreativeStudioView({ onGoToLibrary, embedded = false }) {
+function CreativeStudioView({ onGoToLibrary, embedded = false, pageName = 'playground', bucketName }) {
   const [imageUrl, setImageUrl] = useState('');
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState('');
 
   const [backgroundMode, setBackgroundMode] = useState('generated');
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
-  const [backgroundPrompt, setBackgroundPrompt] = useState('부드럽고 따뜻한 조명과 콘크리트 바닥이 어우러진, 전문적이고 미니멀한 현대적 스튜디오 쇼룸');
+  const [backgroundPrompt, setBackgroundPrompt] = useState('');
   const [shadowMode, setShadowMode] = useState('ai.soft');
   const [padding, setPadding] = useState(0);
   const [aspectRatio, setAspectRatio] = useState('1:1');
@@ -102,7 +102,10 @@ function CreativeStudioView({ onGoToLibrary, embedded = false }) {
       setProcessStatus('AI 피사체 추출 및 스튜디오 배경 연출 중...');
 
       const payload = {
+        message: backgroundPrompt || '',
         image_url: finalImageUrl,
+        page_name: pageName,
+        bucket_name: bucketName || undefined,
         background_mode: backgroundMode,
         background_color: backgroundColor,
         background_prompt: backgroundPrompt,
@@ -156,13 +159,6 @@ function CreativeStudioView({ onGoToLibrary, embedded = false }) {
     setBackgroundMode('generated');
   };
 
-  const recommendedPrompts = [
-    '세련된 화이트 대리석 상판과 따뜻한 펜던트 조명이 어우러진 모던한 주방 쇼룸',
-    '원목 바닥과 창가로 화사한 햇살이 비치는 아늑하고 고급스러운 북유럽풍 거실',
-    '가구 광고 촬영에 최적화된 프로페셔널 스튜디오 조명의 깔끔하고 미니멀한 단색 배경',
-    '우아한 원형 석고 오브제 받침대가 배치된 은은하고 부드러운 파스텔톤 배경'
-  ];
-
   const currentInputImage = filePreview || imageUrl || SAMPLE_BEFORE_IMAGE;
 
   return (
@@ -184,7 +180,6 @@ function CreativeStudioView({ onGoToLibrary, embedded = false }) {
           virtualModelPose={virtualModelPose}
           virtualModelScene={virtualModelScene}
           virtualModelPrompt={virtualModelPrompt}
-          recommendedPrompts={recommendedPrompts}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           onFileChange={handleFileChange}
@@ -200,7 +195,6 @@ function CreativeStudioView({ onGoToLibrary, embedded = false }) {
           setVirtualModelScene={setVirtualModelScene}
           setVirtualModelPrompt={setVirtualModelPrompt}
           onOptionChange={handleOptionChange}
-          onApplyRecommendedPrompt={applyRecommendedPrompt}
           onGenerate={handleGenerate}
         />
 

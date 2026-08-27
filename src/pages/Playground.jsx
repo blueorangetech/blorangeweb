@@ -5,6 +5,8 @@ import {
   Footer,
   CreativeStudioView,
   VariationStudioView,
+  PsdVariationStudioView,
+  CreativeStudioTabNav,
   UserManagement,
   LoginRequiredCard,
   AccessDeniedCard,
@@ -56,7 +58,7 @@ function Playground() {
   } = useAuth();
 
   const [activeMenu, setActiveMenu] = useState('creative-ai-studio');
-  const [creativeTab, setCreativeTab] = useState('product'); // 'product' 또는 'banner'
+  const [creativeTab, setCreativeTab] = useState('product');
 
   useEffect(() => {
     checkAuth('playground', true);
@@ -101,46 +103,14 @@ function Playground() {
           <div className="viewport-content" style={{ flex: 1, padding: '24px 32px', backgroundColor: '#f8fafc', overflowY: 'auto' }}>
             {activeMenu === 'creative-ai-studio' && (
               <div>
-                {/* 상단 서브 탭 */}
-                <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem' }}>
-                  <button
-                    onClick={() => setCreativeTab('product')}
-                    style={{
-                      padding: '0.5rem 1.25rem',
-                      fontWeight: 700,
-                      fontSize: '0.9rem',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      border: 'none',
-                      backgroundColor: creativeTab === 'product' ? '#2563eb' : '#f1f5f9',
-                      color: creativeTab === 'product' ? '#ffffff' : '#475569',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    AI 제품 연출
-                  </button>
-                  <button
-                    onClick={() => setCreativeTab('banner')}
-                    style={{
-                      padding: '0.5rem 1.25rem',
-                      fontWeight: 700,
-                      fontSize: '0.9rem',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      border: 'none',
-                      backgroundColor: creativeTab === 'banner' ? '#2563eb' : '#f1f5f9',
-                      color: creativeTab === 'banner' ? '#ffffff' : '#475569',
-                      transition: 'all 0.2s ease'
-                    }}
-                  >
-                    AI 배너 양산
-                  </button>
-                </div>
+                <CreativeStudioTabNav activeTab={creativeTab} onChange={setCreativeTab} />
                 
                 {creativeTab === 'product' ? (
                   <CreativeStudioView embedded={true} onGoToLibrary={() => setActiveMenu('library')} />
-                ) : (
+                ) : creativeTab === 'variation' ? (
                   <VariationStudioView embedded={true} />
+                ) : (
+                  <PsdVariationStudioView embedded={true} pageName="playground" />
                 )}
               </div>
             )}

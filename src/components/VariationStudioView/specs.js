@@ -1,5 +1,5 @@
 // 매체별 타겟 규격 및 글자수 제한 스펙 정의
-export const PLACEMENT_SPECS_MAP = [
+const PLACEMENT_SPECS_BASE = [
   // 1. Meta (Instagram / Facebook)
   { key: 'meta_feed_1_1', channel: 'Meta (Instagram)', channelKey: 'meta', aspectClass: 'ratio-1-1', maxHeadLen: 25, maxSubLen: 50, format: '피드 정방형 (1:1 - 1080x1080)' },
   { key: 'meta_feed_4_5', channel: 'Meta (Instagram)', channelKey: 'meta', aspectClass: 'ratio-4-5', maxHeadLen: 25, maxSubLen: 50, format: '피드 세로형 (4:5 - 1080x1350)' },
@@ -25,6 +25,20 @@ export const PLACEMENT_SPECS_MAP = [
   { key: 'kakao_feed_1_1', channel: 'Kakao Moment', channelKey: 'kakao', aspectClass: 'ratio-1-1', maxHeadLen: 25, maxSubLen: 45, format: '톡피드 정방형 (1:1 - 1200x1200)' },
   { key: 'kakao_display_2_1', channel: 'Kakao Moment', channelKey: 'kakao', aspectClass: 'ratio-2-1', maxHeadLen: 30, maxSubLen: 60, format: '메인 와이드 배너 (2:1 - 1200x600)' }
 ];
+
+const PLACEMENT_DIMENSIONS = {
+  meta_feed_1_1: [1080, 1080], meta_feed_4_5: [1080, 1350], meta_reels_9_16: [1080, 1920],
+  tiktok_story_9_16: [1080, 1920], tiktok_feed_1_1: [1080, 1080],
+  naver_smart_4_7: [750, 160], naver_feed_1_1: [1200, 1200], naver_main_2_2: [1250, 560],
+  naver_feed_2_3: [1200, 1800], google_landscape_1_91: [1200, 628],
+  google_square_1_1: [1200, 1200], google_shorts_9_16: [1080, 1920],
+  kakao_bizboard_2_1: [1029, 507], kakao_feed_1_1: [1200, 1200], kakao_display_2_1: [1200, 600]
+};
+
+export const PLACEMENT_SPECS_MAP = PLACEMENT_SPECS_BASE.map((spec) => {
+  const [width, height] = PLACEMENT_DIMENSIONS[spec.key];
+  return { ...spec, width, height, aspectRatio: `${width}:${height}` };
+});
 
 export const PLACEMENT_GROUPS = [
   {

@@ -61,7 +61,17 @@ export class ApiClient {
       } catch (e) {
         // 응답이 JSON 형식이 아닐 때 예외 처리
       }
-      const errorMessage = errorData.detail || errorData.message || `API 요청에 실패했습니다. (상태 코드: ${response.status})`;
+      const rawDetail = errorData.detail || errorData.message;
+      let errorMessage = `API 요청에 실패했습니다. (상태 코드: ${response.status})`;
+      if (typeof rawDetail === 'string') {
+        errorMessage = rawDetail;
+      } else if (Array.isArray(rawDetail)) {
+        errorMessage = rawDetail
+          .map((item) => (typeof item === 'string' ? item : item.msg || (item.loc ? `${item.loc.join('.')}: ${item.msg}` : JSON.stringify(item))))
+          .join(', ');
+      } else if (rawDetail && typeof rawDetail === 'object') {
+        errorMessage = rawDetail.msg || rawDetail.message || JSON.stringify(rawDetail);
+      }
       throw new Error(errorMessage);
     }
 
