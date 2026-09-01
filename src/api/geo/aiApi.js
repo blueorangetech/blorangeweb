@@ -10,11 +10,33 @@ export class AiApi {
     this.client = mainClient;
   }
 
-  /**
-   * PhotoRoom AI 피사체 추출 및 배경 합성 (GEO 백엔드 호출)
-   */
-  processPhotoRoom(payload) {
-    return this.client.post('/api/ai/photoroom', payload);
+  generateMultipleAngles(file, { pageName = 'playground', bucketName, angles = [] } = {}) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('page_name', pageName);
+    formData.append('angles', JSON.stringify(angles));
+    if (bucketName) formData.append('bucket_name', bucketName);
+    return this.client.post('/api/ai/comfy/multiple-angles', formData);
+  }
+
+  removeBackground(file, { backgroundMode = 'Alpha', backgroundColor = '#FFFFFF', pageName = 'playground', bucketName } = {}) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('background_mode', backgroundMode);
+    formData.append('background_color', backgroundColor);
+    formData.append('page_name', pageName);
+    if (bucketName) formData.append('bucket_name', bucketName);
+    return this.client.post('/api/ai/comfy/remove-background', formData);
+  }
+
+  restyleImage(file, { prompt, pageName = 'playground', bucketName, seed } = {}) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('prompt', prompt);
+    formData.append('page_name', pageName);
+    if (bucketName) formData.append('bucket_name', bucketName);
+    if (seed) formData.append('seed', seed);
+    return this.client.post('/api/ai/comfy/restyle', formData);
   }
 
   /**

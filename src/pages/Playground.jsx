@@ -4,9 +4,6 @@ import {
   DashboardHeader,
   Footer,
   CreativeStudioView,
-  VariationStudioView,
-  PsdVariationStudioView,
-  CreativeStudioTabNav,
   UserManagement,
   LoginRequiredCard,
   AccessDeniedCard,
@@ -58,7 +55,6 @@ function Playground() {
   } = useAuth();
 
   const [activeMenu, setActiveMenu] = useState('creative-ai-studio');
-  const [creativeTab, setCreativeTab] = useState('product');
 
   useEffect(() => {
     checkAuth('playground', true);
@@ -102,17 +98,7 @@ function Playground() {
           />
           <div className="viewport-content" style={{ flex: 1, padding: '24px 32px', backgroundColor: '#f8fafc', overflowY: 'auto' }}>
             {activeMenu === 'creative-ai-studio' && (
-              <div>
-                <CreativeStudioTabNav activeTab={creativeTab} onChange={setCreativeTab} />
-                
-                {creativeTab === 'product' ? (
-                  <CreativeStudioView embedded={true} onGoToLibrary={() => setActiveMenu('library')} />
-                ) : creativeTab === 'variation' ? (
-                  <VariationStudioView embedded={true} />
-                ) : (
-                  <PsdVariationStudioView embedded={true} pageName="playground" />
-                )}
-              </div>
+              <CreativeStudioView embedded={true} onGoToLibrary={() => setActiveMenu('library')} />
             )}
             {activeMenu === 'library' && (
               <main className="hanssem-main" style={{ margin: '0 auto 3rem', padding: '3rem 2rem', background: 'white', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)' }}>

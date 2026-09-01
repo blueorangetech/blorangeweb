@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import '../../../styles/VariationStudioView.css';
 import PsdSetupPanel from '../panels/PsdSetupPanel';
 import PsdVariationCard from '../PsdVariationCard';
 import PsdLayerEditorModal from '../PsdLayerEditorModal';

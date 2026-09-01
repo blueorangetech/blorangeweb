@@ -8,9 +8,6 @@ import {
   ImageLibrary,
   ClientSidebar,
   CreativeStudioView,
-  VariationStudioView,
-  PsdVariationStudioView,
-  CreativeStudioTabNav
 } from '../components';
 import {
   TrendView as CommonTrendView,
@@ -37,7 +34,6 @@ function HanssemHf() {
   } = useAuth();
 
   const [activeMenu, setActiveMenu] = useState('report-overview');
-  const [creativeTab, setCreativeTab] = useState('product');
   const [uploadStatus, setUploadStatus] = useState({ type: '', message: '' });
   const [startDate, setStartDate] = useState(new Date('2026-06-01'));
   const [endDate, setEndDate] = useState(new Date('2026-06-15'));
@@ -171,17 +167,7 @@ function HanssemHf() {
               <CommonMediaMixCompareView datasetId="hanssem_hf" />
             )}
             {activeMenu === 'creative-ai-studio' && (
-              <div>
-                <CreativeStudioTabNav activeTab={creativeTab} onChange={setCreativeTab} />
-                
-                {creativeTab === 'product' ? (
-                  <CreativeStudioView embedded={true} pageName="hanssem_hf" bucketName="hanssem_hf" />
-                ) : creativeTab === 'variation' ? (
-                  <VariationStudioView embedded={true} />
-                ) : (
-                  <PsdVariationStudioView embedded={true} pageName="hanssem_hf" bucketName="hanssem_hf" />
-                )}
-              </div>
+              <CreativeStudioView embedded={true} pageName="hanssem_hf" bucketName="hanssem_hf" />
             )}
             {activeMenu === 'creative-library' && (
               <main className="hanssem-main" style={{ margin: '0 auto 3rem', padding: '3rem 2rem', background: 'white', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)' }}>

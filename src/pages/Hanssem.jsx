@@ -4,9 +4,6 @@ import {
   Footer,
   UserManagement,
   CreativeStudioView,
-  VariationStudioView,
-  PsdVariationStudioView,
-  CreativeStudioTabNav,
   ImageLibrary,
   LoginRequiredCard,
   AccessDeniedCard,
@@ -37,7 +34,6 @@ function Hanssem() {
   } = useAuth();
 
   const [activeMenu, setActiveMenu] = useState('report-overview');
-  const [creativeTab, setCreativeTab] = useState('product');
   const [uploadStatus, setUploadStatus] = useState({ type: '', message: '' });
   const [startDate, setStartDate] = useState(new Date('2026-01-16'));
   const [endDate, setEndDate] = useState(new Date('2026-01-31'));
@@ -162,17 +158,7 @@ function Hanssem() {
               <CommonMediaMixCompareView datasetId="hanssem" />
             )}
             {activeMenu === 'creative-ai-studio' && (
-              <div>
-                <CreativeStudioTabNav activeTab={creativeTab} onChange={setCreativeTab} />
-                
-                {creativeTab === 'product' ? (
-                  <CreativeStudioView embedded={true} pageName="hanssem" bucketName="hanssem_rh" />
-                ) : creativeTab === 'variation' ? (
-                  <VariationStudioView embedded={true} />
-                ) : (
-                  <PsdVariationStudioView embedded={true} pageName="hanssem" bucketName="hanssem_rh" />
-                )}
-              </div>
+              <CreativeStudioView embedded={true} pageName="hanssem" bucketName="hanssem_rh" />
             )}
             {activeMenu === 'creative-library' && (
               <main className="hanssem-main" style={{ margin: '0 auto 3rem', padding: '3rem 2rem', background: 'white', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)' }}>
