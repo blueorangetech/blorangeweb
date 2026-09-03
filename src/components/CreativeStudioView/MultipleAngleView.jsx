@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import StudioLoadingState from './StudioLoadingState';
 import { aiApi } from '../../api';
+import { downloadFileFromUrl } from '../../utils/downloadUtils';
 
 const ANGLES = [
   ['close_up', '클로즈업'], ['wide_shot', '와이드 앵글'], ['45_right', '오른쪽 45°'], ['90_right', '오른쪽 90°'],
@@ -40,19 +41,23 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
     }
   };
 
-  const handleDownloadAll = () => {
-    images.forEach((img, idx) => {
-      setTimeout(() => {
-        const link = document.createElement('a');
-        link.href = img.url;
-        link.download = img.filename || `${img.label || `angle_${idx + 1}`}.png`;
-        link.target = '_blank';
-        link.rel = 'noreferrer';
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      }, idx * 250);
-    });
+  const [downloadingAll, setDownloadingAll] = useState(false);
+
+  const handleDownloadAll = async () => {
+    if (!images.length || downloadingAll) return;
+    setDownloadingAll(true);
+    try {
+      for (let idx = 0; idx < images.length; idx++) {
+        const img = images[idx];
+        const filename = img.filename || `${img.label || `angle_${idx + 1}`}.png`;
+        await downloadFileFromUrl(img.url, filename);
+        if (idx < images.length - 1) {
+          await new Promise((r) => setTimeout(r, 200));
+        }
+      }
+    } finally {
+      setDownloadingAll(false);
+    }
   };
 
   return (
@@ -179,9 +184,12 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
                 className="btn-download-result"
                 style={{ padding: '4px 10px', fontSize: '0.75rem' }}
                 onClick={handleDownloadAll}
+                disabled={downloadingAll}
               >
-                <span className="material-symbols-outlined" style={{ fontSize: '15px' }}>download</span>
-                전체 다운로드
+                <span className={`material-symbols-outlined ${downloadingAll ? 'spinning' : ''}`} style={{ fontSize: '15px' }}>
+                  {downloadingAll ? 'sync' : 'download'}
+                </span>
+                {downloadingAll ? '다운로드 중...' : '전체 다운로드'}
               </button>
             </div>
           )}
@@ -208,14 +216,18 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
           ) : images.length ? (
             <div className="angle-result-grid">
               {images.map((image) => (
-                <a
+                <div
                   key={image.url}
-                  href={image.url}
-                  download={image.filename || `${image.label || 'angle'}.png`}
-                  target="_blank"
-                  rel="noreferrer"
+                  onClick={() => downloadFileFromUrl(image.url, image.filename || `${image.label || 'angle'}.png`)}
                   className="angle-result-item"
                   title={`${image.label || image.filename} (클릭하여 이미지 다운로드)`}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      downloadFileFromUrl(image.url, image.filename || `${image.label || 'angle'}.png`);
+                    }
+                  }}
                 >
                   <div className="angle-result-image-box">
                     <img src={image.url} alt={image.label || '생성된 다양한 각도'} />
@@ -227,7 +239,7 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
                       다운로드
                     </span>
                   </div>
-                </a>
+                </div>
               ))}
             </div>
           ) : (

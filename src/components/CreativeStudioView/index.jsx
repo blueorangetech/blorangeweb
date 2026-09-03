@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import MultipleAngleView from './MultipleAngleView';
 import RemoveBackgroundView from './RemoveBackgroundView';
 import RestyleView from './RestyleView';
+import PhotoRoomStudioView from './photoroom/PhotoRoomStudioView';
 import '../../styles/CreativeStudioView.css';
 
 function CreativeStudioView({ onGoToLibrary, embedded = false, pageName = 'playground', bucketName }) {
@@ -37,8 +38,24 @@ function CreativeStudioView({ onGoToLibrary, embedded = false, pageName = 'playg
         >
           <span className="material-symbols-outlined">brush</span>리스타일
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'photoroom'}
+          className={activeTab === 'photoroom' ? 'active' : ''}
+          onClick={() => setActiveTab('photoroom')}
+        >
+          <span className="material-symbols-outlined">auto_fix_high</span>포토룸 AI
+        </button>
       </div>
-      {activeTab === 'restyle' ? (
+      {activeTab === 'photoroom' ? (
+        <PhotoRoomStudioView
+          onGoToLibrary={onGoToLibrary}
+          embedded={embedded}
+          pageName={pageName}
+          bucketName={bucketName}
+        />
+      ) : activeTab === 'restyle' ? (
         <RestyleView embedded={embedded} pageName={pageName} bucketName={bucketName} />
       ) : activeTab === 'remove-background' ? (
         <RemoveBackgroundView embedded={embedded} pageName={pageName} bucketName={bucketName} />

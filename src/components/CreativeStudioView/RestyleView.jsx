@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import StudioLoadingState from './StudioLoadingState';
 import { aiApi } from '../../api';
+import { downloadFileFromUrl } from '../../utils/downloadUtils';
 
 const QUICK_SUGGESTIONS = [
   '어두운 우드 인테리어로 변경하세요',
@@ -54,16 +55,17 @@ export default function RestyleView({ embedded, pageName, bucketName }) {
     }
   };
 
-  const handleDownload = () => {
-    if (!result?.imageUrl) return;
-    const link = document.createElement('a');
-    link.href = result.imageUrl;
-    link.download = result.filename || `restyle_${file?.name || 'image.png'}`;
-    link.target = '_blank';
-    link.rel = 'noreferrer';
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!result?.imageUrl || downloading) return;
+    setDownloading(true);
+    try {
+      const filename = result.filename || `restyle_${file?.name || 'image.png'}`;
+      await downloadFileFromUrl(result.imageUrl, filename);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -206,9 +208,16 @@ export default function RestyleView({ embedded, pageName, bucketName }) {
                 <span className="material-symbols-outlined">compare</span>
                 {compareMode ? '단일 뷰로 보기' : '원본과 비교'}
               </button>
-              <button type="button" className="btn-download-result" onClick={handleDownload}>
-                <span className="material-symbols-outlined">download</span>
-                다운로드
+              <button 
+                type="button" 
+                className="btn-download-result" 
+                onClick={handleDownload}
+                disabled={downloading}
+              >
+                <span className={`material-symbols-outlined ${downloading ? 'spinning' : ''}`}>
+                  {downloading ? 'sync' : 'download'}
+                </span>
+                {downloading ? '다운로드 중...' : '다운로드'}
               </button>
               <a
                 href={result.imageUrl}
