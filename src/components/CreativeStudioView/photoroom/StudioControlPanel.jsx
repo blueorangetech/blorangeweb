@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ImageUploadPreview from '../../common/ImageUploadPreview';
 
 /**
  * CreativeStudioView 좌측 설정 제어판 컴포넌트 (PhotoRoom 공식 웹 UI 스타일)
@@ -6,10 +7,7 @@ import React, { useState } from 'react';
 function StudioControlPanel({
   file,
   imageUrl,
-  fileInputRef,
-  backgroundMode,
-  backgroundColor,
-  backgroundPrompt,
+  filePreview,
   shadowMode,
   shadowDirection,
   shadowSpread,
@@ -17,12 +15,8 @@ function StudioControlPanel({
   shadowIntensity,
   padding,
   isLoading,
-  onDragOver,
-  onDrop,
-  onFileChange,
+  onFileSelect,
   onUrlChange,
-  setBackgroundMode,
-  setBackgroundColor,
   setShadowMode,
   setShadowDirection,
   setShadowSpread,
@@ -36,8 +30,6 @@ function StudioControlPanel({
   const [enableSpread, setEnableSpread] = useState(false);
   const [enableSoftness, setEnableSoftness] = useState(true);
   const [enableIntensity, setEnableIntensity] = useState(true);
-
-  const enableShadow = shadowMode !== 'none';
 
   const selectPreset = (mode) => {
     setShadowMode(mode);
@@ -67,53 +59,15 @@ function StudioControlPanel({
 
       <div className="panel-scroll-content">
         {/* 이미지 업로드 박스 */}
-        <div
-          className={`dropzone ${file || imageUrl ? 'has-file with-preview' : ''}`}
-          onClick={() => !file && !imageUrl && fileInputRef.current?.click()}
-          onDragOver={onDragOver}
-          onDrop={onDrop}
+        <ImageUploadPreview
+          file={file}
+          previewUrl={filePreview}
+          imageUrl={imageUrl}
+          onFileSelect={onFileSelect}
+          onUrlChange={onUrlChange}
+          allowUrl
           style={{ marginBottom: '14px' }}
-        >
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={onFileChange}
-          />
-          {file || imageUrl ? (
-            <div className="dropzone-image-preview">
-              <div className="preview-img-wrapper">
-                <img src={imageUrl || (file ? URL.createObjectURL(file) : '')} alt="업로드 이미지 미리보기" />
-              </div>
-              <div className="preview-meta-row">
-                <div className="preview-file-text">
-                  <span className="material-symbols-outlined icon-success">check_circle</span>
-                  <p className="file-name" title={file ? file.name : imageUrl}>
-                    {file ? file.name : (imageUrl.length > 25 ? `${imageUrl.substring(0, 22)}...` : imageUrl)}
-                  </p>
-                  {file && <span className="file-size">{(file.size / 1024 / 1024).toFixed(2)} MB</span>}
-                </div>
-                <button
-                  type="button"
-                  className="btn-change-image"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    fileInputRef.current?.click();
-                  }}
-                >
-                  <span className="material-symbols-outlined">sync</span>
-                  변경
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="dropzone-placeholder">
-              <span className="material-symbols-outlined">add_photo_alternate</span>
-              <p>이미지를 드래그하거나 클릭하여 업로드</p>
-            </div>
-          )}
-        </div>
+        />
 
         {/* 상단 탭: [프리셋] | [고급] (포토룸 웹 100% 동일) */}
         <div style={{

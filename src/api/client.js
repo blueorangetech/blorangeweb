@@ -31,7 +31,7 @@ export class ApiClient {
    * 공통 요청 처리 메서드
    */
   async request(endpoint, options = {}) {
-    const { method = 'GET', params, headers = {}, body, ...customOptions } = options;
+    const { method = 'GET', params, headers = {}, body, responseType = 'json', ...customOptions } = options;
 
     const url = this.buildUrl(endpoint, params);
 
@@ -58,7 +58,7 @@ export class ApiClient {
       let errorData = {};
       try {
         errorData = await response.json();
-      } catch (e) {
+      } catch {
         // 응답이 JSON 형식이 아닐 때 예외 처리
       }
       const rawDetail = errorData.detail || errorData.message;
@@ -78,6 +78,10 @@ export class ApiClient {
     // 204 No Content 등의 경우 비어있는 데이터 반환
     if (response.status === 204) {
       return null;
+    }
+
+    if (responseType === 'blob') {
+      return response.blob();
     }
 
     return response.json();

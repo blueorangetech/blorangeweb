@@ -19,35 +19,6 @@ export class AiApi {
     return this.client.post('/api/ai/comfy/multiple-angles', formData);
   }
 
-  removeBackground(file, {
-    backgroundMode = 'Alpha',
-    backgroundColor = '#FFFFFF',
-    enableShadow = false,
-    shadowDistanceX = 18,
-    shadowDistanceY = 22,
-    shadowBlur = 35,
-    shadowGrow = 0,
-    shadowOpacity = 30,
-    shadowColor = '#000000',
-    pageName = 'playground',
-    bucketName
-  } = {}) {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('background_mode', backgroundMode);
-    formData.append('background_color', backgroundColor);
-    formData.append('enable_shadow', enableShadow);
-    formData.append('shadow_distance_x', shadowDistanceX);
-    formData.append('shadow_distance_y', shadowDistanceY);
-    formData.append('shadow_blur', shadowBlur);
-    formData.append('shadow_grow', shadowGrow);
-    formData.append('shadow_opacity', shadowOpacity);
-    formData.append('shadow_color', shadowColor);
-    formData.append('page_name', pageName);
-    if (bucketName) formData.append('bucket_name', bucketName);
-    return this.client.post('/api/ai/comfy/remove-background', formData);
-  }
-
   restyleImage(file, { prompt, pageName = 'playground', bucketName, seed } = {}) {
     const formData = new FormData();
     formData.append('file', file);
@@ -62,7 +33,16 @@ export class AiApi {
    * PhotoRoom AI 피사체 추출 및 배경 합성 (GEO 백엔드 호출)
    */
   processPhotoRoom(payload) {
-    return this.client.post('/api/ai/photoroom', payload);
+    return this.client.post('/api/ai/photoroom', payload, undefined, { responseType: 'blob' });
+  }
+
+  expandPhotoRoomImage(file, { outputSize, padding = 0, seed } = {}) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('output_size', outputSize);
+    formData.append('padding', padding);
+    if (seed) formData.append('seed', seed);
+    return this.client.post('/api/ai/photoroom/expand', formData, undefined, { responseType: 'blob' });
   }
 
   /**

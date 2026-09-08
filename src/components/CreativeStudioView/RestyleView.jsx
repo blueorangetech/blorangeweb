@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import StudioLoadingState from './StudioLoadingState';
+import ImageUploadPreview from '../common/ImageUploadPreview';
 import { aiApi } from '../../api';
 import { downloadFileFromUrl } from '../../utils/downloadUtils';
 
@@ -13,7 +14,6 @@ const QUICK_SUGGESTIONS = [
 ];
 
 export default function RestyleView({ embedded, pageName, bucketName }) {
-  const inputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState('');
   const [prompt, setPrompt] = useState('어두운 우드 인테리어로 변경하세요');
@@ -83,53 +83,12 @@ export default function RestyleView({ embedded, pageName, bucketName }) {
           </p>
 
           {/* 이미지 업로드 박스 */}
-          <div
-            className={`dropzone ${file ? 'has-file with-preview' : ''}`}
-            onClick={() => !file && inputRef.current?.click()}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => {
-              e.preventDefault();
-              selectFile(e.dataTransfer.files[0]);
-            }}
-          >
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={(e) => selectFile(e.target.files[0])}
-            />
-            {file && preview ? (
-              <div className="dropzone-image-preview">
-                <div className="preview-img-wrapper">
-                  <img src={preview} alt="업로드 이미지 미리보기" />
-                </div>
-                <div className="preview-meta-row">
-                  <div className="preview-file-text">
-                    <span className="material-symbols-outlined icon-success">check_circle</span>
-                    <p className="file-name" title={file.name}>{file.name}</p>
-                    <span className="file-size">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                  </div>
-                  <button
-                    type="button"
-                    className="btn-change-image"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      inputRef.current?.click();
-                    }}
-                  >
-                    <span className="material-symbols-outlined">sync</span>
-                    변경
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="dropzone-placeholder">
-                <span className="material-symbols-outlined">add_photo_alternate</span>
-                <p>이미지를 드래그하거나 클릭하여 업로드</p>
-              </div>
-            )}
-          </div>
+          <ImageUploadPreview
+            file={file}
+            previewUrl={preview}
+            onFileSelect={selectFile}
+            onInvalidFile={setError}
+          />
 
           {/* 프롬프트 입력 영역 */}
           <div className="restyle-prompt-section">

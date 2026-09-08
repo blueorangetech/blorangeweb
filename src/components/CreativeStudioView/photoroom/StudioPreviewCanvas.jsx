@@ -6,20 +6,15 @@ import StudioLoadingState from '../StudioLoadingState';
  */
 function StudioPreviewCanvas({
   isLoading,
-  processStatus,
   errorMessage,
   resultImage,
-  uncertaintyScore,
   currentInputImage,
   file,
-  filePreview,
   imageUrl,
-  SAMPLE_BEFORE_IMAGE,
   backgroundMode,
   backgroundColor,
   onClearError,
-  onLoadSample,
-  onGoToLibrary
+  onLoadSample
 }) {
   const [compareMode, setCompareMode] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -39,7 +34,7 @@ function StudioPreviewCanvas({
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
-    } catch (err) {
+    } catch {
       window.open(resultImage, '_blank');
     } finally {
       setDownloading(false);
@@ -96,7 +91,7 @@ function StudioPreviewCanvas({
               '피사체 3D 바닥면 및 외곽선 정밀 인식 중...',
               'PhotoRoom v2 AI 그림자 모델 렌더링 중...',
               '선택한 방향 및 입체 원근 음영 합성 중...',
-              'GCS 스토리지 영구 보관 및 최적화 중...',
+              '결과 이미지 최적화 및 전송 중...',
             ]}
           />
         ) : errorMessage ? (

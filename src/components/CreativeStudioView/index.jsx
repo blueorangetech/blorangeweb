@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import MultipleAngleView from './MultipleAngleView';
-import RemoveBackgroundView from './RemoveBackgroundView';
 import RestyleView from './RestyleView';
 import PhotoRoomStudioView from './photoroom/PhotoRoomStudioView';
+import ImageExpandView from './photoroom/ImageExpandView';
 import '../../styles/CreativeStudioView.css';
 
-function CreativeStudioView({ onGoToLibrary, embedded = false, pageName = 'playground', bucketName }) {
+function CreativeStudioView({ embedded = false, pageName = 'playground', bucketName }) {
   const [activeTab, setActiveTab] = useState('multiple-angles');
 
   return (
@@ -23,15 +23,6 @@ function CreativeStudioView({ onGoToLibrary, embedded = false, pageName = 'playg
         <button
           type="button"
           role="tab"
-          aria-selected={activeTab === 'remove-background'}
-          className={activeTab === 'remove-background' ? 'active' : ''}
-          onClick={() => setActiveTab('remove-background')}
-        >
-          <span className="material-symbols-outlined">layers_clear</span>배경 제거
-        </button>
-        <button
-          type="button"
-          role="tab"
           aria-selected={activeTab === 'restyle'}
           className={activeTab === 'restyle' ? 'active' : ''}
           onClick={() => setActiveTab('restyle')}
@@ -45,20 +36,26 @@ function CreativeStudioView({ onGoToLibrary, embedded = false, pageName = 'playg
           className={activeTab === 'photoroom' ? 'active' : ''}
           onClick={() => setActiveTab('photoroom')}
         >
-          <span className="material-symbols-outlined">auto_fix_high</span>포토룸 AI
+          <span className="material-symbols-outlined">layers_clear</span>배경제거
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'image-expand'}
+          className={activeTab === 'image-expand' ? 'active' : ''}
+          onClick={() => setActiveTab('image-expand')}
+        >
+          <span className="material-symbols-outlined">aspect_ratio</span>이미지 확장
         </button>
       </div>
-      {activeTab === 'photoroom' ? (
+      {activeTab === 'image-expand' ? (
+        <ImageExpandView embedded={embedded} />
+      ) : activeTab === 'photoroom' ? (
         <PhotoRoomStudioView
-          onGoToLibrary={onGoToLibrary}
           embedded={embedded}
-          pageName={pageName}
-          bucketName={bucketName}
         />
       ) : activeTab === 'restyle' ? (
         <RestyleView embedded={embedded} pageName={pageName} bucketName={bucketName} />
-      ) : activeTab === 'remove-background' ? (
-        <RemoveBackgroundView embedded={embedded} pageName={pageName} bucketName={bucketName} />
       ) : (
         <MultipleAngleView embedded={embedded} pageName={pageName} bucketName={bucketName} />
       )}
