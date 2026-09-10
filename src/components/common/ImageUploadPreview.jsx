@@ -8,13 +8,14 @@ export default function ImageUploadPreview({
   onUrlChange,
   onInvalidFile,
   allowUrl = false,
+  disabled = false,
   style,
 }) {
   const inputRef = useRef(null);
   const activePreview = previewUrl || imageUrl;
 
   const selectFile = (selected) => {
-    if (!selected) return;
+    if (!selected || disabled) return;
     if (!selected.type.startsWith('image/')) {
       onInvalidFile?.('이미지 파일만 업로드할 수 있습니다.');
       return;
@@ -25,11 +26,14 @@ export default function ImageUploadPreview({
   return (
     <div className="image-upload-preview" style={style}>
       <div
-        className={`dropzone ${activePreview ? 'has-file with-preview' : ''}`}
-        onClick={() => !activePreview && inputRef.current?.click()}
-        onDragOver={(event) => event.preventDefault()}
+        className={`dropzone ${activePreview ? 'has-file with-preview' : ''}${disabled ? ' is-disabled' : ''}`}
+        onClick={() => !disabled && !activePreview && inputRef.current?.click()}
+        onDragOver={(event) => {
+          if (!disabled) event.preventDefault();
+        }}
         onDrop={(event) => {
           event.preventDefault();
+          if (disabled) return;
           selectFile(event.dataTransfer.files[0]);
         }}
       >
@@ -37,6 +41,7 @@ export default function ImageUploadPreview({
           ref={inputRef}
           type="file"
           accept="image/*"
+          disabled={disabled}
           hidden
           onChange={(event) => {
             selectFile(event.target.files[0]);
@@ -61,8 +66,9 @@ export default function ImageUploadPreview({
                 className="btn-change-image"
                 onClick={(event) => {
                   event.stopPropagation();
-                  inputRef.current?.click();
+                  if (!disabled) inputRef.current?.click();
                 }}
+                disabled={disabled}
               >
                 <span className="material-symbols-outlined">sync</span>변경
               </button>
@@ -80,6 +86,7 @@ export default function ImageUploadPreview({
           type="url"
           className="image-upload-url-input"
           value={imageUrl}
+          disabled={disabled}
           onChange={(event) => onUrlChange?.(event.target.value)}
           placeholder="또는 이미지 URL 입력 (https://...)"
         />

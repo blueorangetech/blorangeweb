@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import ImageUploadPreview from '../../common/ImageUploadPreview';
+import ImageUploadPreview from '../common/ImageUploadPreview';
 
 /**
  * CreativeStudioView 좌측 설정 제어판 컴포넌트 (PhotoRoom 공식 웹 UI 스타일)
  */
-function StudioControlPanel({
+function BackgroundRemovalControlPanel({
   file,
   imageUrl,
   filePreview,
@@ -53,11 +53,15 @@ function StudioControlPanel({
   return (
     <section className="angle-upload-card glass-card">
       <div className="panel-header">
-        <h3>AI 그림자</h3>
+        <h3>배경 제거</h3>
         <span className="api-badge">PhotoRoom v2</span>
       </div>
 
       <div className="panel-scroll-content">
+        <p className="angle-description">
+            이미지에서 배경을 제외한 오브젝트만 반환 합니다<br/>
+            또한, 그림자를 추가 할 수 있습니다
+          </p>
         {/* 이미지 업로드 박스 */}
         <ImageUploadPreview
           file={file}
@@ -449,4 +453,4 @@ function StudioControlPanel({
   );
 }
 
-export default StudioControlPanel;
+export default BackgroundRemovalControlPanel;

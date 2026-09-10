@@ -1,0 +1,10 @@
+.compose-inputs { border: 0; padding: 0; margin: 0; min-width: 0; }
+.compose-inputs:disabled { opacity: .65; }
+.compose-slot { display: flex; flex-direction: column; gap: 10px; padding: 14px; margin-top: 12px; border: 1px solid var(--border-color, #dedee5); border-radius: 12px; }
+.compose-slot-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #475569; font-size: 13px; }
+.compose-slot-header small { color: #94a3b8; font-size: 11px; text-align: right; }
+.compose-slot .restyle-chip { align-self: flex-end; }
+.compose-slot .dropzone.is-disabled { background: #f8fafc; border-color: #e2e8f0; cursor: not-allowed; opacity: .62; }
+.compose-slot .dropzone.is-disabled:hover { background: #f8fafc; border-color: #e2e8f0; }
+.compose-error { margin: 12px 20px; padding: 12px; color: #b42318; background: #fff1f0; border-radius: 8px; }
+.compose-layout .restyle-prompt-textarea { box-sizing: border-box; }

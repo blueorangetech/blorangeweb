@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import StudioLoadingState from './StudioLoadingState';
 import ImageUploadPreview from '../common/ImageUploadPreview';
+import ComparisonResultCard from '../common/ComparisonResultCard';
+import ImagePreviewPanel, { PreviewPlaceholder } from './ImagePreviewPanel';
 import { aiApi } from '../../api';
 import { downloadFileFromUrl } from '../../utils/downloadUtils';
 
@@ -9,8 +10,9 @@ const QUICK_SUGGESTIONS = [
   '따뜻한 베이지 패브릭 재질로 변경',
   '고급스러운 화이트 대리석 질감으로 변경',
   '매트한 다크 그레이 가죽 텍스처로 변경',
-  '밝은 내추럴 오크 원목으로 변경',
-  '모던한 블랙 메탈 및 유리 재질로 변경',
+  '아침의 밝은 분위기으로 변경',
+  '저녁의 어두운 분위기으로 변경',
+  '새벽의 푸른 분위기으로 변경',
 ];
 
 export default function RestyleView({ embedded, pageName, bucketName }) {
@@ -18,6 +20,7 @@ export default function RestyleView({ embedded, pageName, bucketName }) {
   const [preview, setPreview] = useState('');
   const [prompt, setPrompt] = useState('어두운 우드 인테리어로 변경하세요');
   const [result, setResult] = useState(null); // { imageUrl, filename }
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [compareMode, setCompareMode] = useState(false);
@@ -48,6 +51,13 @@ export default function RestyleView({ embedded, pageName, bucketName }) {
         imageUrl: response.image_url,
         filename: response.filename,
       });
+      setResults((current) => [{
+        id: `${Date.now()}-${response.image_url}`,
+        imageUrl: response.image_url,
+        filename: response.filename,
+        originalUrl: preview,
+        prompt: prompt.trim(),
+      }, ...current]);
     } catch (err) {
       setError(err.message || '리스타일 처리에 실패했습니다.');
     } finally {
@@ -68,6 +78,12 @@ export default function RestyleView({ embedded, pageName, bucketName }) {
     }
   };
 
+  const removeResult = (resultId) => {
+    const next = results.filter((item) => item.id !== resultId);
+    setResults(next);
+    setResult(next[0] || null);
+  };
+
   return (
     <div className={`multiple-angle-layout restyle-layout${embedded ? ' embedded' : ''}`}>
       {/* 좌측 설정 패널 */}
@@ -79,7 +95,9 @@ export default function RestyleView({ embedded, pageName, bucketName }) {
 
         <div className="panel-scroll-content">
           <p className="angle-description">
-            물체와 공간의 구조/형태는 그대로 유지하고, 표면 재질(패브릭, 우드, 대리석 등) 및 색감을 자연스럽게 변환합니다.
+            물체와 공간의 구조/형태는 그대로 유지하고 <br/>
+            표면 재질(패브릭, 우드, 대리석 등) 및 색감 및 <br/>
+            조명 색상을 자연스럽게 변환합니다.
           </p>
 
           {/* 이미지 업로드 박스 */}
@@ -153,61 +171,43 @@ export default function RestyleView({ embedded, pageName, bucketName }) {
         </div>
       </section>
 
-      {/* 우측 결과 패널 */}
-      <section className="angle-results-card glass-card">
-        <div className="panel-header">
-          <h3>결과 미리보기</h3>
-          {result && (
-            <div className="rmbg-header-actions">
-              <button
-                type="button"
-                className={`btn-compare-toggle ${compareMode ? 'active' : ''}`}
-                onClick={() => setCompareMode(!compareMode)}
-              >
-                <span className="material-symbols-outlined">compare</span>
-                {compareMode ? '단일 뷰로 보기' : '원본과 비교'}
-              </button>
-              <button 
-                type="button" 
-                className="btn-download-result" 
-                onClick={handleDownload}
-                disabled={downloading}
-              >
-                <span className={`material-symbols-outlined ${downloading ? 'spinning' : ''}`}>
-                  {downloading ? 'sync' : 'download'}
-                </span>
-                {downloading ? '다운로드 중...' : '다운로드'}
-              </button>
-              <a
-                href={result.imageUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-open-result"
-              >
-                <span className="material-symbols-outlined">open_in_new</span>
-                새 탭
-              </a>
-            </div>
-          )}
-        </div>
-
-        <div className="angle-results-body restyle-result-body">
-          {loading ? (
-            <StudioLoadingState
-              title="AI 재질 리스타일 작업 중"
-              icon="brush"
-              steps={[
-                '가구 및 공간 형태 보존 영역 고정 중...',
-                '재질 및 텍스처 프롬프트 분석 중...',
-                'Qwen 2511 모델 표면 텍스처 합성 중...',
-                '자연스러운 조명 및 색감 매칭 중...',
-              ]}
-            />
-          ) : error ? (
-            <div className="preview-error-container">
-              <span className="material-symbols-outlined error-icon">warning</span>
-              <h4>처리 오류</h4>
-              <p>{error}</p>
+      <ImagePreviewPanel
+        resultCount={results.length}
+        headerActions={result && results.length === 0 ? (
+          <div className="rmbg-header-actions">
+            <button type="button" className={`btn-compare-toggle ${compareMode ? 'active' : ''}`} onClick={() => setCompareMode(!compareMode)}>
+              <span className="material-symbols-outlined">compare</span>
+              {compareMode ? '단일 뷰로 보기' : '원본과 비교'}
+            </button>
+            <button type="button" className="btn-download-result" onClick={handleDownload} disabled={downloading}>
+              <span className={`material-symbols-outlined ${downloading ? 'spinning' : ''}`}>{downloading ? 'sync' : 'download'}</span>
+              {downloading ? '다운로드 중...' : '다운로드'}
+            </button>
+            <a href={result.imageUrl} target="_blank" rel="noreferrer" className="btn-open-result">
+              <span className="material-symbols-outlined">open_in_new</span>새 탭
+            </a>
+          </div>
+        ) : null}
+        isLoading={loading}
+        loadingTitle="AI 재질 리스타일 작업 중"
+        loadingIcon="brush"
+        loadingSteps={[
+          '가구 및 공간 형태 보존 영역 고정 중...',
+          '재질 및 텍스처 프롬프트 분석 중...',
+          'Qwen 2511 모델 표면 텍스처 합성 중...',
+          '자연스러운 조명 및 색감 매칭 중...',
+        ]}
+        errorMessage={error}
+        bodyClassName="restyle-result-body"
+      >
+        {results.length ? (
+            <div className="comparison-results-grid">
+              {results.map((item, index) => (
+                <ComparisonResultCard key={item.id} originalUrl={item.originalUrl} resultUrl={item.imageUrl}
+                  title={`리스타일 결과 ${results.length - index}`} meta={item.prompt} filename={item.filename}
+                  onDownload={() => downloadFileFromUrl(item.imageUrl, item.filename || 'restyle_image.png')}
+                  onDelete={() => removeResult(item.id)} />
+              ))}
             </div>
           ) : result ? (
             <div className={`rmbg-canvas-container ${compareMode ? 'compare-split' : ''}`}>
@@ -244,14 +244,13 @@ export default function RestyleView({ embedded, pageName, bucketName }) {
               )}
             </div>
           ) : (
-            <div className="preview-placeholder">
-              <span className="material-symbols-outlined placeholder-icon">brush</span>
-              <h4>이미지를 업로드하고 프롬프트를 입력해 주세요</h4>
-              <p>좌측에서 원본 이미지를 업로드하고 원하는 구체적인 재질/색상(예: 어두운 우드, 화이트 대리석 등)을 입력해 주세요.</p>
-            </div>
+            <PreviewPlaceholder
+              icon="brush"
+              title="이미지를 업로드하고 프롬프트를 입력해 주세요"
+              description="좌측에서 원본 이미지를 업로드하고 원하는 구체적인 재질/색상(예: 어두운 우드, 화이트 대리석 등)을 입력해 주세요."
+            />
           )}
-        </div>
-      </section>
+      </ImagePreviewPanel>
     </div>
   );
 }

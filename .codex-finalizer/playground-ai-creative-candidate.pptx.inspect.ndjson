@@ -1,0 +1,208 @@
+{"kind":"deck","id":"pr/1xdxnf","name":"Deck"}
+{"kind":"layout","layoutId":"e65281c2-c0f7-4874-ac26-75b670f0b261","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"6abe6c75-8440-4558-a049-44d33d6897b2","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/a2xc5i","slide":1,"title":"INTERNAL CHALLENGE 2026","textShapes":6}
+{"kind":"shape","id":"sh/etovexw3","slide":1,"bbox":[0,0,18,720]}
+{"kind":"textbox","id":"sh/1wfupcfu","slide":1,"text":"INTERNAL CHALLENGE 2026","textPreview":"INTERNAL CHALLENGE 2026","textChars":23,"textLines":1,"bbox":[72,92,420,24]}
+{"kind":"textbox","id":"sh/0v6dg7e9","slide":1,"text":"Playground\nAI Creative","textPreview":"Playground | AI Creative","textChars":22,"textLines":2,"bbox":[72,148,760,176]}
+{"kind":"textbox","id":"sh/nyxcr2xk","slide":1,"text":"이미지 제작부터 비교와 활용까지 이어지는 AI 크리에이티브 워크스페이스","textPreview":"이미지 제작부터 비교와 활용까지 이어지는 AI 크리에이티브 워크스페이스","textChars":39,"textLines":1,"bbox":[76,350,680,70]}
+{"kind":"shape","id":"sh/mxovixwf","slide":1,"bbox":[820,108,330,440]}
+{"kind":"textbox","id":"sh/90zutcfq","slide":1,"text":"AI","textPreview":"AI","textChars":2,"textLines":1,"bbox":[858,146,250,180]}
+{"kind":"textbox","id":"sh/ozqdk7e5","slide":1,"text":"CREATE\nCOMPARE\nEXPLORE","textPreview":"CREATE | COMPARE | EXPLORE","textChars":22,"textLines":3,"bbox":[858,352,250,120]}
+{"kind":"textbox","id":"sh/bmhwvmxw","slide":1,"text":"PLAYGROUND","textPreview":"PLAYGROUND","textChars":10,"textLines":1,"bbox":[76,630,250,28]}
+{"kind":"notes","id":"nt/a2xc5i","slide":1,"text":""}
+{"kind":"slide","id":"sl/vyukdv","slide":2,"title":"02","textShapes":22}
+{"kind":"textbox","id":"sh/nal4nqh0","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[64,42,48,28]}
+{"kind":"textbox","id":"sh/obelgvil","slide":2,"text":"크리에이티브 제작 과정의 단절","textPreview":"크리에이티브 제작 과정의 단절","textChars":16,"textLines":1,"bbox":[64,82,1120,56]}
+{"kind":"textbox","id":"sh/pcnmp0zq","slide":2,"text":"기획, 제작, 비교, 다운로드가 여러 도구와 반복 작업에 흩어져 있습니다","textPreview":"기획, 제작, 비교, 다운로드가 여러 도구와 반복 작업에 흩어져 있습니다","textChars":40,"textLines":1,"bbox":[64,140,1100,40]}
+{"kind":"textbox","id":"sh/adw3i5gb","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[70,226,42,38]}
+{"kind":"textbox","id":"sh/be54rqhw","slide":2,"text":"반복적인 시안 제작","textPreview":"반복적인 시안 제작","textChars":10,"textLines":1,"bbox":[124,224,360,32]}
+{"kind":"textbox","id":"sh/cfelkvyh","slide":2,"text":"각도와 재질을 바꿀 때마다 별도의 요청과 파일 정리가 필요합니다.","textPreview":"각도와 재질을 바꿀 때마다 별도의 요청과 파일 정리가 필요합니다.","textChars":36,"textLines":1,"bbox":[124,257,390,56]}
+{"kind":"textbox","id":"sh/xgnmt0z2","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[70,340,42,38]}
+{"kind":"textbox","id":"sh/yhw3m5gn","slide":2,"text":"참조 이미지 활용의 어려움","textPreview":"참조 이미지 활용의 어려움","textChars":14,"textLines":1,"bbox":[124,338,360,32]}
+{"kind":"textbox","id":"sh/z2p4vah8","slide":2,"text":"편집 대상과 인물, 재질 이미지를 함께 반영하기 어렵습니다.","textPreview":"편집 대상과 인물, 재질 이미지를 함께 반영하기 어렵습니다.","textChars":33,"textLines":1,"bbox":[124,371,390,56]}
+{"kind":"textbox","id":"sh/zm54369s","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[70,454,42,38]}
+{"kind":"textbox","id":"sh/ylwna187","slide":2,"text":"결과 비교와 이력 손실","textPreview":"결과 비교와 이력 손실","textChars":12,"textLines":1,"bbox":[124,452,360,32]}
+{"kind":"textbox","id":"sh/lonm5gri","slide":2,"text":"새 결과가 이전 결과를 덮어쓰면 시안 간 차이를 빠르게 판단하기 어렵습니다.","textPreview":"새 결과가 이전 결과를 덮어쓰면 시안 간 차이를 빠르게 판단하기 어렵습니다.","textChars":42,"textLines":1,"bbox":[124,485,390,56]}
+{"kind":"shape","id":"sh/kne5cbqx","slide":2,"bbox":[600,220,560,330]}
+{"kind":"textbox","id":"sh/bi54z69g","slide":2,"text":"한 화면에서 이어지는 작업","textPreview":"한 화면에서 이어지는 작업","textChars":14,"textLines":1,"bbox":[640,258,480,38]}
+{"kind":"textbox","id":"sh/ahcn618v","slide":2,"text":"이미지 입력","textPreview":"이미지 입력","textChars":6,"textLines":1,"bbox":[640,334,130,32]}
+{"kind":"textbox","id":"sh/xknm1wrm","slide":2,"text":"AI 편집","textPreview":"AI 편집","textChars":5,"textLines":1,"bbox":[810,334,130,32]}
+{"kind":"textbox","id":"sh/cje58bq1","slide":2,"text":"결과 검토","textPreview":"결과 검토","textChars":5,"textLines":1,"bbox":[980,334,130,32]}
+{"kind":"textbox","id":"sh/vepobqpk","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[672,388,70,70]}
+{"kind":"textbox","id":"sh/udgnil8f","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[842,388,70,70]}
+{"kind":"textbox","id":"sh/69k7apsn","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1012,388,70,70]}
+{"kind":"textbox","id":"sh/rat83uts","slide":2,"text":"Playground는 이 과정을 하나의 작업 공간으로 연결합니다","textPreview":"Playground는 이 과정을 하나의 작업 공간으로 연결합니다","textChars":35,"textLines":1,"bbox":[640,492,480,34]}
+{"kind":"textbox","id":"sh/sb2pczad","slide":2,"text":"PLAYGROUND AI CREATIVE","textPreview":"PLAYGROUND AI CREATIVE","textChars":22,"textLines":1,"bbox":[64,678,300,18]}
+{"kind":"textbox","id":"sh/tcbq54ry","slide":2,"text":"2 / 09","textPreview":"2 / 09","textChars":6,"textLines":1,"bbox":[1140,678,76,18]}
+{"kind":"notes","id":"nt/vyukdv","slide":2,"text":""}
+{"kind":"slide","id":"sl/1bqlnr","slide":3,"title":"03","textShapes":20}
+{"kind":"textbox","id":"sh/k7elgjmp","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[64,42,48,28]}
+{"kind":"textbox","id":"sh/j65knyl4","slide":3,"text":"AI 크리에이티브 기능 구성","textPreview":"AI 크리에이티브 기능 구성","textChars":15,"textLines":1,"bbox":[64,82,1120,56]}
+{"kind":"textbox","id":"sh/i5w3et4z","slide":3,"text":"목적에 맞는 탭을 선택하고 동일한 업로드, 생성, 검토 흐름을 사용합니다","textPreview":"목적에 맞는 탭을 선택하고 동일한 업로드, 생성, 검토 흐름을 사용합니다","textChars":40,"textLines":1,"bbox":[64,140,1100,40]}
+{"kind":"textbox","id":"sh/tc72t83m","slide":3,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[70,205,38,34]}
+{"kind":"textbox","id":"sh/sbylk3m1","slide":3,"text":"다양한 각도","textPreview":"다양한 각도","textChars":6,"textLines":1,"bbox":[122,203,270,32]}
+{"kind":"textbox","id":"sh/7a5krylg","slide":3,"text":"한 장의 이미지에서 선택한 카메라 구도를 일괄 생성","textPreview":"한 장의 이미지에서 선택한 카메라 구도를 일괄 생성","textChars":28,"textLines":1,"bbox":[420,203,720,44]}
+{"kind":"shape","id":"sh/69w3it4v","slide":3,"bbox":[122,257,1018,1]}
+{"kind":"textbox","id":"sh/9g32h4n2","slide":3,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[70,287,38,34]}
+{"kind":"textbox","id":"sh/ofu18zmh","slide":3,"text":"리스타일","textPreview":"리스타일","textChars":4,"textLines":1,"bbox":[122,285,270,32]}
+{"kind":"textbox","id":"sh/qhszml8r","slide":3,"text":"구조를 유지하면서 표면 재질과 색감을 변환","textPreview":"구조를 유지하면서 표면 재질과 색감을 변환","textChars":23,"textLines":1,"bbox":[420,285,720,44]}
+{"kind":"shape","id":"sh/ri10vqpc","slide":3,"bbox":[122,339,1018,1]}
+{"kind":"textbox","id":"sh/sjahovqx","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[70,369,38,34]}
+{"kind":"textbox","id":"sh/dkjix07i","slide":3,"text":"PhotoRoom 소재 제작","textPreview":"PhotoRoom 소재 제작","textChars":15,"textLines":1,"bbox":[122,367,270,32]}
+{"kind":"textbox","id":"sh/elcjql83","slide":3,"text":"배경 제거와 그림자, 여백을 적용한 광고 소재 제작","textPreview":"배경 제거와 그림자, 여백을 적용한 광고 소재 제작","textChars":28,"textLines":1,"bbox":[420,367,720,44]}
+{"kind":"shape","id":"sh/fml0zqpo","slide":3,"bbox":[122,421,1018,1]}
+{"kind":"textbox","id":"sh/0nu1svqt","slide":3,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[70,451,38,34]}
+{"kind":"textbox","id":"sh/1o3i107e","slide":3,"text":"이미지 확장","textPreview":"이미지 확장","textChars":6,"textLines":1,"bbox":[122,449,270,32]}
+{"kind":"textbox","id":"sh/29cju5oz","slide":3,"text":"목표 캔버스 비율에 맞춰 배경 영역을 자연스럽게 확장","textPreview":"목표 캔버스 비율에 맞춰 배경 영역을 자연스럽게 확장","textChars":29,"textLines":1,"bbox":[420,449,720,44]}
+{"kind":"shape","id":"sh/nal03apk","slide":3,"bbox":[122,503,1018,1]}
+{"kind":"textbox","id":"sh/ze50ra5s","slide":3,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[70,533,38,34]}
+{"kind":"textbox","id":"sh/ydwzi547","slide":3,"text":"이미지 합성","textPreview":"이미지 합성","textChars":6,"textLines":1,"bbox":[122,531,270,32]}
+{"kind":"textbox","id":"sh/lgnitkny","slide":3,"text":"최대 3개의 참조 이미지와 자연어 지시를 결합","textPreview":"최대 3개의 참조 이미지와 자연어 지시를 결합","textChars":25,"textLines":1,"bbox":[420,531,720,44]}
+{"kind":"shape","id":"sh/kfehkfmd","slide":3,"bbox":[122,585,1018,1]}
+{"kind":"textbox","id":"sh/bqlgnq5g","slide":3,"text":"PLAYGROUND AI CREATIVE","textPreview":"PLAYGROUND AI CREATIVE","textChars":22,"textLines":1,"bbox":[64,678,300,18]}
+{"kind":"textbox","id":"sh/apcze54v","slide":3,"text":"3 / 09","textPreview":"3 / 09","textChars":6,"textLines":1,"bbox":[1140,678,76,18]}
+{"kind":"notes","id":"nt/1bqlnr","slide":3,"text":""}
+{"kind":"slide","id":"sl/kvxypp","slide":4,"title":"04","textShapes":22}
+{"kind":"textbox","id":"sh/8bi907at","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[64,42,48,28]}
+{"kind":"textbox","id":"sh/7q987m98","slide":4,"text":"다양한 각도 생성","textPreview":"다양한 각도 생성","textChars":9,"textLines":1,"bbox":[64,82,1120,56]}
+{"kind":"textbox","id":"sh/mp07yhsn","slide":4,"text":"하나의 원본에서 필요한 카메라 구도를 선택해 여러 시안을 한 번에 생성합니다","textPreview":"하나의 원본에서 필요한 카메라 구도를 선택해 여러 시안을 한 번에 생성합니다","textChars":42,"textLines":1,"bbox":[64,140,1100,40]}
+{"kind":"shape","id":"sh/lorq5cr2","slide":4,"bbox":[64,210,700,400]}
+{"kind":"textbox","id":"sh/knipw7ah","slide":4,"text":"SCREEN CAPTURE","textPreview":"SCREEN CAPTURE","textChars":14,"textLines":1,"bbox":[88,372,652,22]}
+{"kind":"textbox","id":"sh/zm9832tw","slide":4,"text":"다양한 각도 생성 화면","textPreview":"다양한 각도 생성 화면","textChars":12,"textLines":1,"bbox":[88,400,652,34]}
+{"kind":"textbox","id":"sh/ylg7uxsb","slide":4,"text":"각도 선택과 누적 결과 그리드가 보이는 캡처","textPreview":"각도 선택과 누적 결과 그리드가 보이는 캡처","textChars":24,"textLines":1,"bbox":[88,438,652,26]}
+{"kind":"shape","id":"sh/xk7q1sb6","slide":4,"bbox":[812,210,110,30]}
+{"kind":"textbox","id":"sh/cjypsnal","slide":4,"text":"ComfyUI","textPreview":"ComfyUI","textChars":7,"textLines":1,"bbox":[822,212,90,26]}
+{"kind":"shape","id":"sh/e98329c7","slide":4,"bbox":[936,210,150,30]}
+{"kind":"textbox","id":"sh/zuhkvets","slide":4,"text":"최대 9개 각도","textPreview":"최대 9개 각도","textChars":8,"textLines":1,"bbox":[946,212,130,26]}
+{"kind":"textbox","id":"sh/0vql4zud","slide":4,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[812,274,34,28]}
+{"kind":"textbox","id":"sh/1wz2x4by","slide":4,"text":"원본 이미지 입력","textPreview":"원본 이미지 입력","textChars":9,"textLines":1,"bbox":[858,272,344,28]}
+{"kind":"textbox","id":"sh/q5o3ypcb","slide":4,"text":"클릭 또는 드래그로 제품과 인물 이미지를 업로드합니다.","textPreview":"클릭 또는 드래그로 제품과 인물 이미지를 업로드합니다.","textChars":30,"textLines":1,"bbox":[858,302,344,38]}
+{"kind":"textbox","id":"sh/r6xkrutw","slide":4,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[812,350,34,28]}
+{"kind":"textbox","id":"sh/c7ql0zuh","slide":4,"text":"각도 선택","textPreview":"각도 선택","textChars":5,"textLines":1,"bbox":[858,348,344,28]}
+{"kind":"textbox","id":"sh/d8z2t4bm","slide":4,"text":"정면, 클로즈업, 와이드, 좌우 45°와 90° 등을 선택합니다.","textPreview":"정면, 클로즈업, 와이드, 좌우 45°와 90° 등을 선택합니다.","textChars":36,"textLines":1,"bbox":[858,378,344,38]}
+{"kind":"textbox","id":"sh/21ojupcz","slide":4,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[812,426,34,28]}
+{"kind":"textbox","id":"sh/32xknatk","slide":4,"text":"결과 누적","textPreview":"결과 누적","textChars":5,"textLines":1,"bbox":[858,424,344,28]}
+{"kind":"textbox","id":"sh/76t0vq9c","slide":4,"text":"새로 생성한 이미지는 기존 결과를 유지한 채 앞쪽에 추가됩니다.","textPreview":"새로 생성한 이미지는 기존 결과를 유지한 채 앞쪽에 추가됩니다.","textChars":35,"textLines":1,"bbox":[858,454,344,38]}
+{"kind":"textbox","id":"sh/65kz2lsr","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[812,502,34,28]}
+{"kind":"textbox","id":"sh/t8vixgri","slide":4,"text":"상세 확인","textPreview":"상세 확인","textChars":5,"textLines":1,"bbox":[858,500,344,28]}
+{"kind":"textbox","id":"sh/87mh4bax","slide":4,"text":"자세히 보기에서 결과 이미지의 고유 비율을 유지해 확인합니다.","textPreview":"자세히 보기에서 결과 이미지의 고유 비율을 유지해 확인합니다.","textChars":34,"textLines":1,"bbox":[858,530,344,38]}
+{"kind":"textbox","id":"sh/vad0zq9o","slide":4,"text":"PLAYGROUND AI CREATIVE","textPreview":"PLAYGROUND AI CREATIVE","textChars":22,"textLines":1,"bbox":[64,678,300,18]}
+{"kind":"textbox","id":"sh/u94zqls3","slide":4,"text":"4 / 09","textPreview":"4 / 09","textChars":6,"textLines":1,"bbox":[1140,678,76,18]}
+{"kind":"notes","id":"nt/kvxypp","slide":4,"text":""}
+{"kind":"slide","id":"sl/5ocb4q","slide":5,"title":"05","textShapes":20}
+{"kind":"textbox","id":"sh/orqlcfix","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[64,42,48,28]}
+{"kind":"textbox","id":"sh/nqh43a1c","slide":5,"text":"리스타일","textPreview":"리스타일","textChars":4,"textLines":1,"bbox":[64,82,1120,56]}
+{"kind":"textbox","id":"sh/mp83a50r","slide":5,"text":"가구와 공간의 형태를 유지하면서 재질과 색상을 자연스럽게 변경합니다","textPreview":"가구와 공간의 형태를 유지하면서 재질과 색상을 자연스럽게 변경합니다","textChars":37,"textLines":1,"bbox":[64,140,1100,40]}
+{"kind":"textbox","id":"sh/1ozm10jm","slide":5,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[68,224,34,28]}
+{"kind":"textbox","id":"sh/0nql8vi1","slide":5,"text":"구조 보존","textPreview":"구조 보존","textChars":5,"textLines":1,"bbox":[114,222,384,28]}
+{"kind":"textbox","id":"sh/zmh4zq1g","slide":5,"text":"제품 형태와 공간 구도는 유지하고 표면 표현에 집중합니다.","textPreview":"제품 형태와 공간 구도는 유지하고 표면 표현에 집중합니다.","textChars":32,"textLines":1,"bbox":[114,252,384,38]}
+{"kind":"textbox","id":"sh/elo36lkv","slide":5,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[68,300,34,28]}
+{"kind":"textbox","id":"sh/dkfmx0ja","slide":5,"text":"구체적인 프롬프트","textPreview":"구체적인 프롬프트","textChars":9,"textLines":1,"bbox":[114,298,384,28]}
+{"kind":"textbox","id":"sh/cz6l4v2p","slide":5,"text":"우드, 패브릭, 대리석처럼 재질과 색상을 직접 지정합니다.","textPreview":"우드, 패브릭, 대리석처럼 재질과 색상을 직접 지정합니다.","textChars":32,"textLines":1,"bbox":[114,328,384,38]}
+{"kind":"textbox","id":"sh/ql8fql8f","slide":5,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[68,376,34,28]}
+{"kind":"textbox","id":"sh/bmhwzqp0","slide":5,"text":"빠른 키워드 입력","textPreview":"빠른 키워드 입력","textChars":9,"textLines":1,"bbox":[114,374,384,28]}
+{"kind":"textbox","id":"sh/cnqxsvql","slide":5,"text":"자주 사용하는 재질 프롬프트를 추천 칩으로 제공합니다.","textPreview":"자주 사용하는 재질 프롬프트를 추천 칩으로 제공합니다.","textChars":30,"textLines":1,"bbox":[114,404,384,38]}
+{"kind":"textbox","id":"sh/doje1076","slide":5,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[68,452,34,28]}
+{"kind":"textbox","id":"sh/2h8fm18j","slide":5,"text":"결과별 비교","textPreview":"결과별 비교","textChars":6,"textLines":1,"bbox":[114,450,384,28]}
+{"kind":"textbox","id":"sh/3ihwv6p4","slide":5,"text":"생성 당시 원본과 프롬프트를 카드에 함께 보존합니다.","textPreview":"생성 당시 원본과 프롬프트를 카드에 함께 보존합니다.","textChars":29,"textLines":1,"bbox":[114,480,384,38]}
+{"kind":"shape","id":"sh/ojqxobqp","slide":5,"bbox":[550,210,660,400]}
+{"kind":"textbox","id":"sh/pkzexg7u","slide":5,"text":"SCREEN CAPTURE","textPreview":"SCREEN CAPTURE","textChars":14,"textLines":1,"bbox":[574,372,612,22]}
+{"kind":"textbox","id":"sh/edovi187","slide":5,"text":"리스타일 화면","textPreview":"리스타일 화면","textChars":7,"textLines":1,"bbox":[574,400,612,34]}
+{"kind":"textbox","id":"sh/fexwr69s","slide":5,"text":"업로드, 프롬프트, 전후 비교 카드가 보이는 캡처","textPreview":"업로드, 프롬프트, 전후 비교 카드가 보이는 캡처","textChars":27,"textLines":1,"bbox":[574,438,612,26]}
+{"kind":"textbox","id":"sh/jmtk3y18","slide":5,"text":"PLAYGROUND AI CREATIVE","textPreview":"PLAYGROUND AI CREATIVE","textChars":22,"textLines":1,"bbox":[64,678,300,18]}
+{"kind":"textbox","id":"sh/ilk3atk3","slide":5,"text":"5 / 09","textPreview":"5 / 09","textChars":6,"textLines":1,"bbox":[1140,678,76,18]}
+{"kind":"notes","id":"nt/5ocb4q","slide":5,"text":""}
+{"kind":"slide","id":"sl/gf3u4c","slide":6,"title":"06","textShapes":20}
+{"kind":"textbox","id":"sh/i9krq9g7","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[64,42,48,28]}
+{"kind":"textbox","id":"sh/5cvqlofy","slide":6,"text":"PhotoRoom 소재 제작","textPreview":"PhotoRoom 소재 제작","textChars":15,"textLines":1,"bbox":[64,82,1120,56]}
+{"kind":"textbox","id":"sh/4bm9sjed","slide":6,"text":"배경과 그림자를 조정해 광고와 커머스에 활용할 제품 이미지를 만듭니다","textPreview":"배경과 그림자를 조정해 광고와 커머스에 활용할 제품 이미지를 만듭니다","textChars":38,"textLines":1,"bbox":[64,140,1100,40]}
+{"kind":"shape","id":"sh/vmt8fexg","slide":6,"bbox":[64,210,700,400]}
+{"kind":"textbox","id":"sh/ulkrm9gv","slide":6,"text":"SCREEN CAPTURE","textPreview":"SCREEN CAPTURE","textChars":14,"textLines":1,"bbox":[88,372,652,22]}
+{"kind":"textbox","id":"sh/h8bqh4fm","slide":6,"text":"PhotoRoom 소재 제작 화면","textPreview":"PhotoRoom 소재 제작 화면","textChars":18,"textLines":1,"bbox":[88,400,652,34]}
+{"kind":"textbox","id":"sh/wn29ojy1","slide":6,"text":"옵션 패널과 결과 카드가 함께 보이는 캡처","textPreview":"옵션 패널과 결과 카드가 함께 보이는 캡처","textChars":23,"textLines":1,"bbox":[88,438,652,26]}
+{"kind":"textbox","id":"sh/fid8ryx0","slide":6,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[812,224,34,28]}
+{"kind":"textbox","id":"sh/eh4rytwf","slide":6,"text":"배경 처리","textPreview":"배경 처리","textChars":5,"textLines":1,"bbox":[858,222,344,28]}
+{"kind":"textbox","id":"sh/grqhcz69","slide":6,"text":"투명 배경을 기본으로 제품 중심의 결과 이미지를 생성합니다.","textPreview":"투명 배경을 기본으로 제품 중심의 결과 이미지를 생성합니다.","textChars":33,"textLines":1,"bbox":[858,252,344,38]}
+{"kind":"textbox","id":"sh/hszil47u","slide":6,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[812,300,34,28]}
+{"kind":"textbox","id":"sh/u58zapoj","slide":6,"text":"그림자 조정","textPreview":"그림자 조정","textChars":6,"textLines":1,"bbox":[858,298,344,28]}
+{"kind":"textbox","id":"sh/v6h0jup4","slide":6,"text":"형태, 방향, 퍼짐, 부드러움과 강도를 세부 설정합니다.","textPreview":"형태, 방향, 퍼짐, 부드러움과 강도를 세부 설정합니다.","textChars":31,"textLines":1,"bbox":[858,328,344,38]}
+{"kind":"textbox","id":"sh/83qh8f6d","slide":6,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[812,376,34,28]}
+{"kind":"textbox","id":"sh/t4zihk7y","slide":6,"text":"캔버스 구성","textPreview":"캔버스 구성","textChars":6,"textLines":1,"bbox":[858,374,344,28]}
+{"kind":"textbox","id":"sh/61oz65o7","slide":6,"text":"여백과 종횡비를 조정해 매체 규격에 맞춥니다.","textPreview":"여백과 종횡비를 조정해 매체 규격에 맞춥니다.","textChars":25,"textLines":1,"bbox":[858,404,344,38]}
+{"kind":"textbox","id":"sh/72h0faps","slide":6,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[812,452,34,28]}
+{"kind":"textbox","id":"sh/kz6h4f6h","slide":6,"text":"후처리 옵션","textPreview":"후처리 옵션","textChars":6,"textLines":1,"bbox":[858,450,344,28]}
+{"kind":"textbox","id":"sh/l0fidk7m","slide":6,"text":"제품 보정과 조명 등 필요한 처리 옵션을 선택합니다.","textPreview":"제품 보정과 조명 등 필요한 처리 옵션을 선택합니다.","textChars":29,"textLines":1,"bbox":[858,480,344,38]}
+{"kind":"textbox","id":"sh/1w7yhwzq","slide":6,"text":"PLAYGROUND AI CREATIVE","textPreview":"PLAYGROUND AI CREATIVE","textChars":22,"textLines":1,"bbox":[64,678,300,18]}
+{"kind":"textbox","id":"sh/0vyx8ri5","slide":6,"text":"6 / 09","textPreview":"6 / 09","textChars":6,"textLines":1,"bbox":[1140,678,76,18]}
+{"kind":"notes","id":"nt/gf3u4c","slide":6,"text":""}
+{"kind":"slide","id":"sl/kk4c8b","slide":7,"title":"07","textShapes":20}
+{"kind":"textbox","id":"sh/1svqlsvm","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[64,42,48,28]}
+{"kind":"textbox","id":"sh/e547qdwv","slide":7,"text":"이미지 확장","textPreview":"이미지 확장","textChars":6,"textLines":1,"bbox":[64,82,1120,56]}
+{"kind":"textbox","id":"sh/f6d8jidg","slide":7,"text":"원본 피사체를 유지하면서 목표 비율의 빈 캔버스를 AI로 자연스럽게 채웁니다","textPreview":"원본 피사체를 유지하면서 목표 비율의 빈 캔버스를 AI로 자연스럽게 채웁니다","textChars":42,"textLines":1,"bbox":[64,140,1100,40]}
+{"kind":"textbox","id":"sh/ovmpw7ex","slide":7,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[68,224,34,28]}
+{"kind":"textbox","id":"sh/pwfqpsvi","slide":7,"text":"출력 크기 프리셋","textPreview":"출력 크기 프리셋","textChars":9,"textLines":1,"bbox":[114,222,394,28]}
+{"kind":"textbox","id":"sh/2t47uxw7","slide":7,"text":"정사각형, 가로형, 와이드, 세로형과 스토리 규격을 제공합니다.","textPreview":"정사각형, 가로형, 와이드, 세로형과 스토리 규격을 제공합니다.","textChars":35,"textLines":1,"bbox":[114,252,394,38]}
+{"kind":"textbox","id":"sh/nud8n2dc","slide":7,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[68,300,34,28]}
+{"kind":"textbox","id":"sh/cz6907e9","slide":7,"text":"사용자 지정 크기","textPreview":"사용자 지정 크기","textChars":9,"textLines":1,"bbox":[114,298,394,28]}
+{"kind":"textbox","id":"sh/x0fqtcvu","slide":7,"text":"필요한 너비와 높이를 직접 입력할 수 있습니다.","textPreview":"필요한 너비와 높이를 직접 입력할 수 있습니다.","textChars":26,"textLines":1,"bbox":[114,328,394,38]}
+{"kind":"textbox","id":"sh/x0jilgru","slide":7,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[68,376,34,28]}
+{"kind":"textbox","id":"sh/czahcvq9","slide":7,"text":"확장 여백","textPreview":"확장 여백","textChars":5,"textLines":1,"bbox":[114,374,394,28]}
+{"kind":"textbox","id":"sh/by10jq9o","slide":7,"text":"원본 크기와 AI가 생성할 주변 영역의 비중을 조절합니다.","textPreview":"원본 크기와 AI가 생성할 주변 영역의 비중을 조절합니다.","textChars":32,"textLines":1,"bbox":[114,404,394,38]}
+{"kind":"textbox","id":"sh/axszal83","slide":7,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[68,452,34,28]}
+{"kind":"textbox","id":"sh/l43ip0rq","slide":7,"text":"시드 재사용","textPreview":"시드 재사용","textChars":6,"textLines":1,"bbox":[114,450,394,28]}
+{"kind":"textbox","id":"sh/k3u1gvql","slide":7,"text":"동일한 입력과 시드로 유사한 확장 배경을 재현합니다.","textPreview":"동일한 입력과 시드로 유사한 확장 배경을 재현합니다.","textChars":29,"textLines":1,"bbox":[114,480,394,38]}
+{"kind":"shape","id":"sh/z210nq90","slide":7,"bbox":[560,210,650,400]}
+{"kind":"textbox","id":"sh/y1sjel8f","slide":7,"text":"SCREEN CAPTURE","textPreview":"SCREEN CAPTURE","textChars":14,"textLines":1,"bbox":[584,372,602,22]}
+{"kind":"textbox","id":"sh/18zidwrm","slide":7,"text":"이미지 확장 화면","textPreview":"이미지 확장 화면","textChars":9,"textLines":1,"bbox":[584,400,602,34]}
+{"kind":"textbox","id":"sh/07qh4ba1","slide":7,"text":"크기 설정과 확장 결과 카드가 보이는 캡처","textPreview":"크기 설정과 확장 결과 카드가 보이는 캡처","textChars":23,"textLines":1,"bbox":[584,438,602,26]}
+{"kind":"textbox","id":"sh/sbu10bix","slide":7,"text":"PLAYGROUND AI CREATIVE","textPreview":"PLAYGROUND AI CREATIVE","textChars":22,"textLines":1,"bbox":[64,678,300,18]}
+{"kind":"textbox","id":"sh/tc3itgzi","slide":7,"text":"7 / 09","textPreview":"7 / 09","textChars":6,"textLines":1,"bbox":[1140,678,76,18]}
+{"kind":"notes","id":"nt/kk4c8b","slide":7,"text":""}
+{"kind":"slide","id":"sl/4ltto8","slide":8,"title":"08","textShapes":20}
+{"kind":"textbox","id":"sh/vi9ova9s","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[64,42,48,28]}
+{"kind":"textbox","id":"sh/gji54vax","slide":8,"text":"이미지 합성","textPreview":"이미지 합성","textChars":6,"textLines":1,"bbox":[64,82,1120,56]}
+{"kind":"textbox","id":"sh/hkr6x0ri","slide":8,"text":"편집 대상과 참조 이미지를 구분하고 자연어로 원하는 결과를 설명합니다","textPreview":"편집 대상과 참조 이미지를 구분하고 자연어로 원하는 결과를 설명합니다","textChars":38,"textLines":1,"bbox":[64,140,1100,40]}
+{"kind":"shape","id":"sh/il0n65s3","slide":8,"bbox":[64,210,700,400]}
+{"kind":"textbox","id":"sh/3m9oza9o","slide":8,"text":"SCREEN CAPTURE","textPreview":"SCREEN CAPTURE","textChars":14,"textLines":1,"bbox":[88,372,652,22]}
+{"kind":"textbox","id":"sh/4n258fa9","slide":8,"text":"이미지 합성 화면","textPreview":"이미지 합성 화면","textChars":9,"textLines":1,"bbox":[88,400,652,34]}
+{"kind":"textbox","id":"sh/5ob61kru","slide":8,"text":"3개 업로드 슬롯과 합성 결과가 보이는 캡처","textPreview":"3개 업로드 슬롯과 합성 결과가 보이는 캡처","textChars":24,"textLines":1,"bbox":[88,438,652,26]}
+{"kind":"textbox","id":"sh/qpk7apsf","slide":8,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[812,214,34,28]}
+{"kind":"textbox","id":"sh/rqto3u9k","slide":8,"text":"순차 이미지 입력","textPreview":"순차 이미지 입력","textChars":9,"textLines":1,"bbox":[858,212,348,28]}
+{"kind":"textbox","id":"sh/z698bu98","slide":8,"text":"1번은 편집 대상, 2번과 3번은 인물이나 재질 참조로 사용합니다.","textPreview":"1번은 편집 대상, 2번과 3번은 인물이나 재질 참조로 사용합니다.","textChars":37,"textLines":1,"bbox":[858,242,348,38]}
+{"kind":"textbox","id":"sh/e50rip8n","slide":8,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[812,290,34,28]}
+{"kind":"textbox","id":"sh/18rqd4re","slide":8,"text":"다중 참조","textPreview":"다중 참조","textChars":5,"textLines":1,"bbox":[858,288,348,28]}
+{"kind":"textbox","id":"sh/07i9kzqt","slide":8,"text":"최대 3장의 JPG, PNG, WebP 이미지를 함께 활용합니다.","textPreview":"최대 3장의 JPG, PNG, WebP 이미지를 함께 활용합니다.","textChars":36,"textLines":1,"bbox":[858,318,348,38]}
+{"kind":"textbox","id":"sh/r2987u9c","slide":8,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[812,366,34,28]}
+{"kind":"textbox","id":"sh/q1g7ep8r","slide":8,"text":"자연어 합성 지시","textPreview":"자연어 합성 지시","textChars":9,"textLines":1,"bbox":[858,364,348,28]}
+{"kind":"textbox","id":"sh/d4rq9kr2","slide":8,"text":"이미지 번호를 포함해 배치, 재질 교체와 합성 조건을 설명합니다.","textPreview":"이미지 번호를 포함해 배치, 재질 교체와 합성 조건을 설명합니다.","textChars":36,"textLines":1,"bbox":[858,394,348,38]}
+{"kind":"textbox","id":"sh/c3ipgzqh","slide":8,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[812,442,34,28]}
+{"kind":"textbox","id":"sh/byt8je9g","slide":8,"text":"생성 이력 보존","textPreview":"생성 이력 보존","textChars":8,"textLines":1,"bbox":[858,440,348,28]}
+{"kind":"textbox","id":"sh/axkrq98v","slide":8,"text":"원본과 프롬프트를 결과 카드에 저장해 반복 시안을 비교합니다.","textPreview":"원본과 프롬프트를 결과 카드에 저장해 반복 시안을 비교합니다.","textChars":34,"textLines":1,"bbox":[858,470,348,38]}
+{"kind":"textbox","id":"sh/6tobids3","slide":8,"text":"PLAYGROUND AI CREATIVE","textPreview":"PLAYGROUND AI CREATIVE","textChars":22,"textLines":1,"bbox":[64,678,300,18]}
+{"kind":"textbox","id":"sh/7uxcbito","slide":8,"text":"8 / 09","textPreview":"8 / 09","textChars":6,"textLines":1,"bbox":[1140,678,76,18]}
+{"kind":"notes","id":"nt/4ltto8","slide":8,"text":""}
+{"kind":"slide","id":"sl/m3cpsm","slide":9,"title":"09","textShapes":16}
+{"kind":"textbox","id":"sh/bm94ne9o","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[64,42,48,28]}
+{"kind":"textbox","id":"sh/c7i5gjat","slide":9,"text":"결과 검토와 활용","textPreview":"결과 검토와 활용","textChars":9,"textLines":1,"bbox":[64,82,1120,56]}
+{"kind":"textbox","id":"sh/x8bmpore","slide":9,"text":"이전 시안을 유지하면서 차이를 비교하고 필요한 결과를 바로 활용합니다","textPreview":"이전 시안을 유지하면서 차이를 비교하고 필요한 결과를 바로 활용합니다","textChars":38,"textLines":1,"bbox":[64,140,1100,40]}
+{"kind":"shape","id":"sh/2h0napsr","slide":9,"bbox":[64,214,610,360]}
+{"kind":"textbox","id":"sh/ni94ju9c","slide":9,"text":"SCREEN CAPTURE","textPreview":"SCREEN CAPTURE","textChars":14,"textLines":1,"bbox":[88,356,562,22]}
+{"kind":"textbox","id":"sh/oji5czax","slide":9,"text":"누적 결과 카드","textPreview":"누적 결과 카드","textChars":8,"textLines":1,"bbox":[88,384,562,34]}
+{"kind":"textbox","id":"sh/pkrml4ri","slide":9,"text":"전후 비교 슬라이더가 보이는 캡처","textPreview":"전후 비교 슬라이더가 보이는 캡처","textChars":18,"textLines":1,"bbox":[88,422,562,26]}
+{"kind":"shape","id":"sh/edg36psv","slide":9,"bbox":[704,214,506,360]}
+{"kind":"textbox","id":"sh/fep4fu9g","slide":9,"text":"SCREEN CAPTURE","textPreview":"SCREEN CAPTURE","textChars":14,"textLines":1,"bbox":[728,356,458,22]}
+{"kind":"textbox","id":"sh/3u5wz6hk","slide":9,"text":"원본 비율 자세히 보기","textPreview":"원본 비율 자세히 보기","textChars":12,"textLines":1,"bbox":[728,384,458,34]}
+{"kind":"textbox","id":"sh/2twv610z","slide":9,"text":"상세 보기 오버레이 캡처","textPreview":"상세 보기 오버레이 캡처","textChars":13,"textLines":1,"bbox":[728,422,458,26]}
+{"kind":"shape","id":"sh/pwne1gzq","slide":9,"bbox":[66,602,140,30]}
+{"kind":"textbox","id":"sh/4ved8bi5","slide":9,"text":"최신 결과 우선","textPreview":"최신 결과 우선","textChars":8,"textLines":1,"bbox":[76,604,120,26]}
+{"kind":"shape","id":"sh/rypw3qhg","slide":9,"bbox":[220,602,164,30]}
+{"kind":"textbox","id":"sh/qxwval0v","slide":9,"text":"마우스 전후 비교","textPreview":"마우스 전후 비교","textChars":9,"textLines":1,"bbox":[230,604,144,26]}
+{"kind":"shape","id":"sh/d07e5gzm","slide":9,"bbox":[398,602,180,30]}
+{"kind":"textbox","id":"sh/czydcbi1","slide":9,"text":"원본 비율 상세 보기","textPreview":"원본 비율 상세 보기","textChars":11,"textLines":1,"bbox":[408,604,160,26]}
+{"kind":"shape","id":"sh/72lwrm1c","slide":9,"bbox":[592,602,140,30]}
+{"kind":"textbox","id":"sh/61cvyh0r","slide":9,"text":"개별 다운로드","textPreview":"개별 다운로드","textChars":7,"textLines":1,"bbox":[602,604,120,26]}
+{"kind":"textbox","id":"sh/atk7mtor","slide":9,"text":"생성 결과를 덮어쓰지 않아 시안 탐색 과정과 선택 근거를 한 화면에서 유지합니다","textPreview":"생성 결과를 덮어쓰지 않아 시안 탐색 과정과 선택 근거를 한 화면에서 유지합니다","textChars":44,"textLines":1,"bbox":[760,602,446,34]}
+{"kind":"textbox","id":"sh/vut8vy5c","slide":9,"text":"PLAYGROUND AI CREATIVE","textPreview":"PLAYGROUND AI CREATIVE","textChars":22,"textLines":1,"bbox":[64,678,300,18]}
+{"kind":"textbox","id":"sh/wvmpoj6h","slide":9,"text":"9 / 09","textPreview":"9 / 09","textChars":6,"textLines":1,"bbox":[1140,678,76,18]}
+{"kind":"notes","id":"nt/m3cpsm","slide":9,"text":""}

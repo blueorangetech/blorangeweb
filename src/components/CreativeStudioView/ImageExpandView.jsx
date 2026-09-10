@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { aiApi } from '../../../api';
-import { downloadFileFromUrl } from '../../../utils/downloadUtils';
-import ImageUploadPreview from '../../common/ImageUploadPreview';
-import StudioLoadingState from '../StudioLoadingState';
+import React, { useEffect, useRef, useState } from 'react';
+import { aiApi } from '../../api';
+import { downloadFileFromUrl } from '../../utils/downloadUtils';
+import ImageUploadPreview from '../common/ImageUploadPreview';
+import ComparisonResultCard from '../common/ComparisonResultCard';
+import ImagePreviewPanel, { PreviewPlaceholder } from './ImagePreviewPanel';
 
 const SIZE_PRESETS = [
   ['1024x1024', '정사각형', '1:1'],
@@ -21,6 +22,8 @@ export default function ImageExpandView({ embedded }) {
   const [padding, setPadding] = useState(0.1);
   const [seed, setSeed] = useState('');
   const [result, setResult] = useState(null);
+  const [results, setResults] = useState([]);
+  const resultUrls = useRef(new Set());
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [compareMode, setCompareMode] = useState(false);
@@ -30,9 +33,7 @@ export default function ImageExpandView({ embedded }) {
     if (preview) URL.revokeObjectURL(preview);
   }, [preview]);
 
-  useEffect(() => () => {
-    if (result?.imageUrl?.startsWith('blob:')) URL.revokeObjectURL(result.imageUrl);
-  }, [result]);
+  useEffect(() => () => resultUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
 
   const selectFile = (selected) => {
     if (!selected || !selected.type.startsWith('image/')) {
@@ -64,10 +65,17 @@ export default function ImageExpandView({ embedded }) {
         padding,
         seed: seed ? Number(seed) : undefined,
       });
-      setResult({
-        imageUrl: URL.createObjectURL(response),
+      const imageUrl = URL.createObjectURL(response);
+      resultUrls.current.add(imageUrl);
+      const nextResult = {
+        imageUrl,
         filename: `expanded_${outputSize}_${file.name.replace(/\.[^.]+$/, '')}.png`,
-      });
+        originalUrl: preview,
+        outputSize,
+        id: `${Date.now()}-${imageUrl}`,
+      };
+      setResult(nextResult);
+      setResults((current) => [nextResult, ...current]);
     } catch (err) {
       setError(err.message || '이미지 확장에 실패했습니다.');
     } finally {
@@ -83,6 +91,19 @@ export default function ImageExpandView({ embedded }) {
     } finally {
       setDownloading(false);
     }
+  };
+
+  const removeResult = (resultId) => {
+    const removed = results.find((item) => item.id === resultId);
+    const next = results.filter((item) => item.id !== resultId);
+
+    if (removed?.imageUrl) {
+      URL.revokeObjectURL(removed.imageUrl);
+      resultUrls.current.delete(removed.imageUrl);
+    }
+
+    setResults(next);
+    setResult(next[0] || null);
   };
 
   return (
@@ -187,10 +208,9 @@ export default function ImageExpandView({ embedded }) {
         </div>
       </section>
 
-      <section className="angle-results-card glass-card">
-        <div className="panel-header">
-          <h3>결과 미리보기</h3>
-          {result && (
+      <ImagePreviewPanel
+        resultCount={results.length}
+        headerActions={result && results.length === 0 ? (
             <div className="rmbg-header-actions">
               <button type="button" className={`btn-compare-toggle ${compareMode ? 'active' : ''}`} onClick={() => setCompareMode(!compareMode)}>
                 <span className="material-symbols-outlined">compare</span>{compareMode ? '단일 뷰로 보기' : '원본과 비교'}
@@ -200,18 +220,23 @@ export default function ImageExpandView({ embedded }) {
                 {downloading ? '다운로드 중...' : '다운로드'}
               </button>
             </div>
-          )}
-        </div>
-
-        <div className="angle-results-body rmbg-result-body">
-          {loading ? (
-            <StudioLoadingState
-              title="PhotoRoom AI 이미지 확장 중"
-              icon="aspect_ratio"
-              steps={['원본 이미지와 배경 구조 분석 중...', '새 캔버스 영역 계산 중...', '빈 영역의 배경을 자연스럽게 생성 중...', '결과 이미지 저장 중...']}
-            />
-          ) : error ? (
-            <div className="preview-error-container"><span className="material-symbols-outlined error-icon">warning</span><h4>처리 오류</h4><p>{error}</p></div>
+          ) : null}
+        isLoading={loading}
+        loadingTitle="PhotoRoom AI 이미지 확장 중"
+        loadingIcon="aspect_ratio"
+        loadingSteps={['원본 이미지와 배경 구조 분석 중...', '새 캔버스 영역 계산 중...', '빈 영역의 배경을 자연스럽게 생성 중...', '결과 이미지 저장 중...']}
+        errorMessage={error}
+        bodyClassName="rmbg-result-body"
+      >
+          {results.length ? (
+            <div className="comparison-results-grid">
+              {results.map((item, index) => (
+                <ComparisonResultCard key={item.id} originalUrl={item.originalUrl} resultUrl={item.imageUrl}
+                  title={`이미지 확장 결과 ${results.length - index}`} meta={`출력 크기 ${item.outputSize}`} filename={item.filename}
+                  onDownload={() => downloadFileFromUrl(item.imageUrl, item.filename)}
+                  onDelete={() => removeResult(item.id)} />
+              ))}
+            </div>
           ) : result ? (
             <div className={`rmbg-canvas-container ${compareMode ? 'compare-split' : ''}`}>
               {compareMode ? (
@@ -229,10 +254,13 @@ export default function ImageExpandView({ embedded }) {
           ) : preview ? (
             <div className="rmbg-canvas-container"><div className="rmbg-single-view"><div className="rmbg-image-box large"><img src={preview} alt="원본 이미지" /></div><div className="rmbg-result-meta-bar"><span className="rmbg-meta-chip"><span className="material-symbols-outlined">info</span>확장 대기 중 · {outputSize}</span></div></div></div>
           ) : (
-            <div className="preview-placeholder"><span className="material-symbols-outlined placeholder-icon">aspect_ratio</span><h4>확장할 이미지를 업로드해 주세요</h4><p>출력 크기를 선택하면 PhotoRoom AI가 캔버스의 빈 영역을 자연스럽게 채웁니다.</p></div>
+            <PreviewPlaceholder
+              icon="aspect_ratio"
+              title="확장할 이미지를 업로드해 주세요"
+              description="출력 크기를 선택하면 PhotoRoom AI가 캔버스의 빈 영역을 자연스럽게 채웁니다."
+            />
           )}
-        </div>
-      </section>
+      </ImagePreviewPanel>
     </div>
   );
 }

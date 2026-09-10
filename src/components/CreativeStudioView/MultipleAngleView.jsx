@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import StudioLoadingState from './StudioLoadingState';
 import ImageUploadPreview from '../common/ImageUploadPreview';
+import ImageDetailModal from '../common/ImageDetailModal';
+import ImagePreviewPanel, { PreviewPlaceholder } from './ImagePreviewPanel';
 import { aiApi } from '../../api';
 import { downloadFileFromUrl } from '../../utils/downloadUtils';
 
@@ -17,12 +18,12 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
   const [selectedAngles, setSelectedAngles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [detailImage, setDetailImage] = useState(null);
 
   const selectFile = (selected) => {
     if (!selected || !selected.type.startsWith('image/')) return;
     setFile(selected);
     setPreview(URL.createObjectURL(selected));
-    setImages([]);
     setError('');
   };
 
@@ -34,7 +35,7 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
     try {
       const response = await aiApi.generateMultipleAngles(file, { pageName, bucketName, angles: selectedAngles });
       if (!response.images?.length) throw new Error('ComfyUI가 생성 이미지를 반환하지 않았습니다.');
-      setImages(response.images);
+      setImages((current) => [...response.images, ...current]);
     } catch (err) {
       setError(err.message || '다양한 각도 생성에 실패했습니다.');
     } finally {
@@ -132,48 +133,35 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
         </div>
       </section>
 
-      {/* 우측 생성 결과 패널 */}
-      <section className="angle-results-card glass-card">
-        <div className="panel-header">
-          <h3>결과 미리보기</h3>
-          {images.length > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span className="angle-count">{images.length}개 생성됨</span>
-              <button
-                type="button"
-                className="btn-download-result"
-                style={{ padding: '4px 10px', fontSize: '0.75rem' }}
-                onClick={handleDownloadAll}
-                disabled={downloadingAll}
-              >
-                <span className={`material-symbols-outlined ${downloadingAll ? 'spinning' : ''}`} style={{ fontSize: '15px' }}>
-                  {downloadingAll ? 'sync' : 'download'}
-                </span>
-                {downloadingAll ? '다운로드 중...' : '전체 다운로드'}
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="angle-results-body">
-          {loading ? (
-            <StudioLoadingState
-              title="다양한 각도 렌더링 중"
-              icon="360"
-              steps={[
-                '이미지 3D 공간 및 피사체 구조 분석 중...',
-                '카메라 앵글 및 원근 좌표 매핑 중...',
-                '선택된 각도별 고화질 렌더링 중...',
-                '최종 해상도 최적화 및 결과 생성 중...',
-              ]}
-            />
-          ) : error ? (
-            <div className="preview-error-container">
-              <span className="material-symbols-outlined error-icon">warning</span>
-              <h4>생성 오류</h4>
-              <p>{error}</p>
-            </div>
-          ) : images.length ? (
+      <ImagePreviewPanel
+        resultCount={images.length}
+        headerActions={images.length > 0 ? (
+          <button
+            type="button"
+            className="btn-download-result"
+            style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+            onClick={handleDownloadAll}
+            disabled={downloadingAll}
+          >
+            <span className={`material-symbols-outlined ${downloadingAll ? 'spinning' : ''}`} style={{ fontSize: '15px' }}>
+              {downloadingAll ? 'sync' : 'download'}
+            </span>
+            {downloadingAll ? '다운로드 중...' : '전체 다운로드'}
+          </button>
+        ) : null}
+        isLoading={loading}
+        loadingTitle="다양한 각도 렌더링 중"
+        loadingIcon="360"
+        loadingSteps={[
+          '이미지 3D 공간 및 피사체 구조 분석 중...',
+          '카메라 앵글 및 원근 좌표 매핑 중...',
+          '선택된 각도별 고화질 렌더링 중...',
+          '최종 해상도 최적화 및 결과 생성 중...',
+        ]}
+        errorMessage={error}
+        errorTitle="생성 오류"
+      >
+          {images.length ? (
             <div className="angle-result-grid">
               {images.map((image) => (
                 <div
@@ -194,23 +182,31 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
                   </div>
                   <div className="angle-result-header">
                     <span>{image.label || image.filename}</span>
-                    <span className="angle-result-badge">
-                      <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>download</span>
-                      다운로드
-                    </span>
+                    <div className="angle-result-actions">
+                      <button type="button" onClick={(event) => {
+                        event.stopPropagation();
+                        setDetailImage(image);
+                      }}>
+                        <span className="material-symbols-outlined">zoom_out_map</span>자세히
+                      </button>
+                      <span className="angle-result-badge">
+                        <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>download</span>
+                        다운로드
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="preview-placeholder">
-              <span className="material-symbols-outlined placeholder-icon">image</span>
-              <h4>이미지를 업로드해 주세요</h4>
-              <p>좌측에서 원본 이미지와 생성할 각도를 선택하면 결과가 이곳에 표시됩니다.</p>
-            </div>
+            <PreviewPlaceholder
+              title="이미지를 업로드해 주세요"
+              description="좌측에서 원본 이미지와 생성할 각도를 선택하면 결과가 이곳에 표시됩니다."
+            />
           )}
-        </div>
-      </section>
+      </ImagePreviewPanel>
+      <ImageDetailModal imageUrl={detailImage?.url} title={detailImage?.label || detailImage?.filename}
+        alt={`${detailImage?.label || '다양한 각도 결과'} 상세 이미지`} onClose={() => setDetailImage(null)} />
     </div>
   );
 }

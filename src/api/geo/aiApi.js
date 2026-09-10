@@ -29,6 +29,15 @@ export class AiApi {
     return this.client.post('/api/ai/comfy/restyle', formData);
   }
 
+  composeImages(files, { prompt, pageName = 'playground', bucketName } = {}) {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('files', file));
+    formData.append('prompt', prompt);
+    formData.append('page_name', pageName);
+    if (bucketName) formData.append('bucket_name', bucketName);
+    return this.client.post('/api/ai/comfy/compose', formData);
+  }
+
   /**
    * PhotoRoom AI 피사체 추출 및 배경 합성 (GEO 백엔드 호출)
    */

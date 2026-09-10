@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import MultipleAngleView from './MultipleAngleView';
 import RestyleView from './RestyleView';
-import PhotoRoomStudioView from './photoroom/PhotoRoomStudioView';
-import ImageExpandView from './photoroom/ImageExpandView';
+import ImageComposeView from './ImageComposeView';
+import BackgroundRemovalView from './BackgroundRemovalView';
+import ImageExpandView from './ImageExpandView';
 import '../../styles/CreativeStudioView.css';
 
 function CreativeStudioView({ embedded = false, pageName = 'playground', bucketName }) {
@@ -11,6 +12,10 @@ function CreativeStudioView({ embedded = false, pageName = 'playground', bucketN
   return (
     <main className={`hanssem-main creative-studio-main${embedded ? ' embedded' : ''}`}>
       <div className="creative-tool-tabs" role="tablist" aria-label="AI 이미지 편집 도구">
+        <button type="button" role="tab" aria-selected={activeTab === 'compose'}
+          className={activeTab === 'compose' ? 'active' : ''} onClick={() => setActiveTab('compose')}>
+          <span className="material-symbols-outlined">photo_library</span>이미지 합성
+        </button>
         <button
           type="button"
           role="tab"
@@ -48,10 +53,12 @@ function CreativeStudioView({ embedded = false, pageName = 'playground', bucketN
           <span className="material-symbols-outlined">aspect_ratio</span>이미지 확장
         </button>
       </div>
-      {activeTab === 'image-expand' ? (
+      {activeTab === 'compose' ? (
+        <ImageComposeView embedded={embedded} pageName={pageName} bucketName={bucketName} />
+      ) : activeTab === 'image-expand' ? (
         <ImageExpandView embedded={embedded} />
       ) : activeTab === 'photoroom' ? (
-        <PhotoRoomStudioView
+        <BackgroundRemovalView
           embedded={embedded}
         />
       ) : activeTab === 'restyle' ? (
