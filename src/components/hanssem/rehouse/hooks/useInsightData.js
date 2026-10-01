@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { fetchBigQuery, formatDate } from '../../../../api/geo/bigquery';
+import { normalizeRehouseCreativeMetrics } from '../../../../utils/rehouseCreativeMetrics';
 
 export function useInsightData(reportType, startDate, endDate, initialFilters, filterMappings, fallbackData) {
   // 1. 필터 및 드롭다운 상태
@@ -172,7 +173,7 @@ export function useInsightData(reportType, startDate, endDate, initialFilters, f
     });
   }, [sortConfig]);
 
-  const displayData = realData.length > 0 ? realData : (offset === 0 ? fallbackData : []);
+  const displayData = useMemo(() => (realData.length > 0 ? realData : (offset === 0 ? fallbackData : [])).map(normalizeRehouseCreativeMetrics), [realData, offset, fallbackData]);
 
   const filteredData = useMemo(() => {
     const filtered = applyFiltersToData(displayData);

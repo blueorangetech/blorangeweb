@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 export default function PlanningSpreadsheet({
   planningRows,
@@ -12,17 +12,37 @@ export default function PlanningSpreadsheet({
   formatWon,
   formatPercent
 }) {
+  const [learningMonths, setLearningMonths] = useState('3');
+
   return (
     <div className="mediamix-dashboard-grid">
       <div className="mediamix-card">
         <div className="mediamix-card-title">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span>신규 작성 미디어믹스 입력 영역</span>
+            <span>AI 미디어믹스 입력</span>
             <span style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 'normal' }}>
               (💡 엑셀 셀 복사 후 표 영역 선택한 뒤 Ctrl+V로 붙여넣기 가능)
             </span>
           </div>
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="mediamix-planning-actions">
+            <button type="button" className="mediamix-btn mediamix-btn-primary" title="시안용 버튼 · AI 자동 작성 기능은 아직 연결되지 않았습니다">
+              <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>auto_awesome</span>
+              AI 미디어믹스 작성
+            </button>
+            <label className="mediamix-learning-period">
+              <span>학습 기간</span>
+              <span className="mediamix-learning-select-wrapper">
+                <select
+                  aria-label="학습 기간"
+                  value={learningMonths}
+                  onChange={(event) => setLearningMonths(event.target.value)}
+                  className="mediamix-learning-select"
+                >
+                  {[1, 2, 3, 6, 9, 12].map(months => <option key={months} value={months}>{months}개월</option>)}
+                </select>
+                <span className="material-symbols-outlined mediamix-learning-arrow" aria-hidden="true">expand_more</span>
+              </span>
+            </label>
             <button
               className="mediamix-btn mediamix-btn-secondary"
               onClick={onReset}

@@ -1,18 +1,18 @@
 import React from 'react';
 
-const CustomSelect = ({ id, value, setValue, options = [], placeholder, style, searchable = false, searchQuery, setSearchQuery, openDropdown, setOpenDropdown, toggleDropdown }) => {
+const CustomSelect = ({ id, value, setValue, options = [], placeholder, style, searchable = false, searchQuery, setSearchQuery, openDropdown, setOpenDropdown, toggleDropdown, wrapLabel = false }) => {
   const displayOptions = searchable && searchQuery 
     ? options.filter(opt => opt.label.toLowerCase().includes(searchQuery.toLowerCase()))
     : options;
 
   return (
-    <div className="custom-dropdown" style={style}>
+    <div className={`custom-dropdown${wrapLabel ? ' material-select-wrap' : ''}`} style={style}>
       <button
         className="dropdown-toggle tab-dropdown-btn"
         onClick={() => toggleDropdown(id)}
         style={{ width: '100%' }}
       >
-        <span className="dropdown-label" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span className="dropdown-label" title={options.find(opt => opt.value === value)?.label || value || placeholder} style={wrapLabel ? { whiteSpace: 'normal', overflowWrap: 'anywhere', textAlign: 'left', minWidth: 0 } : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {value ? (options.find(opt => opt.value === value)?.label || value) : placeholder}
         </span>
         <span className={`arrow ${openDropdown === id ? 'open' : ''}`}>▼</span>
@@ -45,7 +45,7 @@ const CustomSelect = ({ id, value, setValue, options = [], placeholder, style, s
               onClick={() => { setValue(opt.value); setOpenDropdown(null); }}
               style={{ padding: '8px 12px', cursor: 'pointer' }}
             >
-              <span className="option-text">{opt.label}</span>
+              <span className="option-text" title={opt.label}>{opt.label}</span>
             </li>
           )) : (
             <li style={{ padding: '8px 12px', color: '#999', cursor: 'default' }}>{searchable && searchQuery ? '검색 결과가 없습니다' : '옵션이 없습니다'}</li>

@@ -107,6 +107,66 @@
   gap: 8px;
 }
 
+.mediamix-planning-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.mediamix-learning-period {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #dbe4f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.mediamix-learning-period {
+  padding: 0 0 0 12px;
+  gap: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.mediamix-learning-period:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.mediamix-learning-select-wrapper { position: relative; display: inline-flex; }
+
+.mediamix-learning-select {
+  appearance: none;
+  min-width: 100px;
+  padding: 9px 32px 9px 12px;
+  border: 0;
+  border-left: 1px solid #dbe4f0;
+  border-radius: 0 7px 7px 0;
+  background: #eff6ff;
+  color: #2563eb;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+}
+
+.mediamix-learning-select:hover { background: #dbeafe; }
+.mediamix-learning-select option { color: #334155; background: #fff; }
+.mediamix-learning-arrow {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #2563eb;
+  pointer-events: none;
+}
+
 .mediamix-btn {
   display: flex;
   align-items: center;

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { getCanonicalMedia, mediaLogos } from '../../../utils/mediaUtils';
+import { normalizeRehouseCreativeMetrics } from '../../../utils/rehouseCreativeMetrics';
 
 function CreativeCard({ data }) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const metrics = normalizeRehouseCreativeMetrics(data);
 
 
   const canonicalMedia = getCanonicalMedia(data.media);
@@ -59,9 +61,9 @@ function CreativeCard({ data }) {
   };
 
   // 안전한 수치 변환 함수
-  const formatDecimal = (val) => (val ? parseFloat(val).toFixed(2) : "0.00");
+  const formatDecimal = (val) => val === null || val === undefined ? '—' : Number(val).toFixed(2);
   const formatInt = (val) => {
-    if (val === undefined || val === null) return "0";
+    if (val === undefined || val === null) return '—';
     return Math.round(val).toLocaleString('ko-KR');
   };
 
@@ -92,19 +94,19 @@ function CreativeCard({ data }) {
             <div className="metrics-summary">
               <div className="metric-item">
                 <span className="label">상담신청</span>
-                <span className="value">{formatInt(data.consultation)} 건</span>
+                <span className="value">{formatInt(metrics.consultation)} 건</span>
               </div>
               <div className="metric-item">
                 <span className="label">배분수</span>
-                <span className="value">{formatInt(data.distribution)} 건</span>
+                <span className="value">{formatInt(metrics.distribution)} 건</span>
               </div>
               <div className="metric-item">
                 <span className="label">배분 CVR</span>
-                <span className="value">{formatDecimal(data.cvr)} %</span>
+                <span className="value">{formatDecimal(metrics.cvr)} %</span>
               </div>
               <div className="metric-item">
                 <span className="label">배분 CPA</span>
-                <span className="value highlighting">{formatInt(data.cpa)} 원</span>
+                <span className="value highlighting">{formatInt(metrics.cpa)} 원</span>
               </div>
             </div>
           </div>
@@ -126,56 +128,56 @@ function CreativeCard({ data }) {
             </div>
             <div className="detail-row">
               <span>노출수</span>
-              <strong>{formatInt(data.impressions)}</strong>
+              <strong>{formatInt(metrics.impressions)}</strong>
             </div>
             <div className="detail-row">
               <span>클릭수</span>
-              <strong>{formatInt(data.clicks)}</strong>
+              <strong>{formatInt(metrics.clicks)}</strong>
             </div>
             <div className="detail-row">
               <span>클릭률(CTR)</span>
-              <strong>{formatDecimal(data.ctr)} %</strong>
+              <strong>{formatDecimal(metrics.ctr)} %</strong>
             </div>
             <div className="detail-row">
               <span>광고비</span>
-              <strong>{formatInt(data.cost)} 원</strong>
+              <strong>{formatInt(metrics.cost)} 원</strong>
             </div>
             <div className="detail-row">
               <span>CPC</span>
-              <strong>{formatInt(data.cpc)} 원</strong>
+              <strong>{formatInt(metrics.cpc)} 원</strong>
             </div>
             <div className="detail-row">
               <span>상담신청</span>
-              <strong>{formatInt(data.consultation)} 건</strong>
+              <strong>{formatInt(metrics.consultation)} 건</strong>
             </div>
             <div className="detail-row">
               <span>배분수</span>
-              <strong>{formatInt(data.distribution)} 건</strong>
+              <strong>{formatInt(metrics.distribution)} 건</strong>
             </div>
             <div className="detail-row">
               <span>배분 CVR</span>
-              <strong>{formatDecimal(data.cvr)} %</strong>
+              <strong>{formatDecimal(metrics.cvr)} %</strong>
             </div>
             <div className="detail-row">
               <span>배분률</span>
-              <strong>{formatDecimal(data.distribution_cvr)} %</strong>
+              <strong>{formatDecimal(metrics.distribution_cvr)} %</strong>
             </div>
             <div className="detail-row">
               <span>배분 CPA</span>
-              <strong>{formatInt(data.cpa)} 원</strong>
+              <strong>{formatInt(metrics.cpa)} 원</strong>
             </div>
             <div className="detail-row">
               <span>확정건수</span>
-              <strong>{formatInt(data.confirm)} 건</strong>
+              <strong>{formatInt(metrics.confirm)} 건</strong>
             </div>
             <div className="detail-row">
               <span>확정률</span>
-              <strong>{formatDecimal(data.confirm_cvr)} %</strong>
+              <strong>{formatDecimal(metrics.confirm_cvr)} %</strong>
             </div>
             <div className="detail-divider"></div>
             <div className="detail-row  highlight">
               <span>확정 CPA</span>
-              <strong>{formatInt(data.confirm_cpa)} 원</strong>
+              <strong>{formatInt(metrics.confirm_cpa)} 원</strong>
             </div>
           </div>
           <div className="chart-footer" onClick={toggleFlip}>

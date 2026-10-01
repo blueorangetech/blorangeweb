@@ -5,6 +5,7 @@ import { ko } from 'date-fns/locale';
 import '../../../styles/HanssemInsight.css';
 import '../../../styles/HanssemCompare.css';
 import CreativeCard from './CreativeCard';
+import { normalizeCreativeMetrics } from './common/creativeMetrics';
 import { getCanonicalMedia, mediaLogos } from '../../../utils/mediaUtils';
 import { chartData } from './common/filterMaps';
 import { fetchDataTable, fetchMediaMaterialData } from '../../../api/geo/hanssemHfApi';
@@ -225,7 +226,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
   };
 
   // 필터링된 데이터 계산
-  const displayData = realData.length > 0 ? realData : (offset === 0 ? chartData : []);
+  const displayData = (realData.length > 0 ? realData : (offset === 0 ? chartData : [])).map(normalizeCreativeMetrics);
 
   // 동적 구성: 각 필드 고유값 추출
   const filterOptions = useMemo(() => {
@@ -320,7 +321,7 @@ function InsightView({ startDate, endDate, setStartDate, setEndDate }) {
         if (fieldKey === 'cost') return parseFloat(obj.total_cost || obj.cost || 0);
         if (fieldKey === 'orders') return parseFloat(obj.total_orders || obj.orders || 0);
         if (fieldKey === 'roas') {
-          if (obj.roas !== undefined) return parseFloat(obj.roas);
+          if (obj.roas !== undefined) return Number(obj.roas ?? 0);
           const c = parseFloat(obj.total_cost || obj.cost || 0);
           const r = parseFloat(obj.total_revenue || obj.revenue || 0);
           return c > 0 ? (r / c) * 100 : 0;

@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import CreativeCard from './CreativeCard';
+import ABAnalysisSummary from './ABAnalysisSummary';
+import ABCreativePlaceholder from './ABCreativePlaceholder';
+import '../../../styles/HanssemABCompare.css';
 import CustomSelect from './common/CustomSelect';
 import { runAiCompare } from '../../../api/geo/hanssemHfApi';
 
@@ -32,6 +35,7 @@ function ABTestCompareTab({ fetchedData, renderDatePicker }) {
 
   const [openDropdown, setOpenDropdown] = useState(null);
   const [aiAnalysisResult, setAiAnalysisResult] = useState(null);
+  const [analysisExpanded, setAnalysisExpanded] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [resolvedImgA, setResolvedImgA] = useState('');
   const [resolvedImgB, setResolvedImgB] = useState('');
@@ -167,7 +171,7 @@ function ABTestCompareTab({ fetchedData, renderDatePicker }) {
     }
   };
 
-  const renderAIAnalysis = (dataA, dataB) => {
+  const renderAIAnalysis = (dataA, dataB, full = false) => {
     if (!dataA || !dataB) {
       return (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#999', textAlign: 'center', minHeight: '200px' }}>
@@ -216,6 +220,8 @@ function ABTestCompareTab({ fetchedData, renderDatePicker }) {
       );
     }
 
+    if (!full) return <ABAnalysisSummary dataA={dataA} dataB={dataB} result={aiAnalysisResult} expanded={analysisExpanded} onToggle={() => setAnalysisExpanded(value => !value)} />;
+
     const summary = aiAnalysisResult.summary || {
       ctr_winner: dataA.ctr >= dataB.ctr ? 'A' : 'B',
       cvr_winner: dataA.cvr >= dataB.cvr ? 'A' : 'B',
@@ -227,9 +233,9 @@ function ABTestCompareTab({ fetchedData, renderDatePicker }) {
     const performanceText = aiAnalysisResult.performance || '최적화 제안 결과가 없습니다.';
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', overflowY: 'auto' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ padding: '16px', background: '#fff', borderRadius: '12px', borderLeft: '4px solid #667eea', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-          <strong style={{ display: 'block', marginBottom: '10px', color: '#4a5568', fontSize: '1.05rem' }}>🏆 승리 지표 요약</strong>
+          <strong style={{ display: 'block', marginBottom: '10px', color: '#4a5568', fontSize: '1.05rem' }}>성과 비교 요약</strong>
           <ul style={{ margin: '0', paddingLeft: '20px', color: '#555', lineHeight: '1.8', fontSize: '0.95rem' }}>
             <li><strong>클릭 유도 (CTR):</strong> Creative {summary.ctr_winner || 'A'} 우세</li>
             <li><strong>구매 전환 (CVR):</strong> Creative {summary.cvr_winner || 'A'} 우세</li>
@@ -240,7 +246,7 @@ function ABTestCompareTab({ fetchedData, renderDatePicker }) {
         {(aiAnalysisResult.image_a_description || aiAnalysisResult.image_b_description) && (
           <div style={{ padding: '16px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0' }}>
             <h4 style={{ margin: '0 0 10px 0', color: '#166534', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span>🔍</span> AI 이미지 인식 검증 (Test Verification)
+              <span>🔍</span> 인식한 이미지 내용
             </h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.9rem', color: '#14532d', lineHeight: '1.5' }}>
               {aiAnalysisResult.image_a_description && (
@@ -404,19 +410,19 @@ function ABTestCompareTab({ fetchedData, renderDatePicker }) {
       </nav>
 
       <main className="hanssem-main">
-        <div className="chart-grid" style={{ display: 'flex', gap: '30px', justifyContent: 'center', marginBottom: '40px', marginTop: '20px', alignItems: 'stretch' }}>
-          <div style={{ flex: 2, display: 'flex', gap: '30px', justifyContent: 'center', alignItems: 'center' }}>
-            <div style={{ flex: 1, maxWidth: '320px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div className="ab-compare-shell"><div className="ab-compare-layout">
+          <div className="ab-compare-cards">
+            <div className="ab-compare-card-column">
               <div style={{ background: '#5C9CE6', color: '#fff', padding: '10px 0', width: '100%', textAlign: 'center', borderRadius: '10px', fontWeight: 'bold', marginBottom: '15px', fontSize: '0.95rem', boxShadow: '0 2px 6px rgba(92, 156, 230, 0.2)' }}>Creative A</div>
-              {cardDataA ? <CreativeCard data={cardDataA} onImageResolved={setResolvedImgA} /> : <div style={{ padding: '40px', color: '#999', border: '1px dashed #ddd', borderRadius: '12px', width: '100%', textAlign: 'center' }}>소재를 선택해주세요</div>}
+              {cardDataA ? <CreativeCard data={cardDataA} onImageResolved={setResolvedImgA} /> : <ABCreativePlaceholder variant="A" />}
             </div>
-            <div style={{ flex: 1, maxWidth: '320px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div className="ab-compare-card-column">
               <div style={{ background: '#F28F43', color: '#fff', padding: '10px 0', width: '100%', textAlign: 'center', borderRadius: '10px', fontWeight: 'bold', marginBottom: '15px', fontSize: '0.95rem', boxShadow: '0 2px 6px rgba(242, 143, 67, 0.2)' }}>Creative B</div>
-              {cardDataB ? <CreativeCard data={cardDataB} onImageResolved={setResolvedImgB} /> : <div style={{ padding: '40px', color: '#999', border: '1px dashed #ddd', borderRadius: '12px', width: '100%', textAlign: 'center' }}>소재를 선택해주세요</div>}
+              {cardDataB ? <CreativeCard data={cardDataB} onImageResolved={setResolvedImgB} /> : <ABCreativePlaceholder variant="B" />}
             </div>
           </div>
           
-          <div style={{ flex: 1.2, minWidth: '300px', backgroundColor: '#fdfdff', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+          <div className="ab-compare-analysis">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <h3 style={{ margin: 0, fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px', color: '#2d3748' }}>
                 <span style={{ fontSize: '1.3rem' }}>✨</span> AI 소재 성과 분석
@@ -444,9 +450,16 @@ function ABTestCompareTab({ fetchedData, renderDatePicker }) {
               {renderAIAnalysis(dataA, dataB)}
             </div>
           </div>
-        </div>
+        </div></div>
 
-        <div className="summary-data-table-container">
+        {analysisExpanded && aiAnalysisResult && dataA && dataB && !isAiLoading && (
+          <section id="ab-full-analysis" className="ab-full-analysis" aria-label="전체 AI 분석">
+            <h3>전체 AI 분석</h3>
+            {renderAIAnalysis(dataA, dataB, true)}
+          </section>
+        )}
+
+        <div className="summary-data-table-container ab-comparison-summary">
           <table className="summary-data-table" style={{ width: '100%' }}>
             <thead>
               <tr>

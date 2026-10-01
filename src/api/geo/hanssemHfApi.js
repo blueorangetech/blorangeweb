@@ -4,6 +4,7 @@
 
 import { fetchBigQuery, formatDate } from './bigquery';
 import { aiApi } from './aiApi';
+import { attachCreativeImageSources } from '../../utils/hfCreativeImages';
 
 const DATASET_ID = 'hanssem_hf';
 const TABLE_ID = 'performance_raw';
@@ -45,8 +46,8 @@ export const fetchMediaMaterialData = ({ startDate, endDate, limit, offset, minC
     filters,
   });
 
-export const fetchAllMaterialData = ({ startDate, endDate, limit, offset, minCost, minDistribution, minRoas, filters }) =>
-  fetchBigQuery({
+export const fetchAllMaterialData = async ({ startDate, endDate, limit, offset, minCost, minDistribution, minRoas, filters }) => {
+  const rows = await fetchBigQuery({
     datasetId: DATASET_ID,
     tableId: TABLE_ID,
     reportType: 'all_material',
@@ -59,6 +60,18 @@ export const fetchAllMaterialData = ({ startDate, endDate, limit, offset, minCos
     minRoas,
     filters,
   });
+
+  const creativeTypes = [...new Set(rows.filter(row => !row.media && !row.image_sources?.length).map(row => row.creative_type).filter(Boolean))];
+  if (!creativeTypes.length) return rows;
+  try {
+    // 통합 임계치는 개별 매체에 적용하지 않는다. 이미지 조회는 현재 페이지 소재로 한정한다.
+    const mediaRows = await fetchMediaMaterialData({ startDate, endDate, filters: { ...filters, creative_type: creativeTypes } });
+    return attachCreativeImageSources(rows, mediaRows);
+  } catch (error) {
+    console.warn('Creative image source lookup failed:', error);
+    return rows;
+  }
+};
 
 export const fetchCompareData = ({ startDate, endDate }) =>
   fetchBigQuery({

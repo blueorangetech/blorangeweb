@@ -8,6 +8,7 @@ import TrendControls from './TrendControls';
 import TrendChartSection from './TrendChartSection';
 import TrendTableSection from './TrendTableSection';
 import TrendAiSidebar from './TrendAiSidebar';
+import { buildPerformanceComments } from './buildPerformanceComments';
 
 // 주차 계산 유틸리티 (월요일 시작 기준)
 const getWeekKey = (dateStr) => {
@@ -236,63 +237,15 @@ function CommonTrendView({ datasetId, startDate, endDate, setStartDate, setEndDa
   // ==========================================
   // 💡 실시간 분석 기반 AI 코멘트 생성 (통합)
   // ==========================================
-  const aiComments = useMemo(() => {
-    const data = activeSubTab === 'integrated' ? integratedData : mediaTrendData;
-    if (data.length < 2) {
-      return {
-        daily: '이전 비교 대상 데이터가 부족합니다.',
-        weekly: '충분한 추이 분석 데이터가 없습니다.',
-        monthly: '조회 기간을 늘려 상세 트렌드를 확인해 주세요.'
-      };
-    }
-
-    const last = data[data.length - 1];
-    const prev = data[data.length - 2];
-
-    const lastVal = last[cfg.ordersKey];
-    const prevVal = prev[cfg.ordersKey];
-    const valDiff = lastVal - prevVal;
-    const valPct = prevVal > 0 ? (valDiff / prevVal) * 100 : 0;
-
-    const lastLineVal = last[cfg.lineKey];
-    const prevLineVal = prev[cfg.lineKey];
-    const lineDiff = lastLineVal - prevLineVal;
-    const linePct = prevLineVal > 0 ? (lineDiff / prevLineVal) * 100 : 0;
-
-    const valWord = valPct >= 0 ? `증가(+${valPct.toFixed(1)}%)` : `감소(${valPct.toFixed(1)}%)`;
-    const lineWord = linePct >= 0 ? `상승(+${linePct.toFixed(1)}%)` : `하락(${linePct.toFixed(1)}%)`;
-
-    const formatLine = (val) => cfg.lineKey === 'roas' ? formatPercent(val) : formatWon(val);
-
-    const dailyComment = `최근 분석 구간(${last.period})의 ${cfg.ordersLabel}는 이전 구간(${prev.period}) 대비 ${valWord}했습니다.\n효율 지표인 ${cfg.lineLabel}의 경우 기존 ${formatLine(prevLineVal)}에서 ${formatLine(lastLineVal)} 수준으로 ${lineWord}하여 전반적 성과 변동이 발생했습니다.`;
-
-    const topMedia = mediaBreakdownData[0];
-    const bestLineMedia = [...mediaBreakdownData].sort((a, b) =>
-      cfg.lineKey === 'roas' ? b.roas - a.roas : (a.cpa || Infinity) - (b.cpa || Infinity)
-    )[0];
-
-    const formatLineMedia = (row) => row ? (cfg.lineKey === 'roas' ? formatPercent(row.roas) : formatWon(row.cpa)) : '0';
-
-    const weeklyComment = activeSubTab === 'integrated'
-      ? `전체 매체 중 가장 많은 성과를 낸 곳은 [${topMedia?.media || '기타'}] 매체로, 총 ${formatInt(topMedia?.[cfg.ordersKey])}건의 ${cfg.ordersLabel}를 견인했습니다.\n가장 우수한 효율을 기록한 매체는 [${bestLineMedia?.media || '기타'}] (지표: ${formatLineMedia(bestLineMedia)})입니다.`
-      : `[${selectedMedia}] 매체의 기간 평균 효율은 ${cfg.lineLabel} 기준 ${formatLine(last[cfg.lineKey])}로 확인되며, 누적 집행비용은 ${formatWon(last.cost)}입니다.\nCPA/ROAS 효율 추이를 반영해 타겟팅 고도화 활동을 전개할 것을 제안합니다.`;
-
-    const totalOrders = data.reduce((sum, item) => sum + item[cfg.ordersKey], 0);
-    const totalCost = data.reduce((sum, item) => sum + item.cost, 0);
-    const totalRevenue = data.reduce((sum, item) => sum + item.revenue, 0);
-    const overallLine = cfg.lineKey === 'roas'
-      ? (totalCost > 0 ? (totalRevenue / totalCost) * 100 : 0)
-      : (totalOrders > 0 ? Math.round(totalCost / totalOrders) : 0);
-
-    const monthlyComment = `해당 기간 누적 ${cfg.ordersLabel}는 총 ${formatInt(totalOrders)}건이며, 평균 ${cfg.lineLabel}는 ${formatLine(overallLine)}로 집계되었습니다.\n종합 분석 결과를 감안하여 성과 기준치에 부합하는 고효율 채널로 매체 비중을 리밸런싱할 필요가 있습니다.`;
-
-    return {
-      daily: dailyComment,
-      weekly: weeklyComment,
-      monthly: monthlyComment
-    };
-  }, [integratedData, mediaTrendData, mediaBreakdownData, activeSubTab, selectedMedia, cfg]);
-
+  const aiComments = useMemo(() => buildPerformanceComments({
+    data: activeSubTab === 'integrated' ? integratedData : mediaTrendData,
+    mediaBreakdownData,
+    cfg,
+    activeSubTab,
+    selectedMedia,
+    trendData,
+    getPeriod: date => timeUnit === 'week' ? getWeekKey(date) : timeUnit === 'month' ? getMonthKey(date) : date
+  }), [integratedData, mediaTrendData, mediaBreakdownData, activeSubTab, selectedMedia, cfg, trendData, timeUnit]);
   return (
     <main className="hanssem-main">
       <TrendControls
