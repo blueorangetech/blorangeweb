@@ -13,6 +13,14 @@ const SIZE_PRESETS = [
   ['1080x1920', '스토리', '9:16'],
 ];
 
+const EXPAND_DIRECTIONS = [
+  ['all', '전체', '원본 중앙 배치'],
+  ['up', '↑ 위', '원본 아래 배치'],
+  ['down', '↓ 아래', '원본 위 배치'],
+  ['left', '← 왼쪽', '원본 오른쪽 배치'],
+  ['right', '→ 오른쪽', '원본 왼쪽 배치'],
+];
+
 export default function ImageExpandView({ embedded }) {
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState('');
@@ -20,6 +28,7 @@ export default function ImageExpandView({ embedded }) {
   const [customWidth, setCustomWidth] = useState(1600);
   const [customHeight, setCustomHeight] = useState(1200);
   const [padding, setPadding] = useState(0.1);
+  const [direction, setDirection] = useState('all');
   const [seed, setSeed] = useState('');
   const [result, setResult] = useState(null);
   const [results, setResults] = useState([]);
@@ -63,6 +72,7 @@ export default function ImageExpandView({ embedded }) {
       const response = await aiApi.expandPhotoRoomImage(file, {
         outputSize,
         padding,
+        direction,
         seed: seed ? Number(seed) : undefined,
       });
       const imageUrl = URL.createObjectURL(response);
@@ -72,6 +82,7 @@ export default function ImageExpandView({ embedded }) {
         filename: `expanded_${outputSize}_${file.name.replace(/\.[^.]+$/, '')}.png`,
         originalUrl: preview,
         outputSize,
+        directionLabel: EXPAND_DIRECTIONS.find(([value]) => value === direction)[1],
         id: `${Date.now()}-${imageUrl}`,
       };
       setResult(nextResult);
@@ -159,6 +170,21 @@ export default function ImageExpandView({ embedded }) {
             </div>
           )}
 
+          <div className="rmbg-option-section">
+            <span className="rmbg-section-label">확장 방향</span>
+            <div className="rmbg-mode-grid expand-size-grid">
+              {EXPAND_DIRECTIONS.map(([value, label, description]) => (
+                <button type="button" key={value} disabled={loading}
+                  aria-pressed={direction === value}
+                  className={`mode-btn ${direction === value ? 'active' : ''}`}
+                  onClick={() => setDirection(value)}>
+                  <strong>{label}</strong><small>{description}</small>
+                </button>
+              ))}
+            </div>
+            <p className="expand-help-text">선택한 방향에 여백을 만들고 원본을 반대쪽에 배치합니다. 출력 비율에 따라 다른 방향에도 빈 공간이 생길 수 있습니다.</p>
+          </div>
+
           <div className="rmbg-option-section expand-padding-section">
             <div className="expand-padding-header">
               <span className="rmbg-section-label">확장 여백</span>
@@ -167,7 +193,7 @@ export default function ImageExpandView({ embedded }) {
             <input
               type="range"
               min="0"
-              max="0.5"
+              max="0.48"
               step="0.02"
               value={padding}
               onChange={(event) => setPadding(Number(event.target.value))}
@@ -177,7 +203,9 @@ export default function ImageExpandView({ embedded }) {
               <span>확장 영역 크게</span>
             </div>
             <p className="expand-help-text">
-              여백을 높이면 원본이 작아지고 주변에 AI가 생성하는 확장 영역이 넓어집니다.
+              {direction === 'all'
+                ? '여백을 높이면 원본이 작아지고 사방의 확장 영역이 넓어집니다.'
+                : '여백을 높이면 선택한 방향의 확장 영역이 넓어집니다.'}
             </p>
           </div>
 
@@ -232,7 +260,7 @@ export default function ImageExpandView({ embedded }) {
             <div className="comparison-results-grid">
               {results.map((item, index) => (
                 <ComparisonResultCard key={item.id} originalUrl={item.originalUrl} resultUrl={item.imageUrl}
-                  title={`이미지 확장 결과 ${results.length - index}`} meta={`출력 크기 ${item.outputSize}`} filename={item.filename}
+                  title={`이미지 확장 결과 ${results.length - index}`} meta={`출력 크기 ${item.outputSize} · ${item.directionLabel} 확장`} filename={item.filename}
                   onDownload={() => downloadFileFromUrl(item.imageUrl, item.filename)}
                   onDelete={() => removeResult(item.id)} />
               ))}

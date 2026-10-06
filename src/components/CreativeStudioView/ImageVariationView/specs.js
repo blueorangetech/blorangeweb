@@ -20,10 +20,15 @@ const PLACEMENT_SPECS_BASE = [
   { key: 'google_square_1_1', channel: 'Google AC', channelKey: 'google', aspectClass: 'ratio-1-1', maxHeadLen: 30, maxSubLen: 90, format: 'Play스토어/PMax (1:1 - 1200x1200)' },
   { key: 'google_shorts_9_16', channel: 'Google AC', channelKey: 'google', aspectClass: 'ratio-9-16', maxHeadLen: 25, maxSubLen: 45, format: 'YouTube Shorts (9:16 - 1080x1920)' },
 
-  // 5. Kakao Moment
-  { key: 'kakao_bizboard_2_1', channel: 'Kakao Moment', channelKey: 'kakao', aspectClass: 'ratio-2-1', maxHeadLen: 25, maxSubLen: 40, format: '카카오 비즈보드 (2.03:1 - 1029x507)' },
-  { key: 'kakao_feed_1_1', channel: 'Kakao Moment', channelKey: 'kakao', aspectClass: 'ratio-1-1', maxHeadLen: 25, maxSubLen: 45, format: '톡피드 정방형 (1:1 - 1200x1200)' },
-  { key: 'kakao_display_2_1', channel: 'Kakao Moment', channelKey: 'kakao', aspectClass: 'ratio-2-1', maxHeadLen: 30, maxSubLen: 60, format: '메인 와이드 배너 (2:1 - 1200x600)' }
+  // Kakao and Naver Brand Search
+  { key: 'kakao_wide', channel: 'Kakao', channelKey: 'kakao', format: '1200x600' },
+  { key: 'kakao_square', channel: 'Kakao', channelKey: 'kakao', format: '500x500' },
+  { key: 'kakao_portrait', channel: 'Kakao', channelKey: 'kakao', format: '800x1000' },
+  { key: 'kakao_wide_alt', channel: 'Kakao', channelKey: 'kakao', format: '1200x600' },
+  { key: 'naver_brand_pc_main', channel: 'Naver Brand Search', channelKey: 'naver_brand', format: 'PC 메인 (472x472)' },
+  { key: 'naver_brand_pc_thumbnail', channel: 'Naver Brand Search', channelKey: 'naver_brand', format: 'PC 썸네일 (232x152)' },
+  { key: 'naver_brand_mobile_main', channel: 'Naver Brand Search', channelKey: 'naver_brand', format: 'MO 메인 (208x208)' },
+  { key: 'naver_brand_mobile_thumbnail', channel: 'Naver Brand Search', channelKey: 'naver_brand', format: 'MO 썸네일 (240x240)' }
 ];
 
 const PLACEMENT_DIMENSIONS = {
@@ -32,7 +37,7 @@ const PLACEMENT_DIMENSIONS = {
   naver_smart_4_7: [750, 160], naver_feed_1_1: [1200, 1200], naver_main_2_2: [1250, 560],
   naver_feed_2_3: [1200, 1800], google_landscape_1_91: [1200, 628],
   google_square_1_1: [1200, 1200], google_shorts_9_16: [1080, 1920],
-  kakao_bizboard_2_1: [1029, 507], kakao_feed_1_1: [1200, 1200], kakao_display_2_1: [1200, 600]
+  kakao_wide: [1200, 600], kakao_square: [500, 500], kakao_portrait: [800, 1000], kakao_wide_alt: [1200, 600], naver_brand_pc_main: [472, 472], naver_brand_pc_thumbnail: [232, 152], naver_brand_mobile_main: [208, 208], naver_brand_mobile_thumbnail: [240, 240]
 };
 
 export const PLACEMENT_SPECS_MAP = PLACEMENT_SPECS_BASE.map((spec) => {
@@ -78,12 +83,24 @@ export const PLACEMENT_GROUPS = [
     ]
   },
   {
-    title: 'Kakao Moment',
+    title: 'Kakao',
     channelKey: 'kakao',
     placements: [
-      { id: 'kakao_bizboard_2_1', label: '비즈보드 (2.03:1 - 1029x507)' },
-      { id: 'kakao_feed_1_1', label: '톡피드 / 디스플레이 (1:1 - 1200x1200)' },
-      { id: 'kakao_display_2_1', label: '메인 와이드 (2:1 - 1200x600)' }
+      { id: 'kakao_wide', label: '1200x600' },
+      { id: 'kakao_square', label: '500x500' },
+      { id: 'kakao_portrait', label: '800x1000' },
+      { id: 'kakao_wide_alt', label: '1200x600' }
+    ]
+  },
+  {
+    title: 'Naver Brand Search',
+    channelKey: 'naver_brand',
+    placements: [
+      { id: 'naver_brand_pc_main', label: 'PC 메인 (472x472)' },
+      { id: 'naver_brand_pc_thumbnail', label: 'PC 썸네일 (232x152)' },
+      { id: 'naver_brand_mobile_main', label: 'MO 메인 (208x208)' },
+      { id: 'naver_brand_mobile_thumbnail', label: 'MO 썸네일 (240x240)' }
     ]
   }
 ];
+

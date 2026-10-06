@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import CloseUpCrop from './CloseUpCrop';
 import ImageUploadPreview from '../common/ImageUploadPreview';
 import ImageDetailModal from '../common/ImageDetailModal';
 import ImagePreviewPanel, { PreviewPlaceholder } from './ImagePreviewPanel';
@@ -16,6 +17,8 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
   const [preview, setPreview] = useState('');
   const [images, setImages] = useState([]);
   const [selectedAngles, setSelectedAngles] = useState([]);
+  const [cropRegion, setCropRegion] = useState(null);
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [detailImage, setDetailImage] = useState(null);
@@ -23,6 +26,7 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
   const selectFile = (selected) => {
     if (!selected || !selected.type.startsWith('image/')) return;
     setFile(selected);
+    setCropRegion(null);
     setPreview(URL.createObjectURL(selected));
     setError('');
   };
@@ -30,10 +34,16 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
   const generate = async () => {
     if (!file) return setError('각도를 생성할 원본 이미지를 업로드해 주세요.');
     if (!selectedAngles.length) return setError('생성할 각도를 하나 이상 선택해 주세요.');
+    if (selectedAngles.includes('close_up') && (!cropRegion || cropRegion.width < 0.01 || cropRegion.height < 0.01)) {
+      return setError('클로즈업할 영역을 이미지에서 드래그하여 선택해 주세요.');
+    }
     setLoading(true);
     setError('');
     try {
-      const response = await aiApi.generateMultipleAngles(file, { pageName, bucketName, angles: selectedAngles });
+      const response = await aiApi.generateMultipleAngles(file, {
+        pageName, bucketName, angles: selectedAngles,
+        closeUpRegion: selectedAngles.includes('close_up') ? cropRegion : undefined,
+      });
       if (!response.images?.length) throw new Error('ComfyUI가 생성 이미지를 반환하지 않았습니다.');
       setImages((current) => [...response.images, ...current]);
     } catch (err) {
@@ -82,6 +92,7 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
             previewUrl={preview}
             onFileSelect={selectFile}
             onInvalidFile={setError}
+            disabled={loading}
           />
 
           {/* 각도 선택 */}
@@ -89,6 +100,7 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
             <span>생성할 각도 선택</span>
             <button
               type="button"
+              disabled={loading}
               onClick={() => {
                 setError('');
                 setSelectedAngles(selectedAngles.length === ANGLES.length ? [] : ANGLES.map(([key]) => key));
@@ -103,6 +115,7 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
               <button
                 type="button"
                 key={key}
+                disabled={loading}
                 className={selectedAngles.includes(key) ? 'selected' : ''}
                 onClick={() => {
                   setError('');
@@ -118,6 +131,15 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
               </button>
             ))}
           </div>
+          {selectedAngles.includes('close_up') && (
+            <div className="rmbg-option-section">
+              <span className="rmbg-section-label">클로즈업 영역</span>
+              <p className="expand-help-text">이미지에서 원하는 영역을 드래그해 주세요. 선택 테두리는 결과에 포함되지 않습니다.</p>
+              {preview && <CloseUpCrop src={preview} region={cropRegion} disabled={loading}
+                onChange={(region) => { setCropRegion(region); setError(''); }} />}
+              <p className="expand-help-text">선택 영역과 주변을 기준으로 AI 근접 구도를 생성합니다. 출력은 다른 각도와 같은 약 1MP 크기로 원본 비율을 유지하며, 상품 세부는 달라질 수 있습니다.</p>
+            </div>
+          )}
         </div>
 
         <div className="panel-footer">
@@ -150,13 +172,12 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
           </button>
         ) : null}
         isLoading={loading}
-        loadingTitle="다양한 각도 렌더링 중"
+        loadingTitle="선택한 이미지 처리 중"
         loadingIcon="360"
         loadingSteps={[
-          '이미지 3D 공간 및 피사체 구조 분석 중...',
-          '카메라 앵글 및 원근 좌표 매핑 중...',
-          '선택된 각도별 고화질 렌더링 중...',
-          '최종 해상도 최적화 및 결과 생성 중...',
+          '선택한 영역과 각도 확인 중...',
+          'AI 클로즈업 및 선택한 각도 생성 중...',
+          '결과 이미지 준비 중...',
         ]}
         errorMessage={error}
         errorTitle="생성 오류"
@@ -210,3 +231,4 @@ export default function MultipleAngleView({ embedded, pageName, bucketName }) {
     </div>
   );
 }
+

@@ -10,11 +10,12 @@ export class AiApi {
     this.client = mainClient;
   }
 
-  generateMultipleAngles(file, { pageName = 'playground', bucketName, angles = [] } = {}) {
+  generateMultipleAngles(file, { pageName = 'playground', bucketName, angles = [], closeUpRegion } = {}) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('page_name', pageName);
     formData.append('angles', JSON.stringify(angles));
+    if (closeUpRegion) formData.append('close_up_region', JSON.stringify(closeUpRegion));
     if (bucketName) formData.append('bucket_name', bucketName);
     return this.client.post('/api/ai/comfy/multiple-angles', formData);
   }
@@ -28,6 +29,7 @@ export class AiApi {
     if (seed) formData.append('seed', seed);
     return this.client.post('/api/ai/comfy/restyle', formData);
   }
+
 
   composeImages(files, { prompt, pageName = 'playground', bucketName } = {}) {
     const formData = new FormData();
@@ -45,11 +47,12 @@ export class AiApi {
     return this.client.post('/api/ai/photoroom', payload, undefined, { responseType: 'blob' });
   }
 
-  expandPhotoRoomImage(file, { outputSize, padding = 0, seed } = {}) {
+  expandPhotoRoomImage(file, { outputSize, padding = 0, direction = 'all', seed } = {}) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('output_size', outputSize);
     formData.append('padding', padding);
+    formData.append('direction', direction);
     if (seed) formData.append('seed', seed);
     return this.client.post('/api/ai/photoroom/expand', formData, undefined, { responseType: 'blob' });
   }
@@ -73,34 +76,14 @@ export class AiApi {
     });
   }
 
-  uploadPsd(file, { pageName = 'playground', bucketName } = {}) {
+  generateImageVariations(file, placements, mode = 'expand') {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('page_name', pageName);
-    if (bucketName) formData.append('bucket_name', bucketName);
-    return this.client.post('/api/ai/psd/documents', formData);
+    formData.append('placements', JSON.stringify(placements));
+    formData.append('mode', mode);
+    return this.client.post('/api/ai/image-variations', formData);
   }
 
-  getPsdDocument(documentId, bucketName) {
-    return this.client.get(`/api/ai/psd/documents/${documentId}`,
-      bucketName ? { bucket_name: bucketName } : {});
-  }
-
-  revisePsd(documentId, payload) {
-    return this.client.post(`/api/ai/psd/documents/${documentId}/revisions`, payload);
-  }
-
-  generatePsdVariations(documentId, payload) {
-    return this.client.post(`/api/ai/psd/documents/${documentId}/variations`, payload);
-  }
-
-  adjustPsdPlacementVariation(documentId, placementKey, payload) {
-    return this.client.post(`/api/ai/psd/documents/${documentId}/variations/${placementKey}/adjust`, payload);
-  }
-
-  regeneratePsdPlacementLayerImage(documentId, placementKey, payload) {
-    return this.client.post(`/api/ai/psd/documents/${documentId}/variations/${placementKey}/regenerate-image`, payload);
-  }
 }
 
 export const aiApi = new AiApi();

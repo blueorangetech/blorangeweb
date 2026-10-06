@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 function PlacementGroupSelector({ placementGroups, selectedPlacements, togglePlacement, toggleGroupAll }) {
+  const [collapsed, setCollapsed] = useState({});
   return (
     <div className="placement-groups-container">
       {placementGroups.map(group => {
@@ -8,9 +9,13 @@ function PlacementGroupSelector({ placementGroups, selectedPlacements, togglePla
         return (
           <div key={group.channelKey} className="placement-group-box">
             <div className="group-box-header">
-              <span className={`variation-tag ${group.channelKey}`}>
-                {group.title}
-              </span>
+              <button type="button" className={`variation-tag ${group.channelKey}`}
+                aria-expanded={!collapsed[group.channelKey]} aria-controls={`placements-${group.channelKey}`}
+                onClick={() => setCollapsed((current) => ({ ...current, [group.channelKey]: !current[group.channelKey] }))}
+                style={{ border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>{collapsed[group.channelKey] ? 'expand_more' : 'expand_less'}</span>
+                {group.title} · {group.placements.filter((p) => selectedPlacements[p.id]).length}/{group.placements.length}
+              </button>
               <button
                 type="button"
                 className="btn-select-group-all"
@@ -19,7 +24,8 @@ function PlacementGroupSelector({ placementGroups, selectedPlacements, togglePla
                 {allSelected ? '전체 해제' : '전체 선택'}
               </button>
             </div>
-            <div className="placement-items-list">
+            <div id={`placements-${group.channelKey}`} className="placement-items-list" hidden={!!collapsed[group.channelKey]}
+              style={collapsed[group.channelKey] ? { display: 'none' } : undefined}>
               {group.placements.map(p => (
                 <label key={p.id} className="placement-checkbox-label">
                   <input

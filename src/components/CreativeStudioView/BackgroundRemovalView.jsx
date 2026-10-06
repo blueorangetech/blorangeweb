@@ -11,40 +11,22 @@ function BackgroundRemovalView({ embedded = false }) {
   const [file, setFile] = useState(null);
   const [filePreview, setFilePreview] = useState('');
 
-  const backgroundMode = 'transparent';
-  const backgroundColor = '#FFFFFF';
-  const backgroundPrompt = '';
   const [shadowMode, setShadowMode] = useState('ai.soft');
-  const [shadowPose, setShadowPose] = useState('upright');
   const [shadowDirection, setShadowDirection] = useState('behindRight');
   const [shadowSpread, setShadowSpread] = useState('medium');
   const [shadowSoftness, setShadowSoftness] = useState(0.3);
   const [shadowIntensity, setShadowIntensity] = useState(0.8);
   const [padding, setPadding] = useState(0.12);
-  const [aspectRatio, setAspectRatio] = useState('1:1');
 
-  const [options, setOptions] = useState({
-    beautify: true,
-    lighting: false,
-    ironing: false,
-    textRemoval: false,
-  });
 
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState([]);
   const resultUrls = useRef(new Set());
   const [errorMessage, setErrorMessage] = useState('');
 
-  const [virtualModelModel, setVirtualModelModel] = useState('');
-  const [virtualModelPose, setVirtualModelPose] = useState('');
-  const [virtualModelScene, setVirtualModelScene] = useState('');
-  const [virtualModelPrompt, setVirtualModelPrompt] = useState('');
 
   useEffect(() => () => resultUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
 
-  const handleOptionChange = (key) => {
-    setOptions((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
 
   const handleFileSelect = (selectedFile) => {
     if (selectedFile) {
@@ -82,26 +64,13 @@ function BackgroundRemovalView({ embedded = false }) {
       }
 
       const payload = {
-        message: backgroundPrompt || '',
         image_url: finalImageUrl,
-        background_mode: backgroundMode,
-        background_color: backgroundColor,
-        background_prompt: backgroundPrompt,
         shadow_mode: shadowMode,
-        shadow_pose: shadowPose,
         shadow_direction: shadowDirection,
         shadow_spread: shadowSpread,
         shadow_softness: shadowSoftness,
         shadow_intensity: shadowIntensity,
         padding: padding,
-        aspect_ratio: aspectRatio,
-        options: options,
-        virtual_model: {
-          model: virtualModelModel,
-          pose: virtualModelPose,
-          scene: virtualModelScene,
-          prompt: virtualModelPrompt
-        }
       };
 
       const resultBlob = await aiApi.processPhotoRoom(payload);
@@ -112,7 +81,7 @@ function BackgroundRemovalView({ embedded = false }) {
         resultUrl: nextImage,
         originalUrl: inputSrc,
         filename: file ? `photoroom_${file.name}` : `photoroom_${Date.now()}.png`,
-        meta: `여백 ${Math.round(padding * 100)}% · ${aspectRatio}`,
+        meta: `여백 ${Math.round(padding * 100)}%`,
       }, ...current]);
     } catch (error) {
       console.error('PhotoRoom AI 가공 실패:', error);
@@ -143,34 +112,20 @@ function BackgroundRemovalView({ embedded = false }) {
           imageUrl={imageUrl}
           filePreview={filePreview}
           shadowMode={shadowMode}
-          shadowPose={shadowPose}
           shadowDirection={shadowDirection}
           shadowSpread={shadowSpread}
           shadowSoftness={shadowSoftness}
           shadowIntensity={shadowIntensity}
           padding={padding}
-          aspectRatio={aspectRatio}
-          options={options}
           isLoading={isLoading}
-          virtualModelModel={virtualModelModel}
-          virtualModelPose={virtualModelPose}
-          virtualModelScene={virtualModelScene}
-          virtualModelPrompt={virtualModelPrompt}
           onFileSelect={handleFileSelect}
           onUrlChange={handleUrlChange}
           setShadowMode={setShadowMode}
-          setShadowPose={setShadowPose}
           setShadowDirection={setShadowDirection}
           setShadowSpread={setShadowSpread}
           setShadowSoftness={setShadowSoftness}
           setShadowIntensity={setShadowIntensity}
           setPadding={setPadding}
-          setAspectRatio={setAspectRatio}
-          setVirtualModelModel={setVirtualModelModel}
-          setVirtualModelPose={setVirtualModelPose}
-          setVirtualModelScene={setVirtualModelScene}
-          setVirtualModelPrompt={setVirtualModelPrompt}
-          onOptionChange={handleOptionChange}
           onGenerate={handleGenerate}
         />
 
@@ -209,7 +164,7 @@ function BackgroundRemovalView({ embedded = false }) {
           <PreviewPlaceholder
             icon="layers_clear"
             title="이미지를 업로드하고 실행해 주세요"
-            description="좌측에서 원본 이미지를 업로드하고 그림자 및 배경 옵션을 선택해 주세요."
+            description="좌측에서 원본 이미지를 업로드하고 그림자 옵션을 선택해 주세요."
           >
             <div className="placeholder-sample-btn-wrapper" style={{ marginTop: '14px' }}>
               <button

@@ -470,7 +470,7 @@ function CommonCompareView({ datasetId, startDate, endDate, setStartDate, setEnd
                       {sign}{displayDiff}
                     </td>
                     <td className="number" style={{ color: diffColor, fontWeight: 700 }}>
-                      {sign}{pct.toFixed(1)}%
+                      {sign}{Math.abs(pct).toFixed(1)}%
                     </td>
                   </tr>
                 );

@@ -5,7 +5,6 @@ export { default as LoginModal } from './LoginModal';
 export { default as UserManagement } from './UserManagement';
 export { default as AppLauncher } from './AppLauncher';
 export { default as CreativeStudioView } from './CreativeStudioView/index.jsx';
-export { default as PsdVariationStudioView } from './PsdVariationStudioView.jsx';
 export { default as LoginRequiredCard } from './LoginRequiredCard';
 export { default as AccessDeniedCard } from './AccessDeniedCard';
 export { default as ImageLibrary } from './ImageLibrary/index.jsx';

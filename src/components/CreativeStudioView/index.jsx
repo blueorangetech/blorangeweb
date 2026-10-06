@@ -4,6 +4,7 @@ import RestyleView from './RestyleView';
 import ImageComposeView from './ImageComposeView';
 import BackgroundRemovalView from './BackgroundRemovalView';
 import ImageExpandView from './ImageExpandView';
+import ImageVariationView from './ImageVariationView';
 import '../../styles/CreativeStudioView.css';
 
 function CreativeStudioView({ embedded = false, pageName = 'playground', bucketName }) {
@@ -52,9 +53,16 @@ function CreativeStudioView({ embedded = false, pageName = 'playground', bucketN
         >
           <span className="material-symbols-outlined">aspect_ratio</span>이미지 확장
         </button>
+        <button type="button" role="tab" aria-selected={activeTab === 'image-variations'}
+          className={activeTab === 'image-variations' ? 'active' : ''}
+          onClick={() => setActiveTab('image-variations')}>
+          <span className="material-symbols-outlined">resize</span>소재 베리에이션
+        </button>
       </div>
       {activeTab === 'compose' ? (
         <ImageComposeView embedded={embedded} pageName={pageName} bucketName={bucketName} />
+      ) : activeTab === 'image-variations' ? (
+        <ImageVariationView embedded={embedded} />
       ) : activeTab === 'image-expand' ? (
         <ImageExpandView embedded={embedded} />
       ) : activeTab === 'photoroom' ? (
