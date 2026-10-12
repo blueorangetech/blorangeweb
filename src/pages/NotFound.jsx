@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header, Footer } from '../components';
-import '../styles/Hanssem.css';
+import '../styles/pages/Hanssem.css';
 
 function NotFound() {
   const navigate = useNavigate();

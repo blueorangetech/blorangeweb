@@ -2741,3 +2741,21 @@ main.hanssem-main.creative-studio-main.embedded {
   font-size: 0.7rem;
   margin-top: -6px;
 }
+.preview-progress-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 20px 0;
+  padding: 10px 12px;
+  border: 1px solid #c7d2fe;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: #4338ca;
+  flex-shrink: 0;
+}
+.preview-progress-notice > .material-symbols-outlined { font-size: 20px; }
+.preview-progress-notice > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.preview-progress-notice strong { font-size: .8rem; }
+.preview-progress-notice div > span { font-size: .75rem; overflow-wrap: anywhere; }
+.preview-progress-error { background: #fff7ed; color: #9a3412; border-color: #fed7aa; }
+.preview-progress-error button { margin-left: auto; padding: 5px 9px; border: 1px solid #fed7aa; border-radius: 6px; background: white; color: inherit; cursor: pointer; flex-shrink: 0; }

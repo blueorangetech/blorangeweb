@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../../styles/ClientSidebar.css';
+import '../../styles/components/common/ClientSidebar.css';
 
 const MENU_STRUCTURE = [
   {

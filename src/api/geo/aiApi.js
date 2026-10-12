@@ -76,11 +76,23 @@ export class AiApi {
     });
   }
 
-  generateImageVariations(file, placements, mode = 'expand') {
+  pinpointEdit(file, { imageUrl, region, prompt, referenceFile, parentResultId }) {
+    const formData = new FormData();
+    if (file) formData.append('file', file);
+    if (imageUrl) formData.append('image_url', imageUrl);
+    formData.append('region', JSON.stringify(region));
+    formData.append('prompt', prompt);
+    if (referenceFile) formData.append('reference_file', referenceFile);
+    if (parentResultId) formData.append('parent_result_id', parentResultId);
+    return this.client.post('/api/ai/comfy/pinpoint-edit', formData);
+  }
+
+  generateImageVariations(file, placements, mode = 'expand', customSizes = []) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('placements', JSON.stringify(placements));
     formData.append('mode', mode);
+    formData.append('custom_sizes', JSON.stringify(customSizes));
     return this.client.post('/api/ai/image-variations', formData);
   }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import AppLauncher from './AppLauncher';
-import '../styles/Common.css';
+import '../styles/components/Common.css';
 
 function Header({ title, children }) {
   return (

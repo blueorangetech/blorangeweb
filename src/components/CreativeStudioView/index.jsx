@@ -5,7 +5,7 @@ import ImageComposeView from './ImageComposeView';
 import BackgroundRemovalView from './BackgroundRemovalView';
 import ImageExpandView from './ImageExpandView';
 import ImageVariationView from './ImageVariationView';
-import '../../styles/CreativeStudioView.css';
+import '../../styles/components/CreativeStudioView/CreativeStudioView.css';
 
 function CreativeStudioView({ embedded = false, pageName = 'playground', bucketName }) {
   const [activeTab, setActiveTab] = useState('multiple-angles');
@@ -59,10 +59,11 @@ function CreativeStudioView({ embedded = false, pageName = 'playground', bucketN
           <span className="material-symbols-outlined">resize</span>소재 베리에이션
         </button>
       </div>
-      {activeTab === 'compose' ? (
-        <ImageComposeView embedded={embedded} pageName={pageName} bucketName={bucketName} />
-      ) : activeTab === 'image-variations' ? (
+      <div hidden={activeTab !== 'image-variations'}>
         <ImageVariationView embedded={embedded} />
+      </div>
+      {activeTab === 'image-variations' ? null : activeTab === 'compose' ? (
+        <ImageComposeView embedded={embedded} pageName={pageName} bucketName={bucketName} />
       ) : activeTab === 'image-expand' ? (
         <ImageExpandView embedded={embedded} />
       ) : activeTab === 'photoroom' ? (

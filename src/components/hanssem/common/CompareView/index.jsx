@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import '../../../../styles/HanssemPerformance.css';
-import '../../../../styles/HanssemCompare.css';
+import '../../../../styles/components/hanssem/common/HanssemPerformance.css';
+import '../../../../styles/components/hanssem/common/HanssemCompare.css';
 
 // 하위 컴포넌트 임포트
 import CompareFilterSection from './CompareFilterSection';

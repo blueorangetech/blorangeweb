@@ -4,7 +4,7 @@ import ComparisonResultCard from '../common/ComparisonResultCard';
 import ImagePreviewPanel, { PreviewPlaceholder } from './ImagePreviewPanel';
 import { aiApi } from '../../api';
 import { downloadFileFromUrl } from '../../utils/downloadUtils';
-import '../../styles/ImageComposeView.css';
+import '../../styles/components/CreativeStudioView/ImageComposeView.css';
 
 const EXAMPLES = [
   '1번 의자에 2번 사람을 자연스럽게 앉혀줘. 사람의 얼굴과 의자의 디자인을 유지하고 크기, 원근감, 그림자를 맞춰줘.',

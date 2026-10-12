@@ -5,8 +5,8 @@ import { ko } from 'date-fns/locale';
 import { fetchCompareData } from '../../../api/geo/hanssemHfApi';
 import ABTestCompareTab from './ABTestCompareTab';
 import CommonalityAnalysisTab from './CommonalityAnalysisTab';
-import '../../../styles/HanssemInsight.css';
-import '../../../styles/HanssemCompare.css';
+import '../../../styles/components/hanssem/common/HanssemInsight.css';
+import '../../../styles/components/hanssem/common/HanssemCompare.css';
 
 function ABCompareView({ startDate, endDate, setStartDate, setEndDate }) {
   const [activeTab, setActiveTab] = useState('ab-test'); // 'ab-test' | 'commonality'

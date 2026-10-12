@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { loginUser, registerUser } from '../utils/auth';
 import logoImage from '../assets/blueorange_logo.png';
-import '../styles/LoginModal.css';
+import '../styles/components/LoginModal.css';
 
 const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
   const location = useLocation();

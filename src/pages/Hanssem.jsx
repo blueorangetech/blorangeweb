@@ -20,7 +20,7 @@ import {
 import { InsightView, AllMaterialInsightView } from '../components/hanssem/rehouse';
 import { bqDirectUpload } from '../utils/bqDirectUpload';
 import { useAuth } from '../context/AuthContext';
-import '../styles/Hanssem.css';
+import '../styles/pages/Hanssem.css';
 
 function Hanssem() {
   const {

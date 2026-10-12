@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DashboardHeader, Footer } from '../components';
 import { useAuth } from '../context/AuthContext';
-import '../styles/Intro.css';
+import '../styles/pages/Intro.css';
 
 function Intro() {
   const {

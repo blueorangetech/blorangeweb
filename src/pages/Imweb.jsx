@@ -3,7 +3,7 @@ import Cookies from 'js-cookie'
 import { DashboardHeader, Footer, UserManagement, LoginRequiredCard } from '../components'
 import { uploadFile } from '../utils/fileUpload'
 import { useAuth } from '../context/AuthContext'
-import '../styles/ImWeb.css'
+import '../styles/pages/ImWeb.css'
 
 
 function Imweb() {

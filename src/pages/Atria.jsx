@@ -9,7 +9,7 @@ import {
   NaverBudgetView,
 } from '../components';
 import { useAuth } from '../context/AuthContext';
-import '../styles/Atria.css';
+import '../styles/pages/Atria.css';
 
 function Atria() {
   const {

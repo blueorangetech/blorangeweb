@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import '../../../../styles/HanssemPerformance.css';
+import '../../../../styles/components/hanssem/common/HanssemPerformance.css';
 import * as hanssemApi from '../../../../api/geo/hanssemApi';
 import * as hanssemHfApi from '../../../../api/geo/hanssemHfApi';
 

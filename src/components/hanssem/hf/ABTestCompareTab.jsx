@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import CreativeCard from './CreativeCard';
 import ABAnalysisSummary from './ABAnalysisSummary';
 import ABCreativePlaceholder from './ABCreativePlaceholder';
-import '../../../styles/HanssemABCompare.css';
+import '../../../styles/components/hanssem/hf/HanssemABCompare.css';
 import CustomSelect from './common/CustomSelect';
 import { runAiCompare } from '../../../api/geo/hanssemHfApi';
 

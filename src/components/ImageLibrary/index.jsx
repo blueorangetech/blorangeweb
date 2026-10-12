@@ -4,7 +4,7 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 import FolderTreePopover from './FolderTreePopover';
 import LibraryCard from './LibraryCard';
 import LibraryLightbox from './LibraryLightbox';
-import '../../styles/ImageLibrary.css';
+import '../../styles/components/ImageLibrary/ImageLibrary.css';
 import { LibraryApi } from '../../api';
 
 /**

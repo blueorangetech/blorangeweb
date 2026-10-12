@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import '../../../../styles/HanssemMediaMix.css';
+import '../../../../styles/components/hanssem/common/HanssemMediaMix.css';
 import * as hanssemApi from '../../../../api/geo/hanssemApi';
 import * as hanssemHfApi from '../../../../api/geo/hanssemHfApi';
 import { formatDate } from '../../../../api/geo/bigquery';

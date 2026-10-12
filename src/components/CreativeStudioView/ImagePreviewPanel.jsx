@@ -26,6 +26,7 @@ export default function ImagePreviewPanel({
   bodyClassName = '',
   children,
 }) {
+  const hasResults = resultCount > 0;
   return (
     <section className="angle-results-card glass-card">
       <div className="panel-header">
@@ -39,13 +40,26 @@ export default function ImagePreviewPanel({
       </div>
 
       {notice}
+      {hasResults && isLoading && (
+        <div className="preview-progress-notice" role="status">
+          <span className="material-symbols-outlined spinning" aria-hidden="true">progress_activity</span>
+          <div><strong>{loadingTitle || '이미지 생성 중'}</strong><span>완료되면 새 결과가 추가됩니다.</span></div>
+        </div>
+      )}
+      {hasResults && errorMessage && (
+        <div className="preview-progress-notice preview-progress-error" role="alert">
+          <span className="material-symbols-outlined" aria-hidden="true">warning</span>
+          <div><strong>{errorTitle}</strong><span>{errorMessage}</span></div>
+          {onClearError && <button type="button" onClick={onClearError}>확인</button>}
+        </div>
+      )}
 
       <div
         className={`angle-results-body${bodyClassName ? ` ${bodyClassName}` : ''}`}
         aria-live="polite"
-        aria-busy={isLoading}
+        aria-busy={isLoading && !hasResults}
       >
-        {isLoading ? (
+        {hasResults ? children : isLoading ? (
           <StudioLoadingState title={loadingTitle} icon={loadingIcon} steps={loadingSteps} />
         ) : errorMessage ? (
           <div className="preview-error-container">

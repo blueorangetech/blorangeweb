@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/Playground.css';
+import '../styles/pages/Playground.css';
 import {
   DashboardHeader,
   Footer,
@@ -97,9 +97,9 @@ function Playground() {
             menuStructure={menuStructure}
           />
           <div className="viewport-content" style={{ flex: 1, padding: '24px 32px', backgroundColor: '#f8fafc', overflowY: 'auto' }}>
-            {activeMenu === 'creative-ai-studio' && (
+            <div hidden={activeMenu !== 'creative-ai-studio'}>
               <CreativeStudioView embedded={true} onGoToLibrary={() => setActiveMenu('library')} />
-            )}
+            </div>
             {activeMenu === 'library' && (
               <main className="hanssem-main" style={{ margin: '0 auto 3rem', padding: '3rem 2rem', background: 'white', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)' }}>
                 <ImageLibrary pageName="playground" />

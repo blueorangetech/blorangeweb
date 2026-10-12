@@ -4,7 +4,7 @@ import {
   PieChart, Pie, Cell,
   BarChart, Bar, LabelList
 } from 'recharts';
-import '../styles/TestDashboard.css'
+import '../styles/pages/TestDashboard.css'
 
 const trendData = [
   { date: '5월 1일', value: 25 }, { date: '5월 2일', value: 24 }, { date: '5월 3일', value: 21 },
