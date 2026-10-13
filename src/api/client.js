@@ -84,6 +84,10 @@ export class ApiClient {
       return response.blob();
     }
 
+    if (responseType === 'response') {
+      return response;
+    }
+
     return response.json();
   }
 

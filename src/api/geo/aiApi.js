@@ -1,4 +1,5 @@
 import { mainClient } from '../client';
+import { readVariationStream } from './variationStream';
 
 /**
  * src/api/geo/aiApi.js
@@ -6,6 +7,14 @@ import { mainClient } from '../client';
  * AI 관련 기능(배경 연출, A/B 비교 분석 등) 백엔드 API 서비스 클래스 (GEO 서버 호출)
  */
 export class AiApi {
+  getVariationGuides() {
+    return this.client.get('/api/ai/image-variation-guides');
+  }
+
+  saveVariationGuides(data) {
+    return this.client.put('/api/ai/image-variation-guides', data);
+  }
+
   constructor() {
     this.client = mainClient;
   }
@@ -87,12 +96,18 @@ export class AiApi {
     return this.client.post('/api/ai/comfy/pinpoint-edit', formData);
   }
 
-  generateImageVariations(file, placements, mode = 'expand', customSizes = []) {
+  async generateImageVariations(file, placements, mode = 'expand', customSizes = [], { onEvent, signal, model = 'qwen' } = {}) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('placements', JSON.stringify(placements));
     formData.append('mode', mode);
     formData.append('custom_sizes', JSON.stringify(customSizes));
+    formData.append('model', model);
+    if (onEvent) {
+      formData.append('stream', 'true');
+      const response = await this.client.post('/api/ai/image-variations', formData, undefined, { responseType: 'response', signal });
+      return readVariationStream(response, onEvent);
+    }
     return this.client.post('/api/ai/image-variations', formData);
   }
 
