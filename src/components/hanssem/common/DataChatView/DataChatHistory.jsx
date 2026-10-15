@@ -2,7 +2,25 @@ import React from 'react';
 import { marked } from 'marked';
 import logoImage from '../../../../assets/blueorange_logo.png';
 
-export default function DataChatHistory({ chatHistory, isTyping, chatEndRef }) {
+function safeMarkdown(content) {
+  const doc = new DOMParser().parseFromString(marked.parse(content), 'text/html');
+  const allowed = new Set(['P', 'BR', 'STRONG', 'EM', 'UL', 'OL', 'LI', 'TABLE', 'THEAD', 'TBODY', 'TR', 'TH', 'TD', 'CODE', 'PRE', 'BLOCKQUOTE', 'H1', 'H2', 'H3', 'H4', 'HR', 'DEL', 'A']);
+  for (const node of Array.from(doc.body.querySelectorAll('*'))) {
+    if (!allowed.has(node.tagName)) {
+      node.replaceWith(doc.createTextNode(node.textContent || ''));
+      continue;
+    }
+    const href = node.getAttribute('href') || '';
+    for (const attr of Array.from(node.attributes)) node.removeAttribute(attr.name);
+    if (node.tagName === 'A' && (href.startsWith('#sheet=') || /^https?:\/\//i.test(href))) {
+      node.setAttribute('href', href);
+      if (!href.startsWith('#')) { node.setAttribute('target', '_blank'); node.setAttribute('rel', 'noopener noreferrer'); }
+    }
+  }
+  return doc.body.innerHTML;
+}
+
+export default function DataChatHistory({ chatHistory, isTyping, chatEndRef, onCellReference }) {
   return (
     <div style={{
       flex: 1,
@@ -45,8 +63,8 @@ export default function DataChatHistory({ chatHistory, isTyping, chatEndRef }) {
 
             {/* 대화 버블 */}
             <div
+              className="data-chat-bubble"
               style={{
-                maxWidth: '75%',
                 backgroundColor: isUser ? '#2563eb' : '#ffffff',
                 color: isUser ? '#ffffff' : '#334155',
                 borderRadius: isUser ? '18px 18px 4px 18px' : '4px 18px 18px 18px',
@@ -61,13 +79,18 @@ export default function DataChatHistory({ chatHistory, isTyping, chatEndRef }) {
               }}
             >
               {isUser ? (
-                chat.content
+                <div>{chat.scope && <div style={{ fontSize: '0.75rem', opacity: 0.8, marginBottom: 6 }}>{chat.scope}</div>}{chat.content}</div>
               ) : (
                 /* AI 답변용 마크다운 파싱 (marked 적용) */
                 <div 
                   className="chat-markdown"
+                  onClick={event => {
+                    const link = event.target.closest('a');
+                    const href = link?.getAttribute('href') || '';
+                    if (href.startsWith('#sheet=')) { event.preventDefault(); onCellReference?.(href); }
+                  }}
                   dangerouslySetInnerHTML={{
-                    __html: marked.parse(chat.content)
+                    __html: safeMarkdown(chat.content)
                   }}
                 />
               )}

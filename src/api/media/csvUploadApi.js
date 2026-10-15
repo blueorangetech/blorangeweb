@@ -11,13 +11,6 @@ export class CsvUploadApi {
   }
 
   /**
-   * BigQuery 다이렉트 업로드 요청
-   */
-  uploadDirect(formData) {
-    return this.client.post('/csv/upload/direct', formData);
-  }
-
-  /**
    * GCS 업로드를 위한 서명된(Signed) 업로드 URL 발급 요청
    */
   requestUploadUrl(formData) {

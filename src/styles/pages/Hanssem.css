@@ -16,6 +16,28 @@
 }
 
 /* 헤더 공통 */
+.hanssem-app > .common-header {
+  min-width: 1024px;
+}
+
+.hanssem-app > .common-header .common-container {
+  gap: 24px;
+}
+
+.hanssem-app > .common-header .common-header-title,
+.hanssem-app > .common-header .header-actions,
+.hanssem-app > .common-header .header-actions > *,
+.header-logo-container > span {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.hanssem-app > .common-header button,
+.hanssem-app > .common-header svg {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .header-logo-container {
   display: flex;
   align-items: center;

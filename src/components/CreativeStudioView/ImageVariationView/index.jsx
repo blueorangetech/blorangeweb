@@ -35,6 +35,8 @@ export default function ImageVariationView({ embedded = false }) {
   const [width, setWidth] = useState('1080');
   const [height, setHeight] = useState('1080');
   const [model, setModel] = useState('gpt');
+  const [imageVariation, setImageVariation] = useState(false);
+  const [textVariation, setTextVariation] = useState(false);
   const [guidePending, setGuidePending] = useState(true);
   const selection = usePlacementSelection(PLACEMENT_GROUPS);
   const targetCount = selection.selectedPlacementKeys.length + (useCustomSize ? 1 : 0);
@@ -60,7 +62,7 @@ export default function ImageVariationView({ embedded = false }) {
     let successCount = 0;
     try {
       await aiApi.generateImageVariations(file, selection.selectedPlacementKeys, 'expand', customSizes, {
-        model,
+        model, imageVariation, textVariation,
         signal: controller.signal,
         onEvent: (event) => {
           if (controller.signal.aborted) return;
@@ -98,6 +100,14 @@ export default function ImageVariationView({ embedded = false }) {
                   {option.label} · {option.description}
                 </option>)}
               </select>
+            </fieldset>
+            <fieldset className="variation-custom-size variation-options" disabled={loading}>
+              <legend className="rmbg-section-label">베리에이션 옵션</legend>
+              <label><input type="checkbox" checked={imageVariation} onChange={(event) => setImageVariation(event.target.checked)} />이미지 베리에이션</label>
+              <p className="expand-help-text">제품의 형태·재질·색상·로고를 유지하며, 규격에 어울리는 구도·각도·무드를 변경합니다.</p>
+              <label><input type="checkbox" checked={textVariation} onChange={(event) => setTextVariation(event.target.checked)} />문구 베리에이션</label>
+              <p className="expand-help-text">원문의 의미와 혜택·가격·브랜드명을 유지하며 표현을 바꿉니다. 원본에 문구가 없으면 추가하지 않습니다.</p>
+              <p className="expand-help-text">둘 다 끄면 이미지와 문구를 유지하며 규격에 맞게 재배치합니다.</p>
             </fieldset>
             <GuideEditor disabled={loading} onPendingChange={setGuidePending}
               customSize={useCustomSize && [Number(width), Number(height)].every((value) => Number.isInteger(value) && value >= 128 && value <= 4096) ? `${Number(width)}x${Number(height)}` : ''} />

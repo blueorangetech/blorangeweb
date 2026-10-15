@@ -18,7 +18,7 @@ import {
   HanssemLogo
 } from '../components/hanssem/common';
 import { InsightView, AllMaterialInsightView } from '../components/hanssem/rehouse';
-import { bqDirectUpload } from '../utils/bqDirectUpload';
+import { uploadFile } from '../utils/fileUpload';
 import { useAuth } from '../context/AuthContext';
 import '../styles/pages/Hanssem.css';
 
@@ -50,12 +50,10 @@ function Hanssem() {
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      await bqDirectUpload({
-        file,
+      await uploadFile(file, setUploadStatus, {
         datasetId: 'hanssem', // 한샘 데이터셋 고정
         tableId: 'performance_raw', // 예시 테이블명
         truncate: true,
-        setUploadStatus
       });
       // 파일 선택기 초기화
       e.target.value = '';

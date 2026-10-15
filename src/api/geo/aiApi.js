@@ -96,13 +96,15 @@ export class AiApi {
     return this.client.post('/api/ai/comfy/pinpoint-edit', formData);
   }
 
-  async generateImageVariations(file, placements, mode = 'expand', customSizes = [], { onEvent, signal, model = 'qwen' } = {}) {
+  async generateImageVariations(file, placements, mode = 'expand', customSizes = [], { onEvent, signal, model = 'qwen', imageVariation = false, textVariation = false } = {}) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('placements', JSON.stringify(placements));
     formData.append('mode', mode);
     formData.append('custom_sizes', JSON.stringify(customSizes));
     formData.append('model', model);
+    formData.append('image_variation', String(imageVariation));
+    formData.append('text_variation', String(textVariation));
     if (onEvent) {
       formData.append('stream', 'true');
       const response = await this.client.post('/api/ai/image-variations', formData, undefined, { responseType: 'response', signal });

@@ -1,0 +1,70 @@
+.data-chat-workspace { display: flex; gap: 20px; height: calc(100vh - 120px); min-height: 440px; max-width: 1000px; margin: 0 auto; position: relative; }
+.data-chat-workspace.has-workbook { max-width: none; display: grid; grid-template-columns: minmax(240px, var(--chat-ratio, 38fr)) 12px minmax(300px, var(--sheet-ratio, 62fr)); gap: 0; }
+.data-chat-conversation { display: flex; flex-direction: column; flex: 1; min-width: 0; height: 100%; position: relative; background: #f8fafc; font-family: 'Pretendard', sans-serif; }
+.chat-workbook-divider { display: flex; align-items: center; justify-content: center; cursor: col-resize; touch-action: none; user-select: none; border-radius: 6px; }
+.chat-workbook-divider > span { width: 3px; height: 44px; border-radius: 3px; background: #cbd5e1; }
+.chat-workbook-divider:hover, .chat-workbook-divider:focus-visible, .chat-workbook-divider.is-resizing { background: #dbeafe; outline: none; }
+.chat-workbook-divider:hover > span, .chat-workbook-divider:focus-visible > span, .chat-workbook-divider.is-resizing > span { background: #3b82f6; }
+.data-chat-bubble { max-width: 75%; }
+.has-workbook .data-chat-bubble { max-width: 90%; }
+.workbook-toolbar button, .workbook-tabs button { box-sizing: border-box; min-height: 26px; border: 1px solid #e2e8f0; border-radius: 5px; padding: 3px 7px; font: inherit; font-size: 11px; line-height: 18px; font-weight: 500; white-space: nowrap; background: white; color: #475569; cursor: pointer; }
+.workbook-toolbar button:hover:not(:disabled), .workbook-tabs button:hover { background: #f1f5f9; border-color: #cbd5e1; }
+.workbook-toolbar button:disabled { opacity: .5; cursor: default; }
+.chat-composer-container { padding: 12px 12px 16px; width: 100%; box-sizing: border-box; flex-shrink: 0; }
+.chat-composer { max-width: 720px; margin: 0 auto; background: white; border: 1px solid #dbe1e8; border-radius: 24px; padding: 14px; box-shadow: 0 4px 18px #0f172a08; transition: border-color .15s, box-shadow .15s; }
+.chat-composer:focus-within { border-color: #93b4f4; box-shadow: 0 0 0 3px #2563eb0a; }
+.chat-composer textarea { display: block; width: 100%; box-sizing: border-box; border: 0; outline: 0; resize: vertical; min-height: 52px; max-height: 150px; background: transparent; color: #334155; padding: 4px 6px 10px; font: inherit; font-size: 14px; line-height: 1.6; }
+.chat-composer textarea::placeholder { color: #94a3b8; }
+.chat-composer-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.chat-composer-attachment-action { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.chat-composer-attachment-action > span { font-size: 11px; color: #94a3b8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-attach-button, .chat-send-button, .chat-attachment-remove { display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; border: 0; }
+.chat-attach-button { width: 34px; height: 34px; border-radius: 50%; color: #475569; background: #f1f5f9; }
+.chat-attach-button:hover { background: #e2e8f0; }
+.chat-send-button { width: 36px; height: 36px; border-radius: 50%; color: white; background: #2563eb; }
+.chat-send-button:disabled { background: #e2e8f0; color: #94a3b8; cursor: default; }
+.chat-attach-button:disabled, .chat-attachment-remove:disabled { opacity: .45; cursor: default; }
+.chat-attachment { display: flex; align-items: center; gap: 10px; max-width: 340px; padding: 10px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 14px; background: #fafbfc; }
+.chat-attachment-icon { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 40px; border-radius: 9px; background: #dcfce7; color: #15803d; }
+.chat-attachment-info { min-width: 0; flex: 1; }
+.chat-attachment-info strong { display: block; font-size: 12px; font-weight: 600; color: #334155; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chat-attachment-info > span { display: block; margin-top: 4px; font-size: 10px; color: #64748b; }
+.chat-attachment-remove { border-radius: 50%; width: 24px; height: 24px; background: transparent; color: #64748b; }
+.chat-attachment-remove:hover { background: #e2e8f0; }
+.chat-attachment-remove span { font-size: 17px; }
+.chat-composer-hint { font-size: 11px; color: #94a3b8; text-align: center; margin: 8px 0 0; }
+.chat-upload-error { max-width: 720px; margin: 8px auto 0; font-size: 12px; color: #b91c1c; }
+.chat-file-drop-overlay { position: absolute; inset: 0; z-index: 20; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; border: 2px dashed #3b82f6; border-radius: 20px; background: #eff6fff5; color: #2563eb; pointer-events: none; }
+.chat-file-drop-overlay > .material-symbols-outlined { font-size: 48px; }
+.chat-file-drop-overlay > span:last-child { font-size: 13px; color: #64748b; }
+@keyframes chat-upload-spin { to { transform: rotate(360deg); } }
+.chat-upload-spinner { box-sizing: border-box; display: block; width: 20px; height: 20px; border: 2px solid #bbf7d0; border-top-color: #15803d; border-radius: 50%; animation: chat-upload-spin .8s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .chat-upload-spinner { animation: none; } }
+.workbook-panel { display: flex; flex-direction: column; flex: 1; min-width: 0; overflow: hidden; background: white; border: 1px solid #cbd5e1; border-radius: 12px; }
+.workbook-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+.workbook-heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.workbook-heading span { white-space: nowrap; color: #64748b; font-size: 12px; }
+.workbook-export-actions { display: flex; align-items: center; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.workbook-export-actions button { box-sizing: border-box; min-height: 28px; white-space: nowrap; border: 0; border-radius: 5px; padding: 4px 9px; font: inherit; font-size: 11px; line-height: 20px; font-weight: 600; color: white; background: #2563eb; cursor: pointer; }
+.workbook-export-actions button:disabled { opacity: .5; cursor: default; }
+.workbook-cell-editor { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 7px 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
+.workbook-cell-editor input { flex: 1; min-width: 100px; border: 1px solid #93b4f4; border-radius: 5px; padding: 5px 7px; font: inherit; }
+.workbook-cell-editor button { min-height: 26px; border: 1px solid #e2e8f0; border-radius: 5px; background: white; padding: 3px 7px; font: inherit; font-size: 11px; line-height: 18px; cursor: pointer; }
+.workbook-export-error { color: #b91c1c; padding: 0 10px; font-size: 12px; }
+.workbook-grid td.is-edited { box-shadow: inset 3px 0 #f59e0b; background: #fffbeb; }
+.workbook-grid td.is-edited.selected { background: #dbeafe; }
+.workbook-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 6px 10px; font-size: 11px; }
+.workbook-grid { flex: 1; overflow: auto; min-height: 0; user-select: none; }
+.workbook-grid table { border-collapse: separate; border-spacing: 0; font-size: 12px; table-layout: fixed; }
+.workbook-grid th, .workbook-grid td { border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; min-width: 110px; max-width: 220px; height: 30px; padding: 0; }
+.workbook-grid th { background: #f1f5f9; color: #475569; font-weight: 500; }
+.workbook-grid thead th { position: sticky; top: 0; z-index: 2; }
+.workbook-grid tr > th:first-child { position: sticky; left: 0; min-width: 42px; z-index: 1; }
+.workbook-grid thead th:first-child { z-index: 3; }
+.workbook-grid td button { display: block; width: 100%; height: 100%; min-width: 110px; max-width: 220px; text-align: left; padding: 5px 8px; border: 0; background: transparent; color: #334155; font: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: cell; }
+.workbook-grid td.selected { background: #dbeafe; outline: 1px solid #60a5fa; outline-offset: -1px; }
+.workbook-tabs { display: flex; flex-shrink: 0; gap: 4px; padding: 6px 10px; overflow: auto; border-top: 1px solid #e2e8f0; }
+.workbook-tabs button { white-space: nowrap; }
+.workbook-tabs button[aria-selected=true] { background: #dbeafe; font-weight: 700; }
+.workbook-panel small { padding: 0 12px 10px; color: #64748b; font-size: 11px; }
+@media (max-width: 1000px) { .data-chat-workspace.has-workbook { display: flex; flex-direction: column; height: auto; gap: 20px; } .chat-workbook-divider { display: none; } .has-workbook .data-chat-conversation { flex: auto; height: 65vh; min-height: 440px; } .workbook-panel { flex: auto; height: 60vh; min-width: 0; } }
