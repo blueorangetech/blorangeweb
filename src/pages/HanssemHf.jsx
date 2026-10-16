@@ -7,6 +7,7 @@ import {
   AccessDeniedCard,
   ImageLibrary,
   ClientSidebar,
+  CompetitorMonitoring,
   CreativeStudioView,
 } from '../components';
 import {
@@ -64,6 +65,7 @@ function HanssemHf() {
     'report-overview',
     'report-detail',
     'report-chat',
+    'report-competitor',
     'creative-integrated',
     'creative-insight',
     'creative-compare',
@@ -127,6 +129,9 @@ function HanssemHf() {
             )}
             {activeMenu === 'report-chat' && (
               <DataChatView datasetId="hanssem_hf" />
+            )}
+            {activeMenu === 'report-competitor' && (
+              <CompetitorMonitoring />
             )}
             {activeMenu === 'creative-integrated' && (
               <AllMaterialInsightView
