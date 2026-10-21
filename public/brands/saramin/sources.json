@@ -1,0 +1,46 @@
+[
+  {
+    "brand": "dongnealba",
+    "officialWebsite": "https://www.dongnealba.com",
+    "asset": "dongnealba-icon.png",
+    "description": "Official Google Play app icon; original artwork preserved",
+    "assetSource": "https://play-lh.googleusercontent.com/fSttXWPwFv2S41zK75WDUdaeYMC8kDRbnFN5OriTS7yhZFreIRAqlXYY-RbnOfsr-4Z97Fy47ME7wYKtSu_9Rw=w240-h480",
+    "officialAppListing": "https://play.google.com/store/apps/details?hl=ko&id=com.dongnealba.app.android"
+  },
+  {
+    "brand": "fostiny",
+    "officialWebsite": "https://fostiny.saramin.co.kr",
+    "asset": "fostiny-icon.svg",
+    "description": "Purple star path extracted from official header wordmark; original geometry and colour preserved. Not a separately published app icon."
+  },
+  {
+    "brand": "komate",
+    "officialWebsite": "https://komate.saramin.co.kr",
+    "asset": "komate-icon.png",
+    "description": "Official website header logo or official app icon; original artwork preserved"
+  },
+  {
+    "brand": "wonderful",
+    "officialWebsite": "https://senior.saramin.co.kr",
+    "asset": "wonderful.svg",
+    "description": "Official website header logo or official app icon; original artwork preserved"
+  },
+  {
+    "brand": "goodbuilder",
+    "officialWebsite": "https://goodbuilder.saramin.co.kr",
+    "asset": "goodbuilder.svg",
+    "description": "Official website header logo or official app icon; original artwork preserved"
+  },
+  {
+    "brand": "begins",
+    "officialWebsite": "https://begins.saramin.co.kr",
+    "asset": "begins.svg",
+    "description": "Official website header logo or official app icon; original artwork preserved"
+  },
+  {
+    "brand": "jumpit",
+    "officialWebsite": "https://jumpit.saramin.co.kr",
+    "asset": "jumpit.svg",
+    "description": "Official website header logo or official app icon; original artwork preserved"
+  }
+]
