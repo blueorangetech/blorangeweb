@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-27",
+  "samsungfire": {
+    "page": "https://www.samsungfire.com/v2/html/company/01/M_010_030_002.html",
+    "asset": "https://www.samsungfire.com/v2/resources/images/company/brand/logo-kr.png"
+  },
+  "naver": {
+    "page": "https://www.navercorp.com/company/brandGuide",
+    "asset": "https://www.navercorp.com/img/common/logo.svg",
+    "icon": "https://www.naver.com/favicon.ico?1"
+  },
+  "google": {
+    "page": "https://www.google.com/",
+    "asset": "https://www.google.com/images/branding/google_wordmark/v1/1x/googlelogo_color_white_background_272x92dp.png",
+    "icon": "https://www.google.com/favicon.ico"
+  },
+  "daum": {
+    "page": "https://www.daum.net/",
+    "asset": "https://t1.daumcdn.net/top/daum/daum-pc/production/20261008_133611/index.js",
+    "note": "Unmodified inline portal logo SVG extracted from official homepage bundle",
+    "icon": "https://t1.daumcdn.net/top/favicon/20260220/daum.ico"
+  }
+}

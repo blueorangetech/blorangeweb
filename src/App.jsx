@@ -10,6 +10,7 @@ import Playground from './pages/Playground';
 import Atria from './pages/Atria';
 import NotFound from './pages/NotFound';
 import BrandDashboard from './pages/BrandDashboard';
+import Samsungfire from './pages/Samsungfire';
 
 function TitleUpdater() {
   const location = useLocation();
@@ -22,6 +23,7 @@ function TitleUpdater() {
       '/hanssem_hf': '한샘 홈퍼니싱',
       '/atria': 'Atria',
       '/playground': 'Play Ground',
+      '/samsungfire': 'samsungfire',
     };
 
     const isSaramin = location.pathname === '/saramin' || location.pathname.startsWith('/saramin/');
@@ -84,6 +86,7 @@ function App() {
         <Route path="/atria" element={<Atria />} />
         <Route path="/playground" element={<Playground />} />
         <Route path="/saramin" element={<BrandDashboard />} />
+        <Route path="/samsungfire" element={<Samsungfire />} />
         <Route path="/saramin/:brandId" element={<BrandDashboard />} />
         <Route path="/brand-dashboard/*" element={<SaraminRedirect />} />
         <Route path="*" element={<NotFound />} />
