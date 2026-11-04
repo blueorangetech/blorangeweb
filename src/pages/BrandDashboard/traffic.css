@@ -1,0 +1,76 @@
+.bd-traffic-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
+.bd-traffic-heading h1 { font-size:23px; letter-spacing:-.6px; margin:0; }
+.bd-traffic-heading p { color:#8290a6; font-size:13px; margin:8px 0 0; }
+.bd-traffic-source-tag { font-size:12px; color:#526cae; background:#eaf0ff; padding:7px 10px; border-radius:6px; }
+.bd-traffic-filters { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.bd-traffic-filters > span { color:#929cb0; }
+.bd-traffic .bd-filter-trigger { min-width:120px; }
+.bd-traffic .bd-traffic-toolbar { margin-bottom:12px; }
+.bd-traffic-scope { font-size:12px; color:#8290a6; display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; margin-bottom:18px; }
+.bd-traffic .bd-kpi > strong { font-size:23px; white-space:nowrap; }
+.bd-traffic .bd-kpi > strong small { font-size:12px; font-weight:400; margin-left:6px; color:#8290a6; }
+.bd-traffic .bd-kpi-label .material-symbols-outlined { font-size:18px; }
+.bd-traffic .bd-panel-head { flex-wrap:wrap; gap:12px; }
+.bd-traffic-services { padding:0 22px 10px; display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+.bd-traffic-services button { display:flex; align-items:center; gap:9px; border:1px solid #e1e7f0; background:#fff; color:#97a2b4; border-radius:7px; padding:8px 11px; font-size:12px; }
+.bd-traffic-services button.active { color:#344760; background:#f7f9ff; border-color:#cbd8f2; }
+.bd-traffic-services i,.bd-traffic-tooltip i { display:inline-block; width:8px; height:8px; border-radius:50%; }
+.bd-traffic-services button:not(.active) i { opacity:.3; }
+.bd-traffic-services small { font-size:11px; color:#8290a6; }
+.bd-traffic-line { height:330px; padding:0 12px; }
+.bd-traffic-tooltip { background:#fff; border:1px solid #e1e7f0; border-radius:10px; padding:14px; box-shadow:0 6px 24px #182a4c12; min-width:190px; font-size:12px; }
+.bd-traffic-tooltip > strong { display:block; margin-bottom:10px; }
+.bd-traffic-tooltip > div { display:flex; justify-content:space-between; gap:20px; margin:8px 0; }
+.bd-traffic-tooltip span { display:flex; align-items:center; gap:7px; }
+.bd-traffic-comparison-grid { display:grid; grid-template-columns:minmax(280px,.8fr) minmax(0,1.5fr); gap:16px; }
+.bd-traffic-ranking { height:246px; padding:0 10px; }
+.bd-traffic .bd-table.bd-traffic-summary { min-width:600px; font-size:12px; }
+.bd-traffic .bd-traffic-summary th,.bd-traffic .bd-traffic-summary td { padding:14px 12px; }
+.bd-traffic-comparison-grid > .bd-panel { display:flex; flex-direction:column; }
+.bd-traffic .bd-traffic-comparison-grid .bd-panel-head { min-height:80px; padding:16px 22px; }
+.bd-traffic .bd-traffic-summary th { height:36px; padding:7px 12px; line-height:20px; }
+.bd-traffic .bd-traffic-summary td { height:42px; padding:10px 12px; line-height:20px; }
+.bd-traffic .bd-traffic-comparison-grid .bd-table-foot { height:40px; min-height:40px; margin-top:auto; padding:10px 20px; line-height:18px; }
+.bd-traffic-summary td:first-child { white-space:nowrap; }
+.bd-traffic-rank { display:inline-block; color:#8e9aaf; margin-right:10px; font-size:12px; }
+.bd-traffic-highlight { background:#f3f6ff; }
+.bd-traffic .bd-table.bd-traffic-monthly { min-width:620px; }
+.bd-traffic-insights { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px; padding:0 22px 22px; }
+.bd-traffic-insights > div { display:flex; align-items:flex-start; gap:10px; }
+.bd-traffic-insights > div > span { padding-top:3px; font-size:11px; color:#7790d8; }
+.bd-traffic-insights p { font-size:13px; line-height:1.8; color:#64748b; margin:0; word-break:keep-all; }
+.bd-traffic-insights strong { color:#334b79; font-weight:600; }
+.bd-traffic-source { font-size:12px; color:#8290a6; line-height:1.8; padding:4px 2px 20px; }
+.bd-traffic-source strong { font-weight:500; color:#64748b; }
+.bd-traffic-source p { margin:5px 0; }
+.bd-traffic-source summary { cursor:pointer; }
+.bd-traffic-tabs { display:flex; gap:24px; margin-bottom:20px; border-bottom:1px solid #dfe5ef; }
+.bd-traffic-tabs button { border:0; border-bottom:3px solid transparent; border-radius:0; background:none; padding:12px 4px; color:#8290a6; font-weight:650; }
+.bd-traffic-tabs button.active { border-bottom-color:#5075ed; color:#385fcb; }
+.bd-ad-context { border:1px solid #e2e8f2; background:#f0f4fb; padding:14px 18px; border-radius:8px; margin-bottom:16px; }
+.bd-ad-context strong { color:#526580; font-size:13px; }
+.bd-ad-context p { color:#728098; font-size:12px; line-height:1.8; margin:5px 0 0; }
+.bd-ad-uv-chart { height:230px; padding:0 12px 12px; }
+.bd-ad-click-chart { height:280px; padding:0 12px; }
+.bd-ad-combined-chart { height:340px; padding:0 8px; }
+.bd-ad-axis-labels { display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; font-size:12px; color:#73829a; padding:0 24px 6px; }
+.bd-ad-axis-labels span:first-child { color:#5075ed; }
+.bd-ad-missing-note { margin:0; padding:8px 24px 16px; font-size:12px; color:#8290a6; line-height:1.7; }
+.bd-ad-controls { display:flex; gap:8px; flex-wrap:wrap; }
+.bd-traffic .bd-table.bd-ad-breakdown { min-width:480px; }
+.bd-traffic .bd-table.bd-ad-monthly-shares { min-width:850px; }
+.bd-traffic .bd-ad-monthly-shares th,.bd-traffic .bd-ad-monthly-shares td { padding:12px 14px; }
+.bd-ad-monthly-shares td strong { font-weight:600; color:#435d8f; }
+.bd-traffic .bd-table.bd-ad-weekly { min-width:800px; }
+@container brand-content (max-width:1100px) {
+  .bd-traffic-comparison-grid { grid-template-columns:1fr; }
+  .bd-traffic-insights { grid-template-columns:1fr; gap:12px; }
+  .bd-traffic .bd-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:640px) {
+  .bd-traffic .bd-kpi > strong { font-size:20px; }
+  .bd-traffic .bd-kpi > strong small { font-size:10px; }
+  .bd-traffic-line { height:280px; padding:0; }
+  .bd-traffic .bd-filter-trigger { min-width:105px; }
+  .bd-traffic-services { padding-left:16px; padding-right:16px; }
+}

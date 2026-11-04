@@ -170,9 +170,8 @@ export default function CreativeReportView() {
           <div>
             <h2>디스플레이 광고 소재별 반응 및 효율 분석</h2>
             <p>
-              공개 집행 사례의 배너 및 캠페인 영상 스틸입니다.
+              서비스 홍보 소재의 반응과 전환 효율을 비교합니다.
             </p>
-            <p>성과 수치·매체·기간은 기존 예시 데이터이며, 표시된 과거 캠페인의 실제 집행 실적과 연결되지 않습니다.</p>
           </div>
           <span className="bd-pill">
             {selectedMedia === 'all'
@@ -201,11 +200,9 @@ export default function CreativeReportView() {
           </span>
         </div>
         <div>
-          <strong>실제 집행 캠페인 레퍼런스</strong>
+          <strong>소재 구성</strong>
           <p>
-            ‘든든한 취업의 기준’은 하나애드IMC가 공개한 포털·네트워크 DA 집행 사례이며,
-            ‘THANK YOU VERY MATCH’는 DCR8이 2022년 11월 진행한 통합 캠페인입니다.
-            영상 스틸 여러 장은 동일 캠페인의 서로 다른 장면입니다.
+            채용달력, 근무조건별 공고 모음, 인적성 검사, 자소서 코칭 등 사람인 홍보 이미지 10종을 비교합니다.
           </p>
         </div>
         <span className="bd-rule">소재 최적화 리포트</span>

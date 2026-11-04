@@ -7,6 +7,7 @@ import AnalysisPanel from './AnalysisPanel';
 import IntegratedReportView from './IntegratedReportView';
 import KeywordReportView from './KeywordReportView';
 import TrendReportView from './TrendReportView';
+import SaraminDataChat from './SaraminDataChat';
 import CreativeReportView from './CreativeReportView';
 import MonitoringView from './MonitoringView';
 import CompetitorMonitoringView from './CompetitorMonitoringView';
@@ -22,7 +23,7 @@ const REPORT_MENUS = [
   { id: 'integrated', name: '통합 성과', icon: 'hub', desc: '전체 매체 및 채널 통합 성과 리포트' },
   { id: 'keyword', name: '키워드 분석', icon: 'search', desc: '검색광고 및 주요 키워드별 성과 분석' },
   { id: 'creative', name: '광고 소재 분석', icon: 'palette', desc: '디스플레이/영상 소재별 반응 및 효율 분석' },
-  { id: 'trend', name: '트래픽 트렌드', icon: 'trending_up', desc: '코리안클릭 트래픽과 광고 매체 클릭 간의 기여도 및 상관관계 분석' },
+  { id: 'trend', name: '트래픽 트렌드', icon: 'trending_up', desc: '코리안클릭 월간 UV와 기기별 경쟁 채용 서비스 비교' },
   { id: 'chat', name: 'AI 데이터 챗', icon: 'smart_toy', desc: 'AI 기반 데이터 질의응답 및 인사이트 챗' },
 ];
 
@@ -290,80 +291,9 @@ export default function BrandDashboard() {
           ) : currentReportMenu.id === 'creative' ? (
             <CreativeReportView />
           ) : (
-            <>
-          <div className="bd-report-hero">
-            <div className="bd-report-hero-head">
-              <span className="material-symbols-outlined bd-report-hero-icon">{currentReportMenu.icon}</span>
-              <div>
-                <div className="bd-report-hero-badges">
-                  <span className="bd-report-badge">리포트</span>
-                  <span className="bd-report-badge preparing">기능 준비 중</span>
-                </div>
-                <h1>{currentReportMenu.name} 리포트</h1>
-                <p>{currentReportMenu.desc}</p>
-              </div>
-            </div>
-            <div className="bd-report-hero-actions">
-              <Link to={`/saramin${overviewQuery}`} className="bd-back-btn">
-                <span className="material-symbols-outlined">arrow_back</span>
-                통합 오버뷰로 이동
-              </Link>
-            </div>
-          </div>
-
-          {currentReportMenu.id === 'chat' ? (
-            <div className="bd-chat-preview-card">
-              <div className="bd-chat-preview-header">
-                <div className="bd-chat-preview-title">
-                  <span className="material-symbols-outlined">smart_toy</span>
-                  <div>
-                    <strong>사라민 데이터 챗 (AI Data Assistant)</strong>
-                    <small>자연어로 질문하고 광고 성과 데이터 인사이트를 즉시 확인하세요</small>
-                  </div>
-                </div>
-                <span className="bd-chat-status-pill">연동 준비 중</span>
-              </div>
-              <div className="bd-chat-preview-body">
-                <div className="bd-chat-suggested-title">💡 추천 질문 예시</div>
-                <div className="bd-chat-suggestions">
-                  <span className="bd-chat-chip">“이번 달 집행액 1위 브랜드와 예산 소진율은?”</span>
-                  <span className="bd-chat-chip">“전월 대비 CPC가 가장 많이 개선된 매체는 어디인가요?”</span>
-                  <span className="bd-chat-chip">“SA와 DA의 대표 전환 CPA 효율을 비교해줘”</span>
-                </div>
-                <div className="bd-chat-input-mock">
-                  <input type="text" placeholder="데이터에 대해 궁금한 점을 입력하세요 (예: 6월 점핏 성과 요약해줘)" readOnly />
-                  <button type="button" disabled>전송</button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bd-report-preview-grid">
-              <div className="bd-report-info-card">
-                <div className="bd-card-icon">
-                  <span className="material-symbols-outlined">insights</span>
-                </div>
-                <h3>주요 제공 지표 및 분석 기능</h3>
-                <ul>
-                  <li>{currentReportMenu.name} 기준 일별/월별 추이 및 전월 대비 성과 비교</li>
-                  <li>매체별/캠페인별 집행 효율 및 KPI 달성률 모니터링</li>
-                  <li>맞춤 필터(기간, 광고 유형, 브랜드) 적용 및 엑셀 리포트 추출</li>
-                </ul>
-              </div>
-              <div className="bd-report-info-card">
-                <div className="bd-card-icon">
-                  <span className="material-symbols-outlined">schedule</span>
-                </div>
-                <h3>데이터 파이프라인 연동 예정</h3>
-                <p>
-                  현재 데이터 파이프라인과 대시보드 시각화 뷰를 구축 중입니다.
-                  연동 완료 시 실시간 지표가 자동으로 업데이트됩니다.
-                </p>
-              </div>
-            </div>
+            <SaraminDataChat month={month} />
           )}
-            </>
-          )}
-          <footer className="bd-footer"><span>saramin <b>Brand Insights</b></span><span>{monthLabel(month)} · {currentReportMenu.name} 리포트</span></footer>
+          <footer className="bd-footer"><span>saramin <b>Brand Insights</b></span><span>{currentReportMenu.id === 'trend' ? '코리안클릭 월간 UV' : currentReportMenu.id === 'chat' ? '대시보드 데이터 분석' : monthLabel(month)} · {currentReportMenu.name} 리포트</span></footer>
         </div>
       ) : brandId && !brand ? <div className="bd-content"><h1>브랜드를 찾을 수 없습니다.</h1><Link to={`/saramin${overviewQuery}`}>통합 오버뷰로 이동</Link></div> : <div className="bd-content">
         <h1 className="bd-sr-only">{brand ? `${brand.name} 상세 성과` : 'saramin'}</h1>

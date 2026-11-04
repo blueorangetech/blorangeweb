@@ -28,3 +28,7 @@ artifacts/*
 
 # Firebase
 .firebase
+
+# Test & Scripts
+tests/*
+scripts/*

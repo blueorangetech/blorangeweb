@@ -1257,13 +1257,7 @@
 
 .bd-competitor-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,310px),1fr)); gap:20px; padding:0 23px 23px; }
 .bd-competitor-card { border:1px solid #e5eaf3; border-radius:10px; overflow:hidden; min-width:0; align-self:start; }
-.bd-competitor-copy { background:var(--competitor-background); color:var(--competitor-color); padding:24px; min-height:220px; display:flex; flex-direction:column; align-items:flex-start; }
-.bd-competitor-copy>div { display:flex; align-items:center; justify-content:space-between; width:100%; gap:12px; }
-.bd-competitor-copy strong { font-size:18px; }
-.bd-competitor-copy>div span { font-size:10px; letter-spacing:1px; }
-.bd-competitor-copy h3 { margin:28px 0 16px; font-size:24px; line-height:1.4; letter-spacing:-.7px; max-width:250px; word-break:keep-all; }
 .bd-competitor-benefit { font-size:12px; padding:5px 8px; background:#ffffffaa; border-radius:5px; }
-.bd-competitor-copy>small { margin-top:20px; font-size:12px; }
 .bd-competitor-details { padding:18px; }
 .bd-competitor-tags { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:12px; color:#8290a6; }
 .bd-competitor-tags .bd-deadline { margin-left:auto; }
@@ -1288,3 +1282,4 @@
 .bd-competitor-image-pending { flex-direction:column; gap:12px; color:#8290a6; font-size:12px; }
 .bd-competitor-image-pending .material-symbols-outlined { font-size:36px; color:#b2bdcc; }
 .bd-competitor-image-pending strong { color:#526580; font-size:17px; }
+

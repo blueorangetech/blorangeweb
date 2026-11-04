@@ -1,0 +1,248 @@
+{
+  "source": "채용서비스 별 월 트래픽 추이 자료_코리안클릭_2510~2609.xlsx",
+  "sheet": "Data Report",
+  "unit": "UV",
+  "sha256": "c34a2d610117051913a0fa3c8fdb85b4bc3032bfa01a8283e99f13dc273fc268",
+  "records": [
+    {
+      "device": "MO(APP)",
+      "month": "2025-10",
+      "saramin": 2815931,
+      "jobkorea": 3177877,
+      "wanted": 358907,
+      "remember": 1669202,
+      "incruit": 189594,
+      "sourceRange": "C3:G3"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2025-11",
+      "saramin": 2569366,
+      "jobkorea": 3451387,
+      "wanted": 213886,
+      "remember": 1892741,
+      "incruit": 277768,
+      "sourceRange": "C4:G4"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2025-12",
+      "saramin": 2418635,
+      "jobkorea": 3131754,
+      "wanted": 111706,
+      "remember": 1950216,
+      "incruit": 132935,
+      "sourceRange": "C5:G5"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2026-01",
+      "saramin": 2550970,
+      "jobkorea": 3541362,
+      "wanted": 310095,
+      "remember": 2036752,
+      "incruit": 218191,
+      "sourceRange": "C6:G6"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2026-02",
+      "saramin": 2678600,
+      "jobkorea": 3903407,
+      "wanted": 171030,
+      "remember": 1832771,
+      "incruit": 241737,
+      "sourceRange": "C7:G7"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2026-03",
+      "saramin": 3336230,
+      "jobkorea": 3952662,
+      "wanted": 240011,
+      "remember": 1929995,
+      "incruit": 202055,
+      "sourceRange": "C8:G8"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2026-04",
+      "saramin": 2521835,
+      "jobkorea": 3995142,
+      "wanted": 181396,
+      "remember": 1965711,
+      "incruit": 261733,
+      "sourceRange": "C9:G9"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2026-05",
+      "saramin": 2777626,
+      "jobkorea": 3431094,
+      "wanted": 368192,
+      "remember": 1737782,
+      "incruit": 291075,
+      "sourceRange": "C10:G10"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2026-06",
+      "saramin": 2578738,
+      "jobkorea": 3184335,
+      "wanted": 184152,
+      "remember": 1771803,
+      "incruit": 238818,
+      "sourceRange": "C11:G11"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2026-07",
+      "saramin": 2726551,
+      "jobkorea": 3559757,
+      "wanted": 288309,
+      "remember": 1949631,
+      "incruit": 250474,
+      "sourceRange": "C12:G12"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2026-08",
+      "saramin": 2405850,
+      "jobkorea": 3629145,
+      "wanted": 336545,
+      "remember": 2014717,
+      "incruit": 153683,
+      "sourceRange": "C13:G13"
+    },
+    {
+      "device": "MO(APP)",
+      "month": "2026-09",
+      "saramin": 2666745,
+      "jobkorea": 3601803,
+      "wanted": 257100,
+      "remember": 2042025,
+      "incruit": 176125,
+      "sourceRange": "C14:G14"
+    },
+    {
+      "device": "PC",
+      "month": "2025-10",
+      "saramin": 1917027,
+      "jobkorea": 1298426,
+      "wanted": 159517,
+      "remember": 210132,
+      "incruit": 378026,
+      "sourceRange": "C15:G15"
+    },
+    {
+      "device": "PC",
+      "month": "2025-11",
+      "saramin": 1888446,
+      "jobkorea": 1376000,
+      "wanted": 111648,
+      "remember": 183557,
+      "incruit": 567296,
+      "sourceRange": "C16:G16"
+    },
+    {
+      "device": "PC",
+      "month": "2025-12",
+      "saramin": 1925145,
+      "jobkorea": 1498853,
+      "wanted": 154939,
+      "remember": 109772,
+      "incruit": 456773,
+      "sourceRange": "C17:G17"
+    },
+    {
+      "device": "PC",
+      "month": "2026-01",
+      "saramin": 1847981,
+      "jobkorea": 1426811,
+      "wanted": 37741,
+      "remember": 116359,
+      "incruit": 423552,
+      "sourceRange": "C18:G18"
+    },
+    {
+      "device": "PC",
+      "month": "2026-02",
+      "saramin": 1506915,
+      "jobkorea": 1105097,
+      "wanted": 75326,
+      "remember": 86418,
+      "incruit": 322355,
+      "sourceRange": "C19:G19"
+    },
+    {
+      "device": "PC",
+      "month": "2026-03",
+      "saramin": 1774468,
+      "jobkorea": 1225765,
+      "wanted": 77908,
+      "remember": 163582,
+      "incruit": 388556,
+      "sourceRange": "C20:G20"
+    },
+    {
+      "device": "PC",
+      "month": "2026-04",
+      "saramin": 1567568,
+      "jobkorea": 1034499,
+      "wanted": 75799,
+      "remember": 90662,
+      "incruit": 421894,
+      "sourceRange": "C21:G21"
+    },
+    {
+      "device": "PC",
+      "month": "2026-05",
+      "saramin": 1636186,
+      "jobkorea": 1127812,
+      "wanted": 51580,
+      "remember": 101002,
+      "incruit": 398420,
+      "sourceRange": "C22:G22"
+    },
+    {
+      "device": "PC",
+      "month": "2026-06",
+      "saramin": 1768895,
+      "jobkorea": 1313527,
+      "wanted": 37894,
+      "remember": 141427,
+      "incruit": 481786,
+      "sourceRange": "C23:G23"
+    },
+    {
+      "device": "PC",
+      "month": "2026-07",
+      "saramin": 2039374,
+      "jobkorea": 1299227,
+      "wanted": 64557,
+      "remember": 139765,
+      "incruit": 401911,
+      "sourceRange": "C24:G24"
+    },
+    {
+      "device": "PC",
+      "month": "2026-08",
+      "saramin": 1603336,
+      "jobkorea": 1053409,
+      "wanted": 119950,
+      "remember": 167934,
+      "incruit": 384565,
+      "sourceRange": "C25:G25"
+    },
+    {
+      "device": "PC",
+      "month": "2026-09",
+      "saramin": 1699562,
+      "jobkorea": 921599,
+      "wanted": 58275,
+      "remember": 186310,
+      "incruit": 282993,
+      "sourceRange": "C26:G26"
+    }
+  ]
+}

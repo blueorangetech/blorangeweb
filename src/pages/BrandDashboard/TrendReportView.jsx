@@ -1,476 +1,85 @@
-import { useState, useMemo } from 'react';
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from 'recharts';
-import {
-  TREND_MEDIA_OPTIONS,
-  KOREANCLICK_WEEKLY_DATA,
-  KOREANCLICK_MONTHLY_DATA,
-} from './reportData';
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Cell, ReferenceLine } from 'recharts';
+import FilterSelect from './FilterSelect';
+import AdClickComparison from './AdClickComparison';
+import { TRAFFIC_SERVICES, TRAFFIC_MONTHS, getTrafficComparison, getTrafficChart, exportTrafficCsv, trafficMonthLabel } from './trafficData';
+import './traffic.css';
 
-const number = value => (value == null ? '—' : Math.round(value).toLocaleString('ko-KR'));
-const compact = value => (value >= 10000 ? `${(value / 10000).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}만` : number(value));
-const percent = value => (value == null ? '—' : `${(value * 100).toFixed(2)}%`);
+const number = value => value == null ? '—' : Math.round(value).toLocaleString('ko-KR');
+const compact = value => `${(value / 10000).toLocaleString('ko-KR', { maximumFractionDigits: 0 })}만`;
+const percent = value => value == null ? '비교 불가' : `${value > 0 ? '+' : ''}${(value * 100).toFixed(1)}%`;
+const direction = value => value == null || value === 0 ? '' : value > 0 ? 'bd-positive' : 'bd-negative';
+const monthOptions = months => months.map(month => ({ id: month, name: trafficMonthLabel(month) }));
 
-function MediaLogo({ media, size = 17 }) {
-  const m = (media || '').toLowerCase();
-  if (m.includes('naver') || m.includes('네이버')) {
-    return (
-      <svg width={size} height={size} viewBox="0 0 24 24" style={{ borderRadius: '4px', flexShrink: 0 }}>
-        <rect width="24" height="24" rx="4" fill="#03C75A" />
-        <path d="M13.8 6.5H18V17.5H13.8L10.2 11.8V17.5H6V6.5H10.2L13.8 12.2V6.5Z" fill="white" />
-      </svg>
-    );
-  }
-  if (m.includes('google') || m.includes('구글')) {
-    return (
-      <svg width={size} height={size} viewBox="0 0 24 24" style={{ borderRadius: '4px', flexShrink: 0 }}>
-        <rect width="24" height="24" rx="4" fill="#ffffff" stroke="#e2e8f0" strokeWidth="1" />
-        <path fill="#4285F4" d="M19.6 12.25c0-.64-.06-1.25-.16-1.84H12v3.48h4.26c-.18.99-.75 1.83-1.6 2.4v2h2.59c1.51-1.39 2.35-3.44 2.35-6.04z" />
-        <path fill="#34A853" d="M12 20c2.16 0 3.97-.72 5.3-1.94l-2.59-2c-.72.48-1.64.76-2.71.76-2.08 0-3.85-1.41-4.48-3.3H4.84v2.07C6.16 18.2 8.87 20 12 20z" />
-        <path fill="#FBBC05" d="M7.52 13.52c-.16-.48-.25-.99-.25-1.52s.09-1.04.25-1.52V8.43H4.84A8.006 8.006 0 0 0 4 12c0 1.29.31 2.51.84 3.59l2.68-2.07z" />
-        <path fill="#EA4335" d="M12 7.18c1.17 0 2.23.4 3.06 1.19l2.3-2.3C15.96 4.79 14.15 4 12 4 8.87 4 6.16 5.8 4.84 8.43l2.68 2.07c.63-1.89 2.4-3.32 4.48-3.32z" />
-      </svg>
-    );
-  }
-  if (m.includes('meta') || m.includes('메타')) {
-    return (
-      <svg width={size} height={size} viewBox="0 0 24 24" style={{ borderRadius: '4px', flexShrink: 0 }}>
-        <rect width="24" height="24" rx="4" fill="#0081FB" />
-        <path fill="#ffffff" d="M16.6 8.2c-1.3 0-2.3.8-2.9 1.8-.7-1.1-1.7-1.8-2.9-1.8-2.2 0-3.8 2-3.8 4.5 0 2.4 1.5 4.3 3.6 4.3 1.3 0 2.4-.7 3.1-1.8.7 1.1 1.8 1.8 3.1 1.8 2.1 0 3.6-1.9 3.6-4.3 0-2.5-1.6-4.5-3.8-4.5zm-5.7 6.7c-1.2 0-2.1-1.1-2.1-2.6 0-1.5.9-2.6 2.1-2.6 1.1 0 1.9.9 2.3 2.3-.4 1.6-1.2 2.9-2.3 2.9zm5.7 0c-1.1 0-1.9-1.3-2.3-2.9.4-1.4 1.2-2.3 2.3-2.3 1.2 0 2.1 1.1 2.1 2.6 0 1.5-.9 2.6-2.1 2.6z" />
-      </svg>
-    );
-  }
-  return null;
+function TrafficTooltip({ active, payload, label, indexed }) {
+  if (!active || !payload?.length) return null;
+  return <div className="bd-traffic-tooltip"><strong>{label}</strong>{payload.map(item => <div key={item.dataKey}><span><i style={{ background: item.color }} />{item.name}</span><b>{indexed ? Number(item.value).toFixed(1) : number(item.value)}{indexed ? '' : '명'}</b></div>)}</div>;
 }
 
 export default function TrendReportView() {
-  // 코리안클릭 공식 제공 주기: 'weekly' (주간 단위) 또는 'monthly' (월간 단위)
-  const [periodType, setPeriodType] = useState('weekly');
-  // 선택된 광고 매체 키 (기본: 전체 5개 매체)
-  const [selectedMedia, setSelectedMedia] = useState(
-    TREND_MEDIA_OPTIONS.map(m => m.key)
-  );
-  // 코리안클릭 지표: 'koreanClickUV' (순방문자수) 또는 'koreanClickPV' (페이지뷰)
-  const [metricKey, setMetricKey] = useState('koreanClickUV');
-  // 차트 모드: 'total' (합산 막대) 또는 'stacked' (개별 매체 스택)
-  const [chartMode, setChartMode] = useState('total');
-
-  const toggleMedia = key => {
-    setSelectedMedia(prev => {
-      if (prev.includes(key)) {
-        if (prev.length === 1) return prev; // 최소 1개 매체 유지
-        return prev.filter(k => k !== key);
-      } else {
-        return [...prev, key];
-      }
-    });
+  const [search, setSearch] = useSearchParams();
+  const device = search.get('trafficDevice') === 'PC' ? 'PC' : 'MO(APP)';
+  const start = TRAFFIC_MONTHS.includes(search.get('trafficStart')) ? search.get('trafficStart') : TRAFFIC_MONTHS[0];
+  const requestedEnd = TRAFFIC_MONTHS.includes(search.get('trafficEnd')) ? search.get('trafficEnd') : TRAFFIC_MONTHS.at(-1);
+  const end = requestedEnd < start ? start : requestedEnd;
+  const [mode, setMode] = useState('uv');
+  const [selected, setSelected] = useState(TRAFFIC_SERVICES.map(service => service.id));
+  const [notice, setNotice] = useState('');
+  const [tab, setTab] = useState('competition');
+  const { rows, ranking } = getTrafficComparison(device, start, end);
+  const saramin = ranking.find(service => service.id === 'saramin');
+  const competitor = ranking.find(service => service.id !== 'saramin');
+  const chart = getTrafficChart(rows, selected, mode);
+  const otherDevice = device === 'PC' ? 'MO(APP)' : 'PC';
+  const otherSaramin = getTrafficComparison(otherDevice, start, end).ranking.find(service => service.id === 'saramin');
+  const setFilter = (key, value) => {
+    const next = new URLSearchParams(search);
+    next.set(key, value);
+    if (key === 'trafficStart' && value > end) next.set('trafficEnd', value);
+    if (key === 'trafficEnd' && value < start) next.set('trafficStart', value);
+    setSearch(next);
+  };
+  const toggle = id => setSelected(previous => previous.includes(id) ? previous.length > 1 ? previous.filter(item => item !== id) : previous : [...previous, id]);
+  const download = () => {
+    const url = URL.createObjectURL(new Blob([exportTrafficCsv(rows, device, selected)], { type: 'text/csv;charset=utf-8;' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `koreanclick-UV-${device === 'PC' ? 'PC' : 'APP'}-${start}-${end}.csv`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setNotice('선택한 기기·기간·서비스의 월간 UV를 다운로드했습니다.');
   };
 
-  const selectAllMedia = () => {
-    setSelectedMedia(TREND_MEDIA_OPTIONS.map(m => m.key));
-  };
-
-  // 선택된 기간 데이터 소스 (주간 vs 월간)
-  const rawData = periodType === 'weekly' ? KOREANCLICK_WEEKLY_DATA : KOREANCLICK_MONTHLY_DATA;
-
-  // 선택 매체 클릭 합산 및 비율 계산된 차트 데이터
-  const chartData = useMemo(() => {
-    return rawData.map(d => {
-      const selectedTotalClicks = selectedMedia.reduce(
-        (acc, k) => acc + (d[k] || 0),
-        0
-      );
-      const ratio = d[metricKey] ? (selectedTotalClicks / d[metricKey]) * 100 : 0;
-      return {
-        ...d,
-        selectedTotalClicks,
-        clickRatio: Number(ratio.toFixed(2)),
-      };
-    });
-  }, [rawData, selectedMedia, metricKey]);
-
-  // 상단 KPI 요약
-  const summary = useMemo(() => {
-    const totalKcMetric = rawData.reduce((s, d) => s + (d[metricKey] || 0), 0);
-    const avgKcMetric = totalKcMetric / rawData.length;
-    const totalAdClicks = chartData.reduce((s, d) => s + d.selectedTotalClicks, 0);
-    const avgAdClicks = totalAdClicks / chartData.length;
-    const overallRatio = totalKcMetric ? (totalAdClicks / totalKcMetric) * 100 : 0;
-
-    return {
-      totalKcMetric,
-      avgKcMetric,
-      totalAdClicks,
-      avgAdClicks,
-      overallRatio,
-    };
-  }, [rawData, chartData, metricKey]);
-
-  return (
-    <div className="bd-report-view">
-      {/* 상단 툴바: 좌측 타이틀 & 기간, 우측 세그먼트 필터 한쪽 몰아서 배치 */}
-      <div className="bd-toolbar">
-        <div className="bd-period">
-          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#74829a' }}>trending_up</span>
-          <span style={{ fontWeight: 700, fontSize: '13px', color: '#43516a' }}>트렌드 리포트</span>
-          <span className="bd-full-month">코리안클릭 vs 광고 매체 클릭 기여도</span>
-        </div>
-
-        <div className="bd-toolbar-actions" style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {/* 기간 단위 선택: 주간 단위(기본) vs 월간 단위 */}
-          <div className="bd-segment" aria-label="조회 단위">
-            {[
-              ['weekly', '주간 단위 (Weekly)'],
-              ['monthly', '월간 단위 (Monthly)'],
-            ].map(([k, l]) => (
-              <button
-                key={k}
-                className={periodType === k ? 'active' : ''}
-                onClick={() => setPeriodType(k)}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
-
-          {/* 코리안클릭 지표 선택 */}
-          <div className="bd-segment" aria-label="코리안클릭 지표">
-            {[
-              ['koreanClickUV', '순방문자수 (UV)'],
-              ['koreanClickPV', '페이지뷰 (PV)'],
-            ].map(([k, l]) => (
-              <button
-                key={k}
-                className={metricKey === k ? 'active' : ''}
-                onClick={() => setMetricKey(k)}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
-
-          {/* 차트 보기 모드 */}
-          <div className="bd-segment" aria-label="차트 모드">
-            {[
-              ['total', '매체 합산 클릭'],
-              ['stacked', '매체별 분할 보기'],
-            ].map(([k, l]) => (
-              <button
-                key={k}
-                className={chartMode === k ? 'active' : ''}
-                onClick={() => setChartMode(k)}
-              >
-                {l}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* 매체 선택 필터 바: 테두리 없음, 단일 체크 색상 통일 */}
-      <div className="bd-trend-filter-bar">
-        <div className="bd-trend-filter-title">
-          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#5075ed' }}>filter_alt</span>
-          <strong>합산 대상 광고 매체 선택 ({selectedMedia.length}/{TREND_MEDIA_OPTIONS.length}):</strong>
-          <small>매체를 클릭하여 합산 차트에 포함하거나 제외할 수 있습니다. (코리안클릭 지표는 주간/월간 단위로 집계됩니다)</small>
-        </div>
-
-        <div className="bd-trend-chips">
-          <button
-            type="button"
-            className="bd-trend-all-btn"
-            onClick={selectAllMedia}
-            disabled={selectedMedia.length === TREND_MEDIA_OPTIONS.length}
-          >
-            전체 선택
-          </button>
-          {TREND_MEDIA_OPTIONS.map(m => {
-            const isSelected = selectedMedia.includes(m.key);
-            return (
-              <button
-                key={m.key}
-                type="button"
-                className={`bd-trend-chip ${isSelected ? 'active' : ''}`}
-                onClick={() => toggleMedia(m.key)}
-              >
-                <span className="bd-trend-check">
-                  <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>
-                    {isSelected ? 'check_box' : 'check_box_outline_blank'}
-                  </span>
-                </span>
-                <MediaLogo media={m.name} size={16} />
-                <span>{m.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* KPI 카드 그리드: 규격 100% 통일 */}
-      <div className="bd-kpis">
-        <section className="bd-kpi">
-          <div className="bd-kpi-label">
-            <span>코리안클릭 {metricKey === 'koreanClickUV' ? '총 UV' : '총 PV'} ({periodType === 'weekly' ? '최근 10주' : '최근 8개월'})</span>
-            <span className="material-symbols-outlined" style={{ fontSize: '17px', color: '#aebbd7' }}>bar_chart</span>
-          </div>
-          <strong>{compact(summary.totalKcMetric)}<small style={{ fontSize: '12px', fontWeight: 400, marginLeft: '3px' }}>건</small></strong>
-          <div className="bd-kpi-foot">
-            <span>{periodType === 'weekly' ? '주평균' : '월평균'} {compact(summary.avgKcMetric)}</span>
-            <span>공식 패널 데이터</span>
-          </div>
-        </section>
-
-        <section className="bd-kpi">
-          <div className="bd-kpi-label">
-            <span>선택 매체 총 클릭 수</span>
-            <span className="material-symbols-outlined" style={{ fontSize: '17px', color: '#aebbd7' }}>ads_click</span>
-          </div>
-          <strong>{number(summary.totalAdClicks)}<small style={{ fontSize: '12px', fontWeight: 400, marginLeft: '3px' }}>회</small></strong>
-          <div className="bd-kpi-foot">
-            <span>{periodType === 'weekly' ? '주평균' : '월평균'} {number(summary.avgAdClicks)}회</span>
-            <span>{selectedMedia.length}개 매체 합산</span>
-          </div>
-        </section>
-
-        <section className="bd-kpi">
-          <div className="bd-kpi-label">
-            <span>트래픽 기여 추정율</span>
-            <span className="material-symbols-outlined" style={{ fontSize: '17px', color: '#aebbd7' }}>pie_chart</span>
-          </div>
-          <strong>{summary.overallRatio.toFixed(2)}%</strong>
-          <div className="bd-kpi-foot">
-            <span className="bd-positive">직접 유입 기여</span>
-            <span>광고 클릭 / 코리안클릭</span>
-          </div>
-        </section>
-
-        <section className="bd-kpi">
-          <div className="bd-kpi-label">
-            <span>트래픽 동조성 지수</span>
-            <span className="material-symbols-outlined" style={{ fontSize: '17px', color: '#aebbd7' }}>sync_alt</span>
-          </div>
-          <strong>0.92<small style={{ fontSize: '12px', fontWeight: 400, marginLeft: '3px' }}>/ 1.0</small></strong>
-          <div className="bd-kpi-foot">
-            <span className="bd-positive">강한 양의 상관관계</span>
-            <span>시즌 피크 일치</span>
-          </div>
-        </section>
-      </div>
-
-      {/* 복합 시각화 차트: 코리안클릭 지표 (좌측 Area) + 선택 매체 클릭 (우측 Bar) */}
-      <section className="bd-panel">
-        <div className="bd-panel-head">
-          <div>
-            <h2>코리안클릭 {periodType === 'weekly' ? '주간' : '월간'} 지표와 광고 매체 클릭 동조 추이</h2>
-            <p>
-              좌측 축: 코리안클릭 {metricKey === 'koreanClickUV' ? '순방문자수 (UV)' : '페이지뷰 (PV)'} · 우측 축: {selectedMedia.length}개 선택 광고 매체 클릭 수
-            </p>
-          </div>
-          <div className="bd-trend-chart-legend">
-            <span><i style={{ background: '#5075ed' }} />코리안클릭 {metricKey === 'koreanClickUV' ? 'UV' : 'PV'}</span>
-            {chartMode === 'total' ? (
-              <span><i style={{ background: '#f59e0b' }} />선택 매체 합산 클릭</span>
-            ) : (
-              TREND_MEDIA_OPTIONS.filter(m => selectedMedia.includes(m.key)).map(m => (
-                <span key={m.key}><i style={{ background: m.color }} />{m.name}</span>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="bd-chart" style={{ height: '330px' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={chartData} margin={{ top: 20, right: 20, left: 10, bottom: 0 }}>
-              <defs>
-                <linearGradient id="kcAreaFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#5075ed" stopOpacity={0.28} />
-                  <stop offset="100%" stopColor="#5075ed" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke="#edf0f5" strokeDasharray="3 4" vertical={false} />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fill: '#8d97ab', fontSize: 12 }} dy={6} />
-              {/* 좌측 Y축: 코리안클릭 트래픽 */}
-              <YAxis
-                yAxisId="koreanClick"
-                orientation="left"
-                tickFormatter={compact}
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: '#5075ed', fontSize: 12 }}
-                width={70}
-              />
-              {/* 우측 Y축: 광고 매체 클릭수 */}
-              <YAxis
-                yAxisId="adClicks"
-                orientation="right"
-                tickFormatter={compact}
-                tickLine={false}
-                axisLine={false}
-                tick={{ fill: '#d97706', fontSize: 12 }}
-                width={65}
-              />
-              <Tooltip
-                formatter={(val, name) => {
-                  if (name.includes('코리안클릭')) return [`${compact(val)} (${number(val)})`, name];
-                  return [`${number(val)}회 클릭`, name];
-                }}
-                labelFormatter={(label, payload) => {
-                  const item = payload?.[0]?.payload;
-                  return item ? `${item.label} (${item.range})` : label;
-                }}
-                contentStyle={{ borderRadius: 12, border: '1px solid #e7ebf3', fontSize: 12 }}
-              />
-
-              {/* 코리안클릭 Area 차트 (좌측 Y축) */}
-              <Area
-                yAxisId="koreanClick"
-                type="monotone"
-                dataKey={metricKey}
-                name={`코리안클릭 ${metricKey === 'koreanClickUV' ? 'UV' : 'PV'}`}
-                stroke="#5075ed"
-                strokeWidth={2.5}
-                fill="url(#kcAreaFill)"
-              />
-
-              {/* 광고 매체 클릭 차트 (우측 Y축) */}
-              {chartMode === 'total' ? (
-                <Bar
-                  yAxisId="adClicks"
-                  dataKey="selectedTotalClicks"
-                  name="선택 매체 합산 클릭"
-                  fill="#f59e0b"
-                  radius={[3, 3, 0, 0]}
-                  barSize={18}
-                />
-              ) : (
-                TREND_MEDIA_OPTIONS.filter(m => selectedMedia.includes(m.key)).map(m => (
-                  <Bar
-                    key={m.key}
-                    yAxisId="adClicks"
-                    dataKey={m.key}
-                    name={m.name}
-                    stackId="adMediaStack"
-                    fill={m.color}
-                    barSize={18}
-                  />
-                ))
-              )}
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="bd-chart-bottom">
-          <span>
-            <i style={{ background: '#f59e0b' }} />
-            선택된 {selectedMedia.length}개 광고 매체 클릭 집계 기준
-          </span>
-          <span>
-            총 광고 클릭: <strong>{number(summary.totalAdClicks)}</strong>회 / 기여율 <strong>{summary.overallRatio.toFixed(2)}%</strong>
-          </span>
-        </div>
-      </section>
-
-      {/* 상세 기여도 테이블 */}
-      <section className="bd-panel">
-        <div className="bd-panel-head">
-          <div>
-            <h2>{periodType === 'weekly' ? '주간별' : '월간별'} 코리안클릭 및 광고 매체 상세 기여도</h2>
-            <p>
-              코리안클릭 공식 집계 기간 기준 매체별 클릭 수 및 트래픽 유입 비중
-            </p>
-          </div>
-          <span className="bd-pill">
-            {periodType === 'weekly' ? `총 ${rawData.length}개 주차` : `총 ${rawData.length}개 월`}
-          </span>
-        </div>
-
-        <div className="bd-table-scroll">
-          <table className="bd-table">
-            <thead>
-              <tr>
-                <th>{periodType === 'weekly' ? '주차' : '월'}</th>
-                <th>집계 기간</th>
-                <th>코리안클릭 {metricKey === 'koreanClickUV' ? 'UV' : 'PV'}</th>
-                {TREND_MEDIA_OPTIONS.filter(m => selectedMedia.includes(m.key)).map(m => (
-                  <th key={m.key}>{m.name}</th>
-                ))}
-                <th>선택 매체 합산</th>
-                <th>기여율</th>
-              </tr>
-            </thead>
-            <tbody>
-              {chartData.map(d => (
-                <tr key={d.period}>
-                  <td className="bd-bold">{d.label}</td>
-                  <td>{d.range}</td>
-                  <td className="bd-blue bd-bold">
-                    {compact(d[metricKey])}
-                    <small style={{ fontSize: '11px', color: '#8d97ab', marginLeft: '4px' }}>
-                      ({number(d[metricKey])})
-                    </small>
-                  </td>
-                  {TREND_MEDIA_OPTIONS.filter(m => selectedMedia.includes(m.key)).map(m => (
-                    <td key={m.key}>{number(d[m.key])}</td>
-                  ))}
-                  <td className="bd-bold" style={{ color: '#d97706' }}>
-                    {number(d.selectedTotalClicks)}
-                  </td>
-                  <td>
-                    <span className="bd-event-tag" style={{ background: '#f1f5f9', color: '#334155' }}>
-                      {d.clickRatio}%
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td>전체 합계</td>
-                <td>—</td>
-                <td className="bd-blue bd-bold">{compact(summary.totalKcMetric)}</td>
-                {TREND_MEDIA_OPTIONS.filter(m => selectedMedia.includes(m.key)).map(m => {
-                  const mediaSum = rawData.reduce((s, d) => s + (d[m.key] || 0), 0);
-                  return <td key={m.key}>{number(mediaSum)}</td>;
-                })}
-                <td className="bd-bold" style={{ color: '#d97706' }}>
-                  {number(summary.totalAdClicks)}
-                </td>
-                <td>{summary.overallRatio.toFixed(2)}%</td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-        <div className="bd-table-foot">
-          <span>코리안클릭 데이터는 주간(월~일) 및 월간 단위로 제공되며, 광고 매체 실적 역시 동일 주기에 맞춰 합산 매칭되었습니다.</span>
-          <span>기여율 = 선택 광고 매체 클릭 합산 / 코리안클릭 지표 × 100</span>
-        </div>
-      </section>
-
-      {/* 모니터링 인사이트 */}
-      <div className="bd-insights">
-        <div className="bd-insight-icon">
-          <span className="material-symbols-outlined" style={{ fontSize: '18px', color: '#5075ed' }}>
-            analytics
-          </span>
-        </div>
-        <div>
-          <strong>코리안클릭 지표와 유료 광고 트래픽의 상관관계 분석</strong>
-          <p>
-            코리안클릭 공식 패널 데이터는 주간 및 월간 단위로 산출됩니다. 분석 결과 사람인의 자연 유입 및 서비스 활성도(UV/PV)가 급증하는 
-            채용 시즌 피크에 맞추어 유료 검색광고(SA)와 디스플레이 광고(DA)의 클릭 볼륨이 높은 상관계수(r = 0.92)를 보이며 직접적인 트래픽 견인 역할을 수행하고 있음을 확인했습니다.
-          </p>
-        </div>
-        <span className="bd-rule">KoreanClick Panel Metric</span>
-      </div>
+  return <div className="bd-report-view bd-traffic">
+    <div className="bd-traffic-heading"><div><h1>트래픽 트렌드</h1><p>사람인과 경쟁 채용 서비스의 월간 순방문자 추이</p></div><span className="bd-traffic-source-tag">코리안클릭 · 월간 UV</span></div>
+    <div className="bd-traffic-tabs" role="group" aria-label="트래픽 분석 화면"><button aria-pressed={tab === 'competition'} className={tab === 'competition' ? 'active' : ''} onClick={() => setTab('competition')}>경쟁 서비스 비교</button><button aria-pressed={tab === 'ad'} className={tab === 'ad' ? 'active' : ''} onClick={() => setTab('ad')}>광고 클릭 비교</button></div>
+    <div className="bd-toolbar bd-traffic-toolbar"><div className="bd-traffic-filters">
+      <FilterSelect label="트래픽 기기" value={device} onChange={value => setFilter('trafficDevice', value)} options={[{ id: 'MO(APP)', name: '모바일 앱' }, { id: 'PC', name: 'PC' }]} />
+      <FilterSelect label="시작 월" value={start} onChange={value => setFilter('trafficStart', value)} options={monthOptions(TRAFFIC_MONTHS)} /><span>~</span>
+      <FilterSelect label="종료 월" value={end} onChange={value => setFilter('trafficEnd', value)} options={monthOptions(TRAFFIC_MONTHS)} />
+    </div><button className="bd-export" onClick={download}><span className="material-symbols-outlined" aria-hidden="true">download</span>{tab === 'ad' ? 'UV 다운로드' : '데이터 다운로드'}</button></div>
+    <div className="bd-traffic-scope">조회 {trafficMonthLabel(start)} ~ {trafficMonthLabel(end)} · {rows.length}개월 <span>기준월 {trafficMonthLabel(end)} · {device === 'PC' ? 'PC' : '모바일 앱'}</span></div>
+    {tab === 'ad' ? <AdClickComparison rows={rows} device={device} /> : <><div className="bd-kpis">
+      <section className="bd-kpi"><div className="bd-kpi-label">사람인 월간 UV<span className="material-symbols-outlined" aria-hidden="true">group</span></div><strong>{number(saramin.uv)}<small>명</small></strong><div className="bd-kpi-foot"><span className={direction(saramin.mom)}>{percent(saramin.mom)}</span><span>전월 대비</span></div></section>
+      <section className="bd-kpi"><div className="bd-kpi-label">사람인 순위<span className="material-symbols-outlined" aria-hidden="true">leaderboard</span></div><strong>{saramin.rank}<small>위 / 5개 서비스</small></strong><div className="bd-kpi-foot">기준월 전체 비교 서비스 기준</div></section>
+      <section className="bd-kpi"><div className="bd-kpi-label">경쟁사 최대 UV<span className="material-symbols-outlined" aria-hidden="true">trending_up</span></div><strong>{number(competitor.uv)}<small>명</small></strong><div className="bd-kpi-foot">{competitor.name} · {percent(competitor.mom)} 전월 대비</div></section>
+      <section className="bd-kpi"><div className="bd-kpi-label">{competitor.name} 대비 사람인 격차<span className="material-symbols-outlined" aria-hidden="true">compare_arrows</span></div><strong>{saramin.uv - competitor.uv > 0 ? '+' : ''}{number(saramin.uv - competitor.uv)}<small>명</small></strong><div className="bd-kpi-foot">사람인 UV − {competitor.name} UV</div></section>
     </div>
-  );
+    <section className="bd-panel bd-traffic-trend">
+      <div className="bd-panel-head"><div><h2>서비스별 월간 UV 추이</h2><p>{mode === 'uv' ? '월별 원자료 값을 비교합니다.' : `${trafficMonthLabel(start)} = 100 · 서비스별 기준월 대비 변화`} · {device === 'PC' ? 'PC' : '모바일 앱'}</p></div><div className="bd-segment" aria-label="트래픽 차트 표시"><button aria-pressed={mode === 'uv'} className={mode === 'uv' ? 'active' : ''} onClick={() => setMode('uv')}>실제 UV</button><button aria-pressed={mode === 'index'} className={mode === 'index' ? 'active' : ''} onClick={() => setMode('index')}>시작월 = 100</button></div></div>
+      <div className="bd-traffic-services" aria-label="비교 서비스 선택">{TRAFFIC_SERVICES.map(service => <button key={service.id} aria-pressed={selected.includes(service.id)} className={selected.includes(service.id) ? 'active' : ''} onClick={() => toggle(service.id)}><i style={{ background: service.color }} /><span>{service.name}</span><span aria-hidden="true">{selected.includes(service.id) ? '✓' : '+'}</span></button>)}<small>최소 1개 선택 · 추이·월별 표·다운로드에 반영</small></div>
+      <div className="bd-traffic-line" role="img" aria-label="선택 서비스의 월간 트래픽 추이. 상세 수치는 아래 월별 데이터 표에서 확인할 수 있습니다."><ResponsiveContainer width="100%" height="100%"><LineChart data={chart} margin={{ top: 18, right: 24, bottom: 10, left: 8 }}><CartesianGrid vertical={false} stroke="#edf0f5" strokeDasharray="3 4" /><XAxis dataKey="month" tickLine={false} axisLine={false} minTickGap={22} tick={{ fontSize: 11, fill: '#8290a6' }} /><YAxis width={62} tickFormatter={mode === 'uv' ? compact : number} domain={[0, 'auto']} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: '#8290a6' }} /><Tooltip content={<TrafficTooltip indexed={mode === 'index'} />} />{mode === 'index' && <ReferenceLine y={100} stroke="#b3bfd5" strokeDasharray="4 4" />}{TRAFFIC_SERVICES.filter(service => selected.includes(service.id)).map(service => <Line key={service.id} type="linear" dataKey={service.id} name={service.name} stroke={service.color} strokeWidth={service.id === 'saramin' ? 3 : 2} dot={{ r: 3, strokeWidth: 1 }} activeDot={{ r: 5 }} isAnimationActive={false} />)}</LineChart></ResponsiveContainer></div>
+      <div className="bd-table-foot"><span>단위: {mode === 'uv' ? '명(UV)' : '지수'} · {rows.length}개 월별 관측값</span><span>주간·일간 수치로 분할하거나 보간하지 않습니다.</span></div>
+    </section>
+    <div className="bd-traffic-comparison-grid">
+      <section className="bd-panel"><div className="bd-panel-head"><div><h2>기준월 경쟁 구도</h2><p>{trafficMonthLabel(end)} · 전체 5개 서비스 · {device === 'PC' ? 'PC' : '모바일 앱'}</p></div></div><div className="bd-traffic-ranking" role="img" aria-label="전체 5개 서비스 UV 순위. 비교 표에서 수치를 확인할 수 있습니다."><ResponsiveContainer width="100%" height="100%"><BarChart layout="vertical" data={ranking} margin={{ left: 0, right: 32, top: 0, bottom: 0 }}><CartesianGrid horizontal={false} stroke="#edf0f5" /><XAxis type="number" tickFormatter={compact} tick={{ fontSize: 11, fill: '#8290a6' }} axisLine={false} tickLine={false} /><YAxis type="category" dataKey="name" width={70} tick={{ fontSize: 12, fill: '#526580' }} axisLine={false} tickLine={false} /><Tooltip formatter={value => [`${number(value)}명`, '월간 UV']} cursor={{ fill: '#f5f7fc' }} /><Bar dataKey="uv" barSize={16} radius={[0, 4, 4, 0]} isAnimationActive={false}>{ranking.map(service => <Cell key={service.id} fill={service.color} />)}</Bar></BarChart></ResponsiveContainer></div><div className="bd-table-foot"><span>전체 5개 서비스</span><span>기준월 UV · 단위: 명</span></div></section>
+      <section className="bd-panel"><div className="bd-panel-head"><div><h2>서비스별 비교</h2><p>전체 5개 서비스 · 기간 평균은 월간 UV의 산술평균</p></div></div><div className="bd-table-scroll"><table className="bd-table bd-traffic-summary"><thead><tr>{['서비스', '기준월 UV', '전월 대비', '기간 변화', '월평균 UV'].map(title => <th key={title}>{title}</th>)}</tr></thead><tbody>{ranking.map(service => <tr key={service.id} className={service.id === 'saramin' ? 'bd-traffic-highlight' : ''}><td><span className="bd-traffic-rank">{service.rank}</span>{service.name}</td><td>{number(service.uv)}</td><td className={direction(service.mom)}>{percent(service.mom)}</td><td className={direction(service.periodChange)}>{percent(service.periodChange)}</td><td>{number(service.average)}</td></tr>)}</tbody></table></div><div className="bd-table-foot"><span>기간 변화: 종료월 ÷ 시작월 − 1</span><span>UV 단위: 명</span></div></section>
+    </div>
+    <section className="bd-panel"><div className="bd-panel-head"><div><h2>경쟁 비교 인사이트</h2><p>기준월의 실제 UV와 기기별 순위를 기준으로 계산</p></div></div><div className="bd-traffic-insights"><div><span>01</span><p>{trafficMonthLabel(end)} {device === 'PC' ? 'PC' : '모바일 앱'}에서 사람인은 <strong>{saramin.rank}위</strong>입니다. {competitor.name}보다 UV가 <strong>{number(Math.abs(saramin.uv - competitor.uv))}명 {saramin.uv >= competitor.uv ? '많습니다' : '적습니다'}</strong>.</p></div><div><span>02</span><p>같은 달 {otherDevice === 'PC' ? 'PC' : '모바일 앱'}에서는 사람인이 <strong>{otherSaramin.rank}위({number(otherSaramin.uv)}명)</strong>입니다. 기기별 경쟁 상황을 나누어 확인하세요.</p></div><div><span>03</span><p>사람인의 전월 대비 UV는 <strong>{percent(saramin.mom)}</strong>, {competitor.name}는 <strong>{percent(competitor.mom)}</strong>입니다. {saramin.mom == null || competitor.mom == null ? '원자료에 직전월이 없어 전월 비교를 계산할 수 없습니다.' : `사람인의 증감률이 ${(Math.abs(saramin.mom - competitor.mom) * 100).toFixed(1)}%p ${saramin.mom >= competitor.mom ? '높습니다' : '낮습니다'}.`}</p></div></div></section>
+    <section className="bd-panel"><div className="bd-panel-head"><div><h2>월별 데이터</h2><p>{device === 'PC' ? 'PC' : '모바일 앱'} · 선택 서비스 · 원자료 UV</p></div><span className="bd-unit">단위: 명</span></div><div className="bd-table-scroll"><table className="bd-table bd-traffic-monthly"><thead><tr><th>월</th>{TRAFFIC_SERVICES.filter(service => selected.includes(service.id)).map(service => <th key={service.id}>{service.name}</th>)}</tr></thead><tbody>{rows.map(row => <tr key={row.month}><td>{trafficMonthLabel(row.month)}</td>{TRAFFIC_SERVICES.filter(service => selected.includes(service.id)).map(service => <td key={service.id} className={service.id === 'saramin' ? 'bd-blue bd-bold' : ''}>{number(row[service.id])}</td>)}</tr>)}</tbody></table></div></section>
+    </>}
+    <div className="bd-traffic-source"><strong>출처: 코리안클릭 · 채용서비스별 월 트래픽 추이</strong><p>제공 기간 2025.10 ~ 2026.09 · 기기 구분 MO(APP) / PC · 지표 UV. 모바일 웹 데이터는 제공되지 않았습니다. 기기·서비스 간 중복 방문자를 제거할 수 없어 UV를 합산하거나 시장점유율로 표시하지 않습니다. 광고 클릭 기여도 및 인과관계는 이 자료만으로 판단하지 않습니다.</p></div>
+    {notice && <div role="status" className="bd-notice">{notice}<button aria-label="다운로드 알림 닫기" onClick={() => setNotice('')}>×</button></div>}
+  </div>;
 }
