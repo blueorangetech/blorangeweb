@@ -1,140 +1,45 @@
-import { CREATIVE_ASSETS } from './creativeAssets';
+import { CREATIVE_ASSETS } from './creativeAssets.js';
 
-// 사람인 SA + DA 과거 운영 성과 분석 및 제안용 가공 데이터
+const divide = (value, count) => count > 0 ? value / count : null;
+const deliveryKeys = ['spend', 'impressions', 'clicks', 'signUp', 'apply', 'purchase', 'revenue'];
 
-export const INTEGRATED_SUMMARY = {
-  month: '2026.08',
-  prevMonth: '2026.07',
-  budget: 65000000,
-  spend: 64694800,
-  spendPrev: 58820000,
-  impressions: 27248500,
-  impressionsPrev: 32410000,
-  clicks: 421520,
-  clicksPrev: 442600,
-  ctr: 0.01547,
-  ctrPrev: 0.01365,
-  cpc: 153.48,
-  cpcPrev: 132.89,
-  signUp: 12052,
-  signUpPrev: 11480,
-  signUpCpa: 5367.97,
-  signUpCpaPrev: 5123.69,
-  apply: 24580,
-  applyPrev: 26890,
-  applyCpa: 2632.01,
-  applyCpaPrev: 2187.43,
-  purchaseCount: 164,
-  purchaseCountPrev: 165,
-  revenue: 7789300,
-  revenuePrev: 9873800,
-  roas: 1.52,
-  roasPrev: 1.97,
-};
+function withRates(row) {
+  return {
+    ...row,
+    ctr: divide(row.clicks, row.impressions),
+    cpc: divide(row.spend, row.clicks),
+    signUpCpa: divide(row.spend, row.signUp),
+    applyCpa: divide(row.spend, row.apply),
+  };
+}
 
-// 매체/채널별 종합 성과 (SA + DA)
+export function summarizeMedia(rows) {
+  return withRates(Object.fromEntries(deliveryKeys.map(key => [
+    key, rows.reduce((sum, row) => sum + row[key], 0),
+  ])));
+}
+
+// Independent report inputs. Each row represents a distinct media/device segment.
 export const MEDIA_PERFORMANCE = [
   {
-    media: 'Naver',
-    type: 'SA',
-    campaign: '네이버 검색광고 (사람인+스토어+시니어)',
-    device: '전체',
-    impressions: 18437684,
-    clicks: 103735,
-    ctr: 0.00563,
-    cpc: 196.88,
-    spend: 20423672,
-    signUp: 3095,
-    signUpCpa: 6598.92,
-    apply: 12171,
-    applyCpa: 1678.06,
-    purchase: 49,
-    revenue: 1817051,
+    media: 'Naver', type: 'SA', campaign: '네이버 검색광고 (PC)', device: 'PC',
+    impressions: 3682000, clicks: 37460, spend: 9380000,
+    signUp: 1224, apply: 3972, purchase: 27, revenue: 1126000,
   },
   {
-    media: 'Naver',
-    type: 'SA',
-    campaign: '네이버 SA (PC)',
-    device: 'PC',
-    impressions: 4823218,
-    clicks: 62243,
-    ctr: 0.0129,
-    cpc: 204.1,
-    spend: 12703886,
-    signUp: 1969,
-    signUpCpa: 6451.95,
-    apply: 7578,
-    applyCpa: 1676.42,
-    purchase: 40,
-    revenue: 1705631,
+    media: 'Naver', type: 'SA', campaign: '네이버 검색광고 (모바일)', device: 'MO',
+    impressions: 8440000, clicks: 47280, spend: 8120000,
+    signUp: 1512, apply: 5284, purchase: 34, revenue: 1484000,
   },
   {
-    media: 'Naver',
-    type: 'SA',
-    campaign: '네이버 SA (MO)',
-    device: 'MO',
-    impressions: 13614466,
-    clicks: 41492,
-    ctr: 0.00305,
-    cpc: 186.05,
-    spend: 7719786,
-    signUp: 1126,
-    signUpCpa: 6855.94,
-    apply: 4593,
-    applyCpa: 1680.77,
-    purchase: 9,
-    revenue: 111420,
+    media: 'Google', type: 'SA', campaign: '구글 검색광고 (PC)', device: 'PC',
+    impressions: 327600, clicks: 39640, spend: 7360000,
+    signUp: 943, apply: 2780, purchase: 0, revenue: 0,
   },
   {
-    media: 'Google',
-    type: 'SA',
-    campaign: '구글 검색광고 (사람인+코메이트)',
-    device: '전체',
-    impressions: 616129,
-    clicks: 125303,
-    ctr: 0.20337,
-    cpc: 121.85,
-    spend: 15268825,
-    signUp: 2570,
-    signUpCpa: 5941.18,
-    apply: 6570,
-    applyCpa: 2324.02,
-    purchase: 0,
-    revenue: 0,
-  },
-  {
-    media: 'Google',
-    type: 'SA',
-    campaign: '구글 SA (PC)',
-    device: 'PC',
-    impressions: 215086,
-    clicks: 49131,
-    ctr: 0.22842,
-    cpc: 216.86,
-    spend: 10654963,
-    signUp: 1512,
-    signUpCpa: 7046.93,
-    apply: 4792,
-    applyCpa: 2223.49,
-    purchase: 0,
-    revenue: 0,
-  },
-  {
-    media: 'Google',
-    type: 'SA',
-    campaign: '구글 SA (MO)',
-    device: 'MO',
-    impressions: 401043,
-    clicks: 76172,
-    ctr: 0.18993,
-    cpc: 60.57,
-    spend: 4613862,
-    signUp: 1058,
-    signUpCpa: 4360.93,
-    apply: 1778,
-    applyCpa: 2594.97,
-    purchase: 0,
-    revenue: 0,
+    media: 'Google', type: 'SA', campaign: '구글 검색광고 (모바일)', device: 'MO',
+    impressions: 725400, clicks: 66280, spend: 5820000,
+    signUp: 1304, apply: 3068, purchase: 0, revenue: 0,
   },
   {
     media: 'Meta',
@@ -143,13 +48,9 @@ export const MEDIA_PERFORMANCE = [
     device: 'MO',
     impressions: 4850000,
     clicks: 96500,
-    ctr: 0.0199,
-    cpc: 122.28,
     spend: 11800000,
     signUp: 3180,
-    signUpCpa: 3710.69,
     apply: 3420,
-    applyCpa: 3450.29,
     purchase: 28,
     revenue: 1650000,
   },
@@ -160,13 +61,9 @@ export const MEDIA_PERFORMANCE = [
     device: '전체',
     impressions: 7420000,
     clicks: 63500,
-    ctr: 0.00856,
-    cpc: 125.98,
     spend: 8000000,
     signUp: 1450,
-    signUpCpa: 5517.24,
     apply: 1980,
-    applyCpa: 4040.4,
     purchase: 42,
     revenue: 2450000,
   },
@@ -177,37 +74,33 @@ export const MEDIA_PERFORMANCE = [
     device: 'MO',
     impressions: 5120000,
     clicks: 58200,
-    ctr: 0.01137,
-    cpc: 158.08,
     spend: 9202303,
     signUp: 1757,
-    signUpCpa: 5237.51,
     apply: 2439,
-    applyCpa: 3772.98,
     purchase: 45,
     revenue: 1872249,
   },
-];
+].map(withRates);
 
-// 일별 추이 (8월 1일~31일)
-export const DAILY_INTEGRATED_TREND = [
-  { date: '08.01', spend: 2050000, impressions: 880000, clicks: 13200, signUp: 380, apply: 780 },
-  { date: '08.03', spend: 2180000, impressions: 920000, clicks: 14100, signUp: 410, apply: 840 },
-  { date: '08.05', spend: 2240000, impressions: 940000, clicks: 14600, signUp: 430, apply: 890 },
-  { date: '08.07', spend: 2120000, impressions: 890000, clicks: 13800, signUp: 395, apply: 810 },
-  { date: '08.09', spend: 1850000, impressions: 780000, clicks: 11900, signUp: 340, apply: 690 },
-  { date: '08.11', spend: 2210000, impressions: 930000, clicks: 14400, signUp: 425, apply: 870 },
-  { date: '08.13', spend: 2310000, impressions: 960000, clicks: 15100, signUp: 450, apply: 920 },
-  { date: '08.15', spend: 1720000, impressions: 720000, clicks: 10800, signUp: 310, apply: 620 },
-  { date: '08.17', spend: 2280000, impressions: 950000, clicks: 14900, signUp: 440, apply: 890 },
-  { date: '08.19', spend: 2350000, impressions: 970000, clicks: 15300, signUp: 460, apply: 940 },
-  { date: '08.21', spend: 2290000, impressions: 950000, clicks: 14800, signUp: 445, apply: 900 },
-  { date: '08.23', spend: 1910000, impressions: 800000, clicks: 12200, signUp: 355, apply: 730 },
-  { date: '08.25', spend: 2380000, impressions: 980000, clicks: 15600, signUp: 470, apply: 960 },
-  { date: '08.27', spend: 2420000, impressions: 990000, clicks: 15900, signUp: 485, apply: 990 },
-  { date: '08.29', spend: 2340000, impressions: 960000, clicks: 15200, signUp: 460, apply: 930 },
-  { date: '08.31', spend: 2190000, impressions: 910000, clicks: 14200, signUp: 420, apply: 860 },
-];
+export function getDailyIntegratedTrend(totals) {
+  const weights = Array.from({ length: 31 }, (_, day) => {
+    const weekday = new Date(Date.UTC(2026, 7, day + 1)).getUTCDay();
+    return (weekday === 0 || weekday === 6 ? .84 : 1.06) * (1 + .09 * Math.sin(day * .81));
+  });
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+  let cumulative = 0;
+  return weights.map((weight, index) => {
+    const start = cumulative / totalWeight;
+    cumulative += weight;
+    const end = cumulative / totalWeight;
+    return {
+      date: `08.${String(index + 1).padStart(2, '0')}`,
+      ...Object.fromEntries(['spend', 'signUp', 'apply'].map(key => [
+        key, Math.round(totals[key] * end) - Math.round(totals[key] * start),
+      ])),
+    };
+  });
+}
 
 // 사람인 채용 플랫폼 특화 키워드 데이터셋 (가공 & 가상 생성)
 export const KEYWORD_CATEGORIES = [

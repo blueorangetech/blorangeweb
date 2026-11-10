@@ -11,11 +11,7 @@ import {
   Tooltip,
   Cell
 } from 'recharts';
-import {
-  INTEGRATED_SUMMARY,
-  MEDIA_PERFORMANCE,
-  DAILY_INTEGRATED_TREND
-} from './reportData';
+import { MEDIA_PERFORMANCE, getDailyIntegratedTrend, summarizeMedia } from './reportData';
 
 const number = value => (value == null ? '—' : Math.round(value).toLocaleString('ko-KR'));
 const money = value => (value == null ? '—' : `₩${number(value)}`);
@@ -72,7 +68,7 @@ function MediaLogo({ media, size = 20 }) {
   );
 }
 
-export default function IntegratedReportView({ month = '2026-08' }) {
+export default function IntegratedReportView() {
   const [mediaFilter, setMediaFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [deviceFilter, setDeviceFilter] = useState('all');
@@ -82,48 +78,22 @@ export default function IntegratedReportView({ month = '2026-08' }) {
     return MEDIA_PERFORMANCE.filter(item => {
       if (mediaFilter !== 'all' && !item.media.toLowerCase().includes(mediaFilter.toLowerCase())) return false;
       if (typeFilter !== 'all' && item.type !== typeFilter) return false;
-      if (deviceFilter !== 'all' && item.device !== deviceFilter && item.device !== '전체') return false;
+      if (deviceFilter !== 'all' && item.device !== deviceFilter) return false;
       return true;
     });
   }, [mediaFilter, typeFilter, deviceFilter]);
 
-  const totals = useMemo(() => {
-    const target = filteredMedia.length > 0 ? filteredMedia : MEDIA_PERFORMANCE;
-    const spend = target.reduce((s, i) => s + i.spend, 0);
-    const impressions = target.reduce((s, i) => s + i.impressions, 0);
-    const clicks = target.reduce((s, i) => s + i.clicks, 0);
-    const signUp = target.reduce((s, i) => s + i.signUp, 0);
-    const apply = target.reduce((s, i) => s + i.apply, 0);
-    return {
-      spend,
-      impressions,
-      clicks,
-      ctr: impressions ? clicks / impressions : 0,
-      cpc: clicks ? spend / clicks : 0,
-      signUp,
-      signUpCpa: signUp ? spend / signUp : 0,
-      apply,
-      applyCpa: apply ? spend / apply : 0,
-    };
-  }, [filteredMedia]);
+  const totals = useMemo(() => summarizeMedia(filteredMedia), [filteredMedia]);
+  const dailyTrend = useMemo(() => getDailyIntegratedTrend(totals), [totals]);
 
   const mediaShareData = useMemo(() => {
-    const map = {};
-    MEDIA_PERFORMANCE.forEach(item => {
-      const key = item.media.split(' ')[0];
-      if (!map[key]) {
-        map[key] = { name: key, spend: 0, signUp: 0, apply: 0 };
-      }
-      map[key].spend += item.spend;
-      map[key].signUp += item.signUp;
-      map[key].apply += item.apply;
-    });
-    const colors = { Naver: '#03c75a', Google: '#4285f4', Meta: '#0668e1', 'Google GDN': '#ea4335', 'Naver GFA': '#10b981' };
-    return Object.values(map).map(m => ({
-      ...m,
-      color: colors[m.name] || '#64748b',
-    }));
-  }, []);
+    const spendByMedia = new Map();
+    for (const row of filteredMedia) {
+      spendByMedia.set(row.media, (spendByMedia.get(row.media) ?? 0) + row.spend);
+    }
+    const colors = { Naver: '#03c75a', Google: '#4285f4', Meta: '#0668e1', 'Google GDN': '#ea4335', 'Naver GFA': '#10a377' };
+    return [...spendByMedia].map(([name, spend]) => ({ name, spend, color: colors[name] }));
+  }, [filteredMedia]);
 
   return (
     <div className="bd-report-view">
@@ -183,8 +153,7 @@ export default function IntegratedReportView({ month = '2026-08' }) {
           </div>
           <strong>{money(totals.spend)}</strong>
           <div className="bd-kpi-foot">
-            <span className="bd-negative">↗ 10.0%</span>
-            <span>전월 대비</span>
+            <span>선택 조건 기준</span>
           </div>
         </section>
 
@@ -208,7 +177,6 @@ export default function IntegratedReportView({ month = '2026-08' }) {
           </div>
           <strong>{number(totals.signUp)}<small style={{ fontSize: '12px', fontWeight: 400, marginLeft: '3px' }}>건</small></strong>
           <div className="bd-kpi-foot">
-            <span className="bd-positive">↗ 5.0%</span>
             <span>CPA <strong>{money(totals.signUpCpa)}</strong></span>
           </div>
         </section>
@@ -249,7 +217,7 @@ export default function IntegratedReportView({ month = '2026-08' }) {
           </div>
           <div className="bd-chart">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={DAILY_INTEGRATED_TREND} margin={{ top: 15, right: 12, left: 0, bottom: 0 }}>
+              <AreaChart data={dailyTrend} margin={{ top: 15, right: 12, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="integratedTrendFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#5075ed" stopOpacity={0.24} />
@@ -267,7 +235,7 @@ export default function IntegratedReportView({ month = '2026-08' }) {
                 />
                 <Tooltip
                   formatter={v => (trendMetric === 'spend' ? money(v) : `${number(v)}건`)}
-                  labelFormatter={v => `8월 ${v} 성과`}
+                  labelFormatter={v => `8월 ${Number(v.slice(3))}일 성과`}
                   contentStyle={{ borderRadius: 12, border: '1px solid #e7ebf3', fontSize: 12 }}
                 />
                 <Area
@@ -311,7 +279,7 @@ export default function IntegratedReportView({ month = '2026-08' }) {
             </ResponsiveContainer>
           </div>
           <div className="bd-chart-bottom">
-            <span><i className="bd-muted-dot" />Naver(44%) · Google(34%) · Meta(18%)</span>
+            <span><i className="bd-muted-dot" />{mediaShareData.map(({ name, spend }) => `${name} ${percent(spend / totals.spend)}`).join(' · ') || '선택 조건에 해당하는 집행 내역 없음'}</span>
             <span>총 {mediaShareData.length}개 주요 매체</span>
           </div>
         </section>
@@ -391,7 +359,7 @@ export default function IntegratedReportView({ month = '2026-08' }) {
         </div>
         <div className="bd-table-foot">
           <span>총 {filteredMedia.length}개 캠페인</span>
-          <span>CTR·CPC·CPA는 선택한 세그먼트의 합계로 계산합니다.</span>
+          <span>기기별 조회는 기기가 구분된 내역을 집계합니다.</span>
         </div>
       </section>
 
@@ -401,10 +369,10 @@ export default function IntegratedReportView({ month = '2026-08' }) {
           <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>check</span>
         </div>
         <div>
-          <strong>운영 모니터링 · 8월 효율 분석 및 제안</strong>
+          <strong>성과 비교 기준</strong>
           <p>
-            네이버 PC/MO는 고효율 키워드 중심 입찰 방어로 CTR이 개선(PC +0.22%p, MO +0.37%p)되며 비수기 전환 단가를 안정적으로 유지했습니다.
-            구글 PC는 CPC 급등(115원→216원)에 따라 9월 공채 시즌에는 효율이 검증된 모바일 비중 확대(35:65) 및 고효율 직무 키워드 집중 운영을 제안합니다.
+            입사지원과 회원가입의 전환 단가를 매체·기기별로 비교할 수 있습니다.
+            상단 필터를 변경하면 성과 요약과 두 차트가 같은 조건으로 집계됩니다.
           </p>
         </div>
         <span className="bd-rule">월간 운영 기준</span>
