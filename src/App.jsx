@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { AuthProvider } from './context/AuthContext';
 import Intro from './pages/Intro';
@@ -9,7 +9,6 @@ import HanssemHf from './pages/HanssemHf';
 import Playground from './pages/Playground';
 import Atria from './pages/Atria';
 import NotFound from './pages/NotFound';
-import BrandDashboard from './pages/BrandDashboard';
 import Samsungfire from './pages/Samsungfire';
 
 function TitleUpdater() {
@@ -26,9 +25,8 @@ function TitleUpdater() {
       '/samsungfire': 'samsungfire',
     };
 
-    const isSaramin = location.pathname === '/saramin' || location.pathname.startsWith('/saramin/');
     const title = titleMap[location.pathname] || '페이지를 찾을 수 없습니다';
-    document.title = isSaramin ? 'saramin' : location.pathname === '/' ? '블루오렌지 대시보드' : `${title} | 블루오렌지 대시보드`;
+    document.title = location.pathname === '/' ? '블루오렌지 대시보드' : `${title} | 블루오렌지 대시보드`;
   }, [location]);
 
   return null;
@@ -48,11 +46,6 @@ function decodeJwt(token) {
   } catch (e) {
     return null;
   }
-}
-
-function SaraminRedirect() {
-  const location = useLocation();
-  return <Navigate to={`${location.pathname.replace('/brand-dashboard', '/saramin')}${location.search}${location.hash}`} replace />;
 }
 
 function App() {
@@ -85,10 +78,7 @@ function App() {
         <Route path="/hanssem_hf" element={<HanssemHf />} />
         <Route path="/atria" element={<Atria />} />
         <Route path="/playground" element={<Playground />} />
-        <Route path="/saramin" element={<BrandDashboard />} />
         <Route path="/samsungfire" element={<Samsungfire />} />
-        <Route path="/saramin/:brandId" element={<BrandDashboard />} />
-        <Route path="/brand-dashboard/*" element={<SaraminRedirect />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AuthProvider>
