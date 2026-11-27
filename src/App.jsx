@@ -1,14 +1,14 @@
 import { useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
-import { AuthProvider } from './context/AuthContext';
-import Intro from './pages/Intro';
-import Imweb from './pages/Imweb';
-import Hanssem from './pages/Hanssem';
-import HanssemHf from './pages/HanssemHf';
-import Playground from './pages/Playground';
-import Atria from './pages/Atria';
-import NotFound from './pages/NotFound';
+import { AuthProvider } from './shared/auth/AuthContext';
+import Intro from './pages/intro/index';
+import Imweb from './pages/imweb/index';
+import Hanssem from './pages/hanssem/rehouse/index';
+import HanssemHf from './pages/hanssem/hf/index';
+import Playground from './pages/playground/index';
+import Atria from './pages/atria/index';
+import NotFound from './pages/not-found/index';
 import Samsungfire from './pages/Samsungfire';
 
 function TitleUpdater() {

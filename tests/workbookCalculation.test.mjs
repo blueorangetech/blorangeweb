@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
-import { applyWorkbookEdits, calculationCache } from '../src/components/hanssem/common/DataChatView/workbookEditing.js';
+import { applyWorkbookEdits, calculationCache } from '../src/pages/hanssem/shared/DataChatView/workbookEditing.js';
 
 function sheet(name, rows, formulas, cell_types = {}) {
   return { name, rows, formulas, cell_types };
@@ -37,7 +37,7 @@ test('cached results retain text and boolean types', () => {
   assert.deepEqual(calculationCache(result).S, { A1: '0012', B1: true, C1: false });
 });
 
-const fixturePath = new URL('../output/data-chat-test/calculation-fixture.json', import.meta.url);
+const fixturePath = new URL('./fixtures/calculation-fixture.json', import.meta.url);
 test('supplied media mix: all cached formula values match and budget totals update', { skip: !existsSync(fixturePath) }, () => {
   const original = JSON.parse(readFileSync(fixturePath, 'utf8'));
   const result = applyWorkbookEdits(original, {});
